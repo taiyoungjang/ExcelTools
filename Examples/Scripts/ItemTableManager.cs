@@ -139,7 +139,7 @@ namespace TBL.ItemTable
         {
           using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())
           {
-            using (var compressStream = new System.IO.Compression.GZipStream(__zip, System.IO.Compression.CompressionMode.Compress))
+            using (var compressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__zip))
             {
               compressStream.Write(__uncompressed, 0, __uncompressed.Length);
               compressStream.Flush();
@@ -193,7 +193,7 @@ namespace TBL.ItemTable
       }
       using (System.IO.MemoryStream __ms = new System.IO.MemoryStream(bytes))
       {
-        using (var decompressStream = new System.IO.Compression.GZipStream(__ms, System.IO.Compression.CompressionMode.Decompress))
+        using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__ms))
         {
           int uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);
           bytes = new byte[uncompressedSize__];

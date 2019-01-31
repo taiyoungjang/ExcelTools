@@ -166,7 +166,7 @@ namespace TBL
             string[] refAssemblies = new string[] {
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}DocumentFormat.OpenXml.dll",
                 //$"{folder}{System.IO.Path.DirectorySeparatorChar}LambdaSqlBuilder.dll",
-                //$"{folder}{System.IO.Path.DirectorySeparatorChar}ICSharpCode.SharpZipLib.dll",
+                $"{folder}{System.IO.Path.DirectorySeparatorChar}ICSharpCode.SharpZipLib.dll",
                 //$"{folder}{System.IO.Path.DirectorySeparatorChar}Mono.Security.dll",
                 //$"{folder}{System.IO.Path.DirectorySeparatorChar}Mono.CSharp.dll",
                 $"{shared_directory}{System.IO.Path.DirectorySeparatorChar}System.dll",

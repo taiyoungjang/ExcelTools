@@ -184,11 +184,7 @@ namespace TableGenerate
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
                     _writer.WriteLineEx("{");
-                    //_writer.WriteLineEx("#if !UNITY_5_3_OR_NEWER");
-                    _writer.WriteLineEx("using (var compressStream = new System.IO.Compression.GZipStream(__zip, System.IO.Compression.CompressionMode.Compress))");
-                    //_writer.WriteLineEx("#else");
-                    //_writer.WriteLineEx("using (var compressStream = new Unity.IO.Compression.GZipStream(__zip, Unity.IO.Compression.CompressionMode.Compress))");
-                    //_writer.WriteLineEx("#endif");
+                    _writer.WriteLineEx("using (var compressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__zip))");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("compressStream.Write(__uncompressed, 0, __uncompressed.Length);");
                     _writer.WriteLineEx("compressStream.Flush();");
@@ -261,11 +257,7 @@ namespace TableGenerate
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("using (System.IO.MemoryStream __ms = new System.IO.MemoryStream(bytes))");
                     _writer.WriteLineEx("{");
-                    //_writer.WriteLineEx($"#if !{UNITY_DEFINE}");
-                    _writer.WriteLineEx("using (var decompressStream = new System.IO.Compression.GZipStream(__ms, System.IO.Compression.CompressionMode.Decompress))");
-                    //_writer.WriteLineEx("#else");
-                    //_writer.WriteLineEx("using (var decompressStream = new Unity.IO.Compression.GZipStream(__ms, Unity.IO.Compression.CompressionMode.Decompress))");
-                    //_writer.WriteLineEx("#endif");
+                    _writer.WriteLineEx("using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__ms))");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("int uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
                     _writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
