@@ -153,49 +153,36 @@ namespace TableGenerate
                     _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
                     _writer.WriteLineEx("public void WriteFile(string path)");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("byte[] __uncompressed = null;");
+                    _writer.WriteLineEx("int uncompressedLength = 0;");
+                    _writer.WriteLineEx("System.IO.MemoryStream uncompressedMemoryStream = null;");
+                    _writer.WriteLineEx("uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.IO.MemoryStream __ms = null;");
-                    _writer.WriteLineEx("try");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("__ms = new System.IO.MemoryStream(128 * 1024);");
-                    _writer.WriteLineEx("var __m = __ms;");
-                    _writer.WriteLineEx("using(var __writer = new System.IO.BinaryWriter(__ms))");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("__ms = null;");
+                    _writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.WriteStream(__writer);");
+                        _writer.WriteLineEx($"{trimSheetName}.WriteStream(uncompressedMemoryStreamWriter);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("__uncompressed = __m.ToArray();");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("finally");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("if(__ms != null) __ms.Dispose();");
-                    _writer.WriteLineEx("}");
+                    _writer.WriteLineEx("uncompressedLength = (int) uncompressedMemoryStream.Position;");
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("System.IO.FileStream stream = null;");
                     _writer.WriteLineEx("try");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFileName();");
+                    _writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFile" +
+                        "Name();");
+                    _writer.WriteLineEx("uncompressedMemoryStream.Position=0;");
                     _writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using (var compressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__zip))");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("compressStream.Write(__uncompressed, 0, __uncompressed.Length);");
-                    _writer.WriteLineEx("compressStream.Flush();");
-                    _writer.WriteLineEx("}");
+                    _writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);");
                     _writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("var __compressed = __zip.ToArray();");
                     _writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
                     _writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
                     _writer.WriteLineEx("stream.Write(hashBytes, 0, hashBytes.Length);");
-                    _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__uncompressed.Length), 0, 4 );");
+                    _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
                     _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );");
                     _writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
                     _writer.WriteLineEx("}");
@@ -214,12 +201,12 @@ namespace TableGenerate
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("finally");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("if(stream != null) stream.Dispose();");
+                    _writer.WriteLineEx("if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();");
                     _writer.WriteLineEx("}");
 
                     _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("#endif");
-                    
+                    _writer.WriteLineEx("#endif //NO_EXCEL_LOADER");
+
 
                     _writer.WriteLineEx($"    public string GetFileName() {{ return \"{filename}\"; }}");
                     // ReadStream function
@@ -257,7 +244,7 @@ namespace TableGenerate
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("using (System.IO.MemoryStream __ms = new System.IO.MemoryStream(bytes))");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__ms))");
+                    _writer.WriteLineEx("using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms))");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("int uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
                     _writer.WriteLineEx("bytes = new byte[uncompressedSize__];");

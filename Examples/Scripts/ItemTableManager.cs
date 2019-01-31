@@ -108,49 +108,35 @@ namespace TBL.ItemTable
     #if !NO_EXCEL_LOADER
     public void WriteFile(string path)
     {
-      byte[] __uncompressed = null;
+      int uncompressedLength = 0;
+      System.IO.MemoryStream uncompressedMemoryStream = null;
+      uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);
       {
-        System.IO.MemoryStream __ms = null;
-        try
-        {
-          __ms = new System.IO.MemoryStream(128 * 1024);
-          var __m = __ms;
-          using(var __writer = new System.IO.BinaryWriter(__ms))
-          {
-            __ms = null;
-            Item.WriteStream(__writer);
-            ItemEffect.WriteStream(__writer);
-            ItemEnchant.WriteStream(__writer);
-            ItemManufacture.WriteStream(__writer);
-            RandomBoxGroup.WriteStream(__writer);
-          }
-          __uncompressed = __m.ToArray();
-        }
-        finally
-        {
-          if(__ms != null) __ms.Dispose();
-        }
+        var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);
+        Item.WriteStream(uncompressedMemoryStreamWriter);
+        ItemEffect.WriteStream(uncompressedMemoryStreamWriter);
+        ItemEnchant.WriteStream(uncompressedMemoryStreamWriter);
+        ItemManufacture.WriteStream(uncompressedMemoryStreamWriter);
+        RandomBoxGroup.WriteStream(uncompressedMemoryStreamWriter);
+        uncompressedLength = (int) uncompressedMemoryStream.Position;
       }
       System.IO.FileStream stream = null;
       try
       {
         string tempFileName = System.IO.Path.GetTempFileName();
+        uncompressedMemoryStream.Position=0;
         stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);
         {
           using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())
           {
-            using (var compressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__zip))
-            {
-              compressStream.Write(__uncompressed, 0, __uncompressed.Length);
-              compressStream.Flush();
-            }
+            ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);
             using(var md5 = System.Security.Cryptography.MD5.Create())
             {
               var __compressed = __zip.ToArray();
               byte[] hashBytes = md5.ComputeHash(__compressed);
               stream.WriteByte((byte)hashBytes.Length);
               stream.Write(hashBytes, 0, hashBytes.Length);
-              stream.Write( System.BitConverter.GetBytes(__uncompressed.Length), 0, 4 );
+              stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );
               stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );
               stream.Write(__compressed, 0, __compressed.Length);
             }
@@ -167,10 +153,10 @@ namespace TBL.ItemTable
       }
       finally
       {
-        if(stream != null) stream.Dispose();
+        if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();
       }
     }
-    #endif
+    #endif //NO_EXCEL_LOADER
       public string GetFileName() { return "ItemTable"; }
     public void ReadStream(System.IO.Stream stream)
     {
@@ -193,7 +179,7 @@ namespace TBL.ItemTable
       }
       using (System.IO.MemoryStream __ms = new System.IO.MemoryStream(bytes))
       {
-        using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2OutputStream(__ms))
+        using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms))
         {
           int uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);
           bytes = new byte[uncompressedSize__];
