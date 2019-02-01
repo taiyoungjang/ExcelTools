@@ -1,7 +1,7 @@
-- Execute table generator
+Execute table generator
 <br/>
-Examples\ExecuteTable.bat or Examples\TableGenerate.ps1
+ Examples\ExecuteTable.bat or Examples\TableGenerate.ps1
 <br/>
-- Edit configure path
+Edit configure path
 <br/>
-Examples\TableGenerate.ps1
+ Examples\TableGenerate.ps1
