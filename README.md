@@ -5,3 +5,7 @@ Execute table generator
 Edit configure path
 <br/>
  Examples\TableGenerate.ps1
+<br/>
+using library
+<br/>
+OpenXML, ISharpCode.Bzip2
