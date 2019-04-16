@@ -1,33 +1,14 @@
-TableGenerateCmd »ç¿ë¹æ¹ı
-Usage: TableGenerateCmd -i È¯°æ¼³Á¤ÆÄÀÏ -c ÃßÃâ¸í·É -s ¼Ò½ºÆú´õ -l ¾ğ¾î[kr|cn] -v ¸¶ÀÏ½ºÅæ¹öÁ¯ 
-Option: -i È¯°æ ¼³Á¤ ÆÄÀÏ ¸í
-           ¹İµå½Ã ½ÇÇà ÆÄÀÏ°ú °°Àº À§Ä¡¿¡ ÀÖ¾î¾ß ÇÑ´Ù.
-           ¼³Á¤À» ¾ÈÇÒ °æ¿ì, TableGenerateCmd.ini ÆÄÀÏÀ» ÀĞ¾î ¿Â´Ù.
-        -c ÃßÃâ ¸í·É, ¸í·É¾î´Â ´ë¼Ò¹®ÀÚ¸¦ ±¸ºĞÇÏÁö ¾Ê´Â´Ù. ¿É¼ÇÀ» ¼³Á¤ÇÏÁö ¾ÊÀ¸¸é [all]·Î ½ÇÇàµÈ´Ù.
-           all: ¸ğµç Çü½ÄÀÇ ÆÄÀÏ·Î ÃßÃâÇÑ´Ù.
-           idl: .IDL, .H, .CPP ÆÄÀÏ Çü½ÄÀ¸·Î ÃßÃâÇÑ´Ù.
-           c#: .CS Çü½ÄÀÇ ÆÄÀÏ·Î ÃßÃâ
-           table: .TBL Çü½ÄÀÇ ÆÄÀÏ·Î ÃßÃâ
-           string: .KOR°ú °°Àº Çü½ÄÀ¸·Î ÃßÃâ
-           db: .SQL°ú °°Àº Çü½ÄÀ¸·Î ÃßÃâ
-        -s ¼Ò½º Æú´õ. ExcelÆÄÀÏÀÌ ÀúÀåµÇ¾î ÀÖ´Â À§Ä¡ Á¤º¸
-        -l ¾ğ¾î [kr|cn]
-           kr: ÇÑ±¹¾î
-           cn: Áß±¹¾î
-        -v ¹öÀü Á¤º¸
+TableGenerateCmd ì‚¬ìš©ë°©ë²•
+Usage: TableGenerateCmd -i í™˜ê²½ì„¤ì •íŒŒì¼ -l ì–¸ì–´[kor|chn] 
+Option: -i í™˜ê²½ ì„¤ì • íŒŒì¼ ëª…
+           ë°˜ë“œì‹œ ì‹¤í–‰ íŒŒì¼ê³¼ ê°™ì€ ìœ„ì¹˜ì— ìˆì–´ì•¼ í•œë‹¤.
+           ì„¤ì •ì„ ì•ˆí•  ê²½ìš°, TableGenerateCmd.ini íŒŒì¼ì„ ì½ì–´ ì˜¨ë‹¤.
+        -c ì¶”ì¶œ ëª…ë ¹, ëª…ë ¹ì–´ëŠ” ëŒ€ì†Œë¬¸ìë¥¼ êµ¬ë¶„í•˜ì§€ ì•ŠëŠ”ë‹¤. ì˜µì…˜ì„ ì„¤ì •í•˜ì§€ ì•Šìœ¼ë©´ [all]ë¡œ ì‹¤í–‰ëœë‹¤.
+           all: ëª¨ë“  í˜•ì‹ì˜ íŒŒì¼ë¡œ ì¶”ì¶œí•œë‹¤.
+           c#: .CS í˜•ì‹ì˜ íŒŒì¼ë¡œ ì¶”ì¶œ
+           table: .bytes í˜•ì‹ì˜ íŒŒì¼ë¡œ ì¶”ì¶œ
+        -s ì†ŒìŠ¤ í´ë”. ExcelíŒŒì¼ì´ ì €ì¥ë˜ì–´ ìˆëŠ” ìœ„ì¹˜ ì •ë³´
+        -l ì–¸ì–´ [kr|cn]
+           kor: í•œêµ­ì–´
+           chn: ì¤‘êµ­ì–´
 
-examlpe:
-    TableGenerateCmd.exe
-		: ±âº» ¿É¼ÇÀ» »ç¿ëÇÏ¿© ÇÁ·Î±×·¥À» ½ÇÇàÇÔ.
-	TableGenerateCmd.exe -i TableGenerateCmd2.ini
-		: TableGenerateCmd2.ini ÆÄÀÏ ¼³Á¤À» ÀĞ¾î¼­ ÇÁ·Î±×·¥À» ½ÇÇàÇÔ
-	TableGenerateCmd -c idl c# table
-		: idl, c#, table Çü½ÄÀÇ ÆÄÀÏ¸¸ ÃßÃâ
-	TableGenerateCmd -i TableGenerateCmd2.ini -c string db
-		: È¯°æ ¼³Á¤ ÆÄÀÏÀ» ÀĞ¾î¿Í string, db Çü½ÄÀÇ °á°ú¹°¸¸ ÃßÃâÇÔ.
-
-Usage: TableGenerateCmd -s SourcePath(*.xls) -v ¸¶ÀÏ½ºÅæ¹öÁ¯ -l [kr|cn]
-      => ¼Ò½º Æú´õ Á¤º¸¸¦ ÀÔ·ÂÇÒ °æ¿ì,  $Version ¸ÅÅ©·Î¸¦ »ç¿ëÇÒ ¼ö ÀÖÀ½.
-      ex) TableGenerateCmd -s D:\Temp\Table$Version
-
-Usage: TableGenerateCmd -s Table_M12 -l cn -v M12 -c
