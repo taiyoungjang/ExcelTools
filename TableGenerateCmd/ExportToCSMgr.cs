@@ -324,17 +324,17 @@ namespace TableGenerate
             _writer.WriteLineEx($"public static System.Collections.Generic.List<{sheetName}> _array = null;");
             _writer.WriteLineEx($"public static System.Collections.Generic.Dictionary<{type},{sheetName}> _map = null;");
             _writer.WriteLineEx();
-            _writer.WriteLineEx($"public static void ArrayToMap(System.Collections.Generic.List<{sheetName}> array)");
+            _writer.WriteLineEx($"public static void ArrayToMap(System.Collections.Generic.List<{sheetName}> array__)");
             _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"_map = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array.Count{(string.IsNullOrEmpty(equality_type) ? string.Empty : $",{equality_type}")});");
+            _writer.WriteLineEx($"_map = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Count{(string.IsNullOrEmpty(equality_type) ? string.Empty : $",{equality_type}")});");
             //_writer.WriteLineEx($"array.Sort(delegate({sheetName} a,{sheetName} b)");
             //_writer.WriteLineEx( "{");
             //_writer.WriteLineEx($"return a.{primitiveName}.CompareTo(b.{primitiveName});");
             //_writer.WriteLineEx("});");
             _writer.WriteLineEx($"{sheetName} __table = null;");
-            _writer.WriteLineEx("for( int __i=0;__i<array.Count;__i++)");
+            _writer.WriteLineEx("for( int __i=0;__i<array__.Count;__i++)");
             _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"__table = array[__i];");
+            _writer.WriteLineEx($"__table = array__[__i];");
             _writer.WriteLineEx($"try{{");
             _writer.WriteLineEx($"_map.Add(__table.{primitiveName}, __table);");
             _writer.WriteLineEx($"}}catch(System.Exception e)");
@@ -426,7 +426,7 @@ namespace TableGenerate
 
             _writer.WriteLineEx( "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language)");
             _writer.WriteLineEx( "{");
-            _writer.WriteLineEx( "int i=0; int j=0;");
+            _writer.WriteLineEx( "var i=0; var j=0;");
             _writer.WriteLineEx( "string[,] rows = null;");
             foreach (var column in columns)
             {
@@ -446,7 +446,7 @@ namespace TableGenerate
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"rows = imp.GetSheet(\"{sheetName}\", language);");
             if (nation_column != null) _writer.WriteLineEx($"      bool useNation = rows[0,{nation_column.data_column_index}].Trim().ToLower() == \"nation\";");
-            _writer.WriteLineEx($"var array = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 3);");
+            _writer.WriteLineEx($"var array__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 3);");
             _writer.WriteLineEx( "for (i = 3; i < rows.GetLength(0); i++)");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"j=0;");
@@ -466,33 +466,33 @@ namespace TableGenerate
                 {
                     if (column.array_index == 0)
                     {
-                        _writer.WriteLineEx($"{column.var_name} = new {type}();");
+                        int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
+                        _writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[{array_count}];");
                     }
 
                     if ( column.IsDateTime() == true )
                     {
                         _writer.WriteLineEx($"j = {column.data_column_index};");
-                        _writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}.Add(new System.DateTime(1970,1,1));}}else{{{column.var_name}.Add({convert_function});}}");
+                        _writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = new System.DateTime(1970,1,1);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
                     }
                     else if (column.IsTimeSpan() == true)
                     {
                         _writer.WriteLineEx($"j = {column.data_column_index};");
-                        _writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}.Add(System.TimeSpan.FromTicks(0));}}else{{{column.var_name}.Add({convert_function});}}");
+                        _writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = System.TimeSpan.FromTicks(0);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
                     }
                     else if (column.IsNumberType() == true)
                     {
                         _writer.WriteLineEx($"j = {column.data_column_index};");
                         _writer.WriteLineEx("{");
                         _writer.WriteLineEx($"{column.GetPrimitiveType(_gen_type)} outvalue = {column.GetInitValue(_gen_type)}; if(!string.IsNullOrEmpty({arg})) ");
-                        _writer.WriteLineEx($"outvalue = {convert_function}; {column.var_name}.Add(outvalue);");
+                        _writer.WriteLineEx($"outvalue = {convert_function}; {column.var_name}[{column.array_index}] = outvalue;");
                         _writer.WriteLineEx("}");
                     }
                     else if (column.IsNumberType() == false)
                     {
                         _writer.WriteLineEx($"j = {column.data_column_index};");
-                        _writer.WriteLineEx($"{column.var_name}.Add({convert_function});");
+                        _writer.WriteLineEx($"{column.var_name}[{column.array_index}] = {convert_function};");
                     }
-
                     continue;
                 }
                 if (column.IsDateTime() == true)
@@ -520,7 +520,7 @@ namespace TableGenerate
                 }
             }
             _writer.WriteLineEx(string.Format("{0} values = new {0}({1});", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}").ToArray())));
-            _writer.WriteLineEx("foreach (var preValues in array)");
+            _writer.WriteLineEx("foreach (var preValues in array__)");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"if (preValues.{key_column.var_name} == {key_column.var_name})");
             _writer.WriteLineEx("{");
@@ -529,10 +529,10 @@ namespace TableGenerate
             _writer.WriteLineEx("}");
             _writer.WriteLineEx( "}");
 
-            _writer.WriteLineEx( "array.Add(values);");
+            _writer.WriteLineEx( "array__.Add(values);");
             _writer.WriteLineEx( "}");
-            _writer.WriteLineEx("ArrayToMap(array);");
-            _writer.WriteLineEx("_array = array;");
+            _writer.WriteLineEx("ArrayToMap(array__);");
+            _writer.WriteLineEx("_array = array__;");
             _writer.WriteLineEx( "}catch(System.Exception e)");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx("if( rows == null ) throw;");
@@ -637,7 +637,7 @@ namespace TableGenerate
                 if (column.array_index >= 0)
                 {
                     int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
-                    _writer.WriteLineEx($"    public static int {column.var_name}_Length{{ get {{ return {array_count}; }} }} ");
+                    _writer.WriteLineEx($"     public static int {column.var_name}_Length {{ get {{ return {array_count}; }} }}");
                 }
             }
         }
@@ -683,7 +683,7 @@ namespace TableGenerate
                         string convert_function = column.GetConvertFunction(arg, _gen_type);
                         if (i == 0)
                         {
-                            _writer.WriteLineEx($"{append}new {generate_type}()");
+                            _writer.WriteLineEx($"{append}new {generate_type}");
                             append = ",";
                             _writer.WriteLineEx("{");
                             _writer.WriteLineEx($"{convert_function}");
@@ -715,13 +715,12 @@ namespace TableGenerate
             _writer.WriteLineEx("public static void WriteStream(System.IO.BinaryWriter __writer)");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"__writer.Write(_array.Count);"); ;
-            _writer.WriteLineEx($"for (int __i=0;__i<_array.Count;__i++)");
+            _writer.WriteLineEx($"for (var __i=0;__i<_array.Count;__i++)");
             _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"{sheetName} __table = _array[__i];");
-            foreach (var column in columns)
+            _writer.WriteLineEx($"var __table = _array[__i];");
+            foreach (var column in columns.Where( t => t.array_index <= 0))
             {
                 string type = column.GenerateType(_gen_type);
-                string var_name = column.var_name;
 
                 if (column.is_generated == false)
                 {
@@ -729,21 +728,23 @@ namespace TableGenerate
                 }
 
                 if (column.array_index >= 0)
-                    var_name += $"[{column.array_index}]";
-
-                if (column.array_index >= 0)
                 {
+                    _writer.WriteLineEx($"TBL.Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
+                    _writer.Write($"for(var j__=0;j__<__table.{column.var_name}.Length;++j__)");
+                    _writer.Write("{");
                     if (column.IsDateTime())
-                        _writer.WriteLineEx($"__writer.Write(__table.{var_name}.ToBinary());");
+                        _writer.Write($"__writer.Write(__table.{column.var_name}[j__].ToBinary());");
                     else if (column.IsTimeSpan())
-                        _writer.WriteLineEx($"__writer.Write(__table.{var_name}.Ticks);");
+                        _writer.Write($"__writer.Write(__table.{column.var_name}[j__].Ticks);");
                     else if (column.IsEnumType())
                     {
                         string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
-                        _writer.WriteLineEx($"__writer.Write(({primitive_type})__table.{var_name});");
+                        _writer.Write($"__writer.Write(({primitive_type})__table.{column.var_name}[j__]);");
                     }
                     else
-                        _writer.WriteLineEx($"__writer.Write(__table.{var_name});");
+                        _writer.Write($"__writer.Write(__table.{column.var_name}[j__]);");
+                    _writer.Write("}");
+                    _writer.WriteLineEx("");
                 }
                 else
                 {
@@ -767,15 +768,14 @@ namespace TableGenerate
         {
             _writer.WriteLineEx("public static void ReadStream(System.IO.BinaryReader __reader)");
             _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"var array = new System.Collections.Generic.List<{sheetName}>();");
+            _writer.WriteLineEx($"var array__ = new System.Collections.Generic.List<{sheetName}>();");
             _writer.WriteLineEx($"int __count = __reader.ReadInt32();"); 
             _writer.WriteLineEx($"for (int __i=0;__i<__count;__i++)");
             _writer.WriteLineEx("{");
-            foreach (var column in columns)
+            foreach (var column in columns.Where( t => t.array_index <= 0))
             {
                 string type = column.GenerateType(_gen_type);
                 string convert_funtion = column.GetReadStreamFunction(_gen_type);
-                string var_name = column.var_name;
 
                 if (column.is_generated == false)
                 {
@@ -783,18 +783,17 @@ namespace TableGenerate
                 }
 
                 if (column.array_index >= 0)
-                    var_name += column.array_index;
-
-                if (column.array_index >= 0)
                 {
-                    if (column.array_index == 0)
-                        _writer.WriteLineEx($"var {column.var_name} = new {type}({column.var_name}_Length);");
-
-                    _writer.WriteLineEx($"{column.var_name}.Add( {convert_funtion});");
+                    _writer.WriteLineEx($"{type} {column.var_name} = null;");
+                    _writer.WriteLineEx("{");
+                    _writer.WriteLineEx("var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);");
+                    _writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[arrayCount__];");
+                    _writer.WriteLineEx($"for(var __j=0;__j<arrayCount__;++__j){column.var_name}[__j] = {convert_funtion};");
+                    _writer.WriteLineEx("}");
                 }
                 else
                 {
-                    _writer.WriteLineEx($"var {var_name} = {convert_funtion};");
+                    _writer.WriteLineEx($"var {column.var_name} = {convert_funtion};");
                 }
             }
             _writer.WriteLineEx(
@@ -802,10 +801,10 @@ namespace TableGenerate
                 sheetName,
                 string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => t.var_name).ToArray())
             ));
-            _writer.WriteLineEx($"array.Add(__table);");
+            _writer.WriteLineEx($"array__.Add(__table);");
             _writer.WriteLineEx("}");
-            _writer.WriteLineEx($"ArrayToMap(array);");
-            _writer.WriteLineEx($"_array = array;");
+            _writer.WriteLineEx($"ArrayToMap(array__);");
+            _writer.WriteLineEx($"_array = array__;");
             _writer.WriteLineEx("}");
         }
         private void PropertyFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
