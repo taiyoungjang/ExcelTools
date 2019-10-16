@@ -30,7 +30,7 @@ $CurrentFolder = (get-item ([Environment]::CurrentDirectory) ).Name
 $CurrentDirectory = (get-item ([Environment]::CurrentDirectory) ).FullName
 # ********************************
 #$PlatformType = "Mixed Platforms"
-$LangVers = [array] "eng", "kor"
+$LangVers = [array] "English", "Korean"
 $nl = [Environment]::NewLine
 $hostname=[Environment]::MachineName
 if($CPU_Count -eq 0)
@@ -56,8 +56,8 @@ function Building_Table
     foreach($LangVer in $LangVers) 
     { 
     # set Table {
-        $Project_Table_Generater_Path = "${CurrentDirectory}\..\TableGenerateCmd\bin\" 
-        $Project_Table_Generater_File = "${Project_Table_Generater_Path}TableGenerateCmd.exe"
+        $Project_Table_Generater_Path = "${CurrentDirectory}\..\TableGenerateCmd.NetCore\bin\Debug\netcoreapp3.0\" 
+        $Project_Table_Generater_File = "${Project_Table_Generater_Path}TableGenerateCmd.dll"
         $Project_Table_Generater_INI_File = "${CurrentDirectory}\TableGenerateCmd.ini" 
         [array] $Project_Table_Generater_Command = "-i", $Project_Table_Generater_INI_File, "-c", "c#", "table", "-l", "$LangVer", "-a", "unity3d", "-p", $CPU_Count
     
@@ -90,7 +90,7 @@ function Building_Table
 
         write-host "`n** Execute TableGenerate ${LangVer} **`n" -foregroundcolor Blue -backgroundcolor White
         out-file -filepath $Project_Table_Generater_INI_File -inputobject $Project_Table_Generater_INI
-	    Invoke-Expression "$Project_Table_Generater_File $Project_Table_Generater_Command"
+	    Invoke-Expression "dotnet $Project_Table_Generater_File $Project_Table_Generater_Command"
 	    if( $LastExitCode -ne 0 )
 	    {
 		    write-host "exit_code:"$LastExitCode.ToString()

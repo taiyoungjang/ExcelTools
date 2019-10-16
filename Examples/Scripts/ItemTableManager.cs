@@ -1,13 +1,14 @@
 // generate ItemTable
 // DO NOT TOUCH SOURCE....
+#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018
 #if UNITY_EDITOR
 public class ItemTableManager : UnityEngine.MonoBehaviour
 {
-  public System.Collections.Generic.List<TBL.ItemTable.Item> Item = new System.Collections.Generic.List<TBL.ItemTable.Item>();
-  public System.Collections.Generic.List<TBL.ItemTable.ItemEffect> ItemEffect = new System.Collections.Generic.List<TBL.ItemTable.ItemEffect>();
-  public System.Collections.Generic.List<TBL.ItemTable.ItemEnchant> ItemEnchant = new System.Collections.Generic.List<TBL.ItemTable.ItemEnchant>();
-  public System.Collections.Generic.List<TBL.ItemTable.ItemManufacture> ItemManufacture = new System.Collections.Generic.List<TBL.ItemTable.ItemManufacture>();
-  public System.Collections.Generic.List<TBL.ItemTable.RandomBoxGroup> RandomBoxGroup = new System.Collections.Generic.List<TBL.ItemTable.RandomBoxGroup>();
+  public TBL.ItemTable.Item[] Item = null;
+  public TBL.ItemTable.ItemEffect[] ItemEffect = null;
+  public TBL.ItemTable.ItemEnchant[] ItemEnchant = null;
+  public TBL.ItemTable.ItemManufacture[] ItemManufacture = null;
+  public TBL.ItemTable.RandomBoxGroup[] RandomBoxGroup = null;
 }
 [UnityEditor.CustomEditor(typeof(ItemTableManager))]
 public class ItemTableEditor : UnityEditor.Editor
@@ -17,11 +18,11 @@ public class ItemTableEditor : UnityEditor.Editor
     ItemTableManager myScript = (ItemTableManager) target;
     if(UnityEngine.GUILayout.Button("Load"))
     {
-      myScript.Item = TBL.ItemTable.Item._array;
-      myScript.ItemEffect = TBL.ItemTable.ItemEffect._array;
-      myScript.ItemEnchant = TBL.ItemTable.ItemEnchant._array;
-      myScript.ItemManufacture = TBL.ItemTable.ItemManufacture._array;
-      myScript.RandomBoxGroup = TBL.ItemTable.RandomBoxGroup._array;
+      myScript.Item = TBL.ItemTable.Item.Array_;
+      myScript.ItemEffect = TBL.ItemTable.ItemEffect.Array_;
+      myScript.ItemEnchant = TBL.ItemTable.ItemEnchant.Array_;
+      myScript.ItemManufacture = TBL.ItemTable.ItemManufacture.Array_;
+      myScript.RandomBoxGroup = TBL.ItemTable.RandomBoxGroup.Array_;
     }
     DrawDefaultInspector();
   }
@@ -63,7 +64,7 @@ namespace TBL.ItemTable
     #if !NO_EXCEL_LOADER
     public void ExcelLoad(string path, string language)
     {
-      language = language.Trim().ToLower();
+      language = language.Trim();
       string directoryName = System.IO.Path.GetDirectoryName(path);
       var imp = new ClassUtil.ExcelImporter();
       imp.Open(path);
@@ -77,28 +78,28 @@ namespace TBL.ItemTable
     #endif
     #endif
     /*
-    public void GetMapAndArray(System.Collections.Generic.Dictionary<string,object> container)
+    public void GetMapAndArray(System.Collections.Immutable.ImmutableDictionary<string,object> container)
     {
-      container.Remove( "ItemTable.Item._map");
-      container.Remove( "ItemTable.Item._array");
-      container.Add( "ItemTable.Item._map", new System.Collections.Generic.Dictionary<int,Item>(Item._map,default(global::TBL.IntEqualityComparer)));
-      container.Add( "ItemTable.Item._array",new System.Collections.Generic.List<Item>(Item._array));
-      container.Remove( "ItemTable.ItemEffect._map");
-      container.Remove( "ItemTable.ItemEffect._array");
-      container.Add( "ItemTable.ItemEffect._map", new System.Collections.Generic.Dictionary<int,ItemEffect>(ItemEffect._map,default(global::TBL.IntEqualityComparer)));
-      container.Add( "ItemTable.ItemEffect._array",new System.Collections.Generic.List<ItemEffect>(ItemEffect._array));
-      container.Remove( "ItemTable.ItemEnchant._map");
-      container.Remove( "ItemTable.ItemEnchant._array");
-      container.Add( "ItemTable.ItemEnchant._map", new System.Collections.Generic.Dictionary<int,ItemEnchant>(ItemEnchant._map,default(global::TBL.IntEqualityComparer)));
-      container.Add( "ItemTable.ItemEnchant._array",new System.Collections.Generic.List<ItemEnchant>(ItemEnchant._array));
-      container.Remove( "ItemTable.ItemManufacture._map");
-      container.Remove( "ItemTable.ItemManufacture._array");
-      container.Add( "ItemTable.ItemManufacture._map", new System.Collections.Generic.Dictionary<int,ItemManufacture>(ItemManufacture._map,default(global::TBL.IntEqualityComparer)));
-      container.Add( "ItemTable.ItemManufacture._array",new System.Collections.Generic.List<ItemManufacture>(ItemManufacture._array));
-      container.Remove( "ItemTable.RandomBoxGroup._map");
-      container.Remove( "ItemTable.RandomBoxGroup._array");
-      container.Add( "ItemTable.RandomBoxGroup._map", new System.Collections.Generic.Dictionary<int,RandomBoxGroup>(RandomBoxGroup._map,default(global::TBL.IntEqualityComparer)));
-      container.Add( "ItemTable.RandomBoxGroup._array",new System.Collections.Generic.List<RandomBoxGroup>(RandomBoxGroup._array));
+      container.Remove( "ItemTable.Item.Map_");
+      container.Remove( "ItemTable.Item.Array_");
+      container.Add( "ItemTable.Item.Map_", new System.Collections.Immutable.ImmutableDictionary<ItemID,Item>(Item.Map_));
+      container.Add( "ItemTable.Item.Array_",Item.Array_);
+      container.Remove( "ItemTable.ItemEffect.Map_");
+      container.Remove( "ItemTable.ItemEffect.Array_");
+      container.Add( "ItemTable.ItemEffect.Map_", new System.Collections.Immutable.ImmutableDictionary<int,ItemEffect>(ItemEffect.Map_,default(global::TBL.IntEqualityComparer)));
+      container.Add( "ItemTable.ItemEffect.Array_",ItemEffect.Array_);
+      container.Remove( "ItemTable.ItemEnchant.Map_");
+      container.Remove( "ItemTable.ItemEnchant.Array_");
+      container.Add( "ItemTable.ItemEnchant.Map_", new System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant>(ItemEnchant.Map_,default(global::TBL.IntEqualityComparer)));
+      container.Add( "ItemTable.ItemEnchant.Array_",ItemEnchant.Array_);
+      container.Remove( "ItemTable.ItemManufacture.Map_");
+      container.Remove( "ItemTable.ItemManufacture.Array_");
+      container.Add( "ItemTable.ItemManufacture.Map_", new System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture>(ItemManufacture.Map_,default(global::TBL.IntEqualityComparer)));
+      container.Add( "ItemTable.ItemManufacture.Array_",ItemManufacture.Array_);
+      container.Remove( "ItemTable.RandomBoxGroup.Map_");
+      container.Remove( "ItemTable.RandomBoxGroup.Array_");
+      container.Add( "ItemTable.RandomBoxGroup.Map_", new System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup>(RandomBoxGroup.Map_,default(global::TBL.IntEqualityComparer)));
+      container.Add( "ItemTable.RandomBoxGroup.Array_",RandomBoxGroup.Array_);
     }
     */
     public void CheckReplaceFile( string tempFileName, string fileName ) 
@@ -223,34 +224,35 @@ namespace TBL.ItemTable
   #endif
   public partial class Item : BaseClasses.Item
   {
-    public static System.Collections.Generic.List<Item> _array = null;
-    public static System.Collections.Generic.Dictionary<int,Item> _map = null;
+  public static Item[] Array_ { get; private set; }= null;
+  public static System.Collections.Immutable.ImmutableDictionary<ItemID,Item> Map_ { get; private set; }= null;
     
 
-    public static void ArrayToMap(System.Collections.Generic.List<Item> array__)
+    public static void ArrayToMap(Item[] array__)
     {
-      _map = new System.Collections.Generic.Dictionary<int,Item> (array__.Count,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<ItemID,Item> (array__.Length);
       Item __table = null;
-      for( int __i=0;__i<array__.Count;__i++)
+      for( int __i=0;__i<array__.Length;__i++)
       {
         __table = array__[__i];
         try{
-          _map.Add(__table.Item_ID, __table);
+          map_.Add(__table.Item_ID, __table);
         }catch(System.Exception e)
         {
           throw new System.Exception(__table.Item_ID.ToString() + " " + e.Message);
         }
       }
+      Map_ = System.Collections.Immutable.ImmutableDictionary<ItemID,Item>.Empty.AddRange(map_);
     }
     
 
     public static void WriteStream(System.IO.BinaryWriter __writer)
     {
-      __writer.Write(_array.Count);
-      for (var __i=0;__i<_array.Count;__i++)
+      __writer.Write(Array_.Length);
+      for (var __i=0;__i<Array_.Length;__i++)
       {
-        var __table = _array[__i];
-        __writer.Write(__table.Item_ID);
+        var __table = Array_[__i];
+        __writer.Write((int)__table.Item_ID);
         __writer.Write(__table.Name);
         __writer.Write(__table.Item_grade);
         __writer.Write(__table.Require_lv);
@@ -308,8 +310,9 @@ namespace TBL.ItemTable
     #if !UNITY_5_3_OR_NEWER
     public static bool SetDataSet(System.Data.DataSet dts)
     {
-      Item._map = new System.Collections.Generic.Dictionary<int,Item>();
-      Item._array = new System.Collections.Generic.List<Item>();
+      Item.Map_ = System.Collections.Immutable.ImmutableDictionary<ItemID,Item>.Empty;
+      Item.Array_ = new Item[dts.Tables["Item"].Rows.Count];
+      int row__ = 0;
       foreach (System.Data.DataRow row in dts.Tables["Item"].Rows)
       {
         Item table = new Item
@@ -386,8 +389,8 @@ namespace TBL.ItemTable
           ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["RandomBoxGroup_NO4"].ToString())))
         }
         );
-        Item._map.Add(table.Item_ID, table);
-        Item._array.Add(table);
+        Item.Map_ = Item.Map_.Add(table.Item_ID, table);
+        Item.Array_[row__++] = table;
       }
       return true;
     }
@@ -396,7 +399,7 @@ namespace TBL.ItemTable
     {
       var i=0; var j=0;
       string[,] rows = null;
-      int Item_ID;
+      ItemID Item_ID;
       string Name;
       int Item_grade;
       int Require_lv;
@@ -447,7 +450,7 @@ namespace TBL.ItemTable
       try
       {
         rows = imp.GetSheet("Item", language);
-        var array__ = new System.Collections.Generic.List<Item>(rows.GetLength(0) - 3);
+        var list__ = new System.Collections.Generic.List<Item>(rows.GetLength(0) - 3);
         for (i = 3; i < rows.GetLength(0); i++)
         {
           j=0;
@@ -720,18 +723,18 @@ namespace TBL.ItemTable
             outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,59]))); RandomBoxGroup_NO[4] = outvalue;
           }
           Item values = new Item(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO);
-          foreach (var preValues in array__)
+          foreach (var preValues in list__)
           {
-            if (preValues.Item_ID == Item_ID)
+            if (preValues.Item_ID.Equals(Item_ID))
             {
               i=0;j=0;
               throw new System.Exception("Item.Item_ID:" + preValues.Item_ID.ToString() + ") Duplicated!!");
             }
           }
-          array__.Add(values);
+          list__.Add(values);
         }
-        ArrayToMap(array__);
-        _array = array__;
+        Array_ = list__.ToArray();
+        ArrayToMap(Array_);
       }catch(System.Exception e)
       {
         if( rows == null ) throw;
@@ -744,7 +747,7 @@ namespace TBL.ItemTable
     public static void GetDataTable(System.Data.DataSet dts)
     {
       System.Data.DataTable table = dts.Tables.Add("Item");
-      table.Columns.Add("Item_ID", typeof(int));
+      table.Columns.Add("Item_ID", typeof(ItemID));
       table.Columns.Add("Name", typeof(string));
       table.Columns.Add("Item_grade", typeof(int));
       table.Columns.Add("Require_lv", typeof(int));
@@ -800,7 +803,7 @@ namespace TBL.ItemTable
       table.Columns.Add("RandomBoxGroup_NO2", typeof(int));
       table.Columns.Add("RandomBoxGroup_NO3", typeof(int));
       table.Columns.Add("RandomBoxGroup_NO4", typeof(int));
-      foreach(var item in _array )
+      foreach(var item in Array_ )
       {
         table.Rows.Add(
         item.Item_ID
@@ -865,11 +868,11 @@ namespace TBL.ItemTable
     #endif
     public static void ReadStream(System.IO.BinaryReader __reader)
     {
-      var array__ = new System.Collections.Generic.List<Item>();
-      int __count = __reader.ReadInt32();
-      for (int __i=0;__i<__count;__i++)
+      var count__ = __reader.ReadInt32();
+      var array__ = new Item[count__];
+      for (var __i=0;__i<array__.Length;__i++)
       {
-        var Item_ID = __reader.ReadInt32();
+        var Item_ID = (ItemID)__reader.ReadInt32();
         var Name = __reader.ReadString();
         var Item_grade = __reader.ReadInt32();
         var Require_lv = __reader.ReadInt32();
@@ -943,17 +946,17 @@ namespace TBL.ItemTable
           for(var __j=0;__j<arrayCount__;++__j)RandomBoxGroup_NO[__j] = __reader.ReadInt32();
         }
         Item __table = new Item(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO);
-        array__.Add(__table);
+        array__[__i] = __table;
       }
+      Array_ = array__;
       ArrayToMap(array__);
-      _array = array__;
     }
      public static int Next_Item_material_Length { get { return 3; } }
      public static int Next_Item_material_quantity_Length { get { return 3; } }
      public static int PartName_Length { get { return 1; } }
      public static int PartIndex_Length { get { return 1; } }
      public static int RandomBoxGroup_NO_Length { get { return 5; } }
-  public Item (int Item_ID,string Name,int Item_grade,int Require_lv,int Enchant_lv,int PhysicalAttack,int PhysicalDefense,int MagicalAttack,int MagicalDefense,float Critical,int HP,int KnockBackResist,eDictionaryType DictionaryType,int ItemType,short Gear_Score,short InventoryType,bool UsageType,short Socket_quantity,int Removal_cost,short Belonging,short Sub_stats_quantity,int Stack,int DesignScroll_ID,int BindingSkill_ID,int BindingAttack_ID,int Manufacture_gold,int Manufacture_cash,int SummonCompanion_ID,int Next_itemID,int Next_item_price,int[] Next_Item_material,int[] Next_Item_material_quantity,string Resource_Path,string WeaponName,short WeaponIndex,string[] PartName,short[] PartIndex,string Icon_path,int EXP,int Buy_cost,int Sell_reward,int Consignment_maxprice,int QuestBringer,int ItemEvent_ID,string Description,int Sub_Item,int WeaponType,int[] RandomBoxGroup_NO) : base(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO){}
+  public Item (ItemID Item_ID,string Name,int Item_grade,int Require_lv,int Enchant_lv,int PhysicalAttack,int PhysicalDefense,int MagicalAttack,int MagicalDefense,float Critical,int HP,int KnockBackResist,eDictionaryType DictionaryType,int ItemType,short Gear_Score,short InventoryType,bool UsageType,short Socket_quantity,int Removal_cost,short Belonging,short Sub_stats_quantity,int Stack,int DesignScroll_ID,int BindingSkill_ID,int BindingAttack_ID,int Manufacture_gold,int Manufacture_cash,int SummonCompanion_ID,int Next_itemID,int Next_item_price,int[] Next_Item_material,int[] Next_Item_material_quantity,string Resource_Path,string WeaponName,short WeaponIndex,string[] PartName,short[] PartIndex,string Icon_path,int EXP,int Buy_cost,int Sell_reward,int Consignment_maxprice,int QuestBringer,int ItemEvent_ID,string Description,int Sub_Item,int WeaponType,int[] RandomBoxGroup_NO) : base(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO){}
   }
   
 
@@ -962,33 +965,34 @@ namespace TBL.ItemTable
   #endif
   public partial class ItemEffect : BaseClasses.ItemEffect
   {
-    public static System.Collections.Generic.List<ItemEffect> _array = null;
-    public static System.Collections.Generic.Dictionary<int,ItemEffect> _map = null;
+  public static ItemEffect[] Array_ { get; private set; }= null;
+  public static System.Collections.Immutable.ImmutableDictionary<int,ItemEffect> Map_ { get; private set; }= null;
     
 
-    public static void ArrayToMap(System.Collections.Generic.List<ItemEffect> array__)
+    public static void ArrayToMap(ItemEffect[] array__)
     {
-      _map = new System.Collections.Generic.Dictionary<int,ItemEffect> (array__.Count,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,ItemEffect> (array__.Length,default(global::TBL.IntEqualityComparer));
       ItemEffect __table = null;
-      for( int __i=0;__i<array__.Count;__i++)
+      for( int __i=0;__i<array__.Length;__i++)
       {
         __table = array__[__i];
         try{
-          _map.Add(__table.Index, __table);
+          map_.Add(__table.Index, __table);
         }catch(System.Exception e)
         {
           throw new System.Exception(__table.Index.ToString() + " " + e.Message);
         }
       }
+      Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEffect>.Empty.AddRange(map_);
     }
     
 
     public static void WriteStream(System.IO.BinaryWriter __writer)
     {
-      __writer.Write(_array.Count);
-      for (var __i=0;__i<_array.Count;__i++)
+      __writer.Write(Array_.Length);
+      for (var __i=0;__i<Array_.Length;__i++)
       {
-        var __table = _array[__i];
+        var __table = Array_[__i];
         __writer.Write(__table.Index);
         __writer.Write(__table.Item_ID);
         __writer.Write(__table.Effect_type);
@@ -1004,8 +1008,9 @@ namespace TBL.ItemTable
     #if !UNITY_5_3_OR_NEWER
     public static bool SetDataSet(System.Data.DataSet dts)
     {
-      ItemEffect._map = new System.Collections.Generic.Dictionary<int,ItemEffect>();
-      ItemEffect._array = new System.Collections.Generic.List<ItemEffect>();
+      ItemEffect.Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEffect>.Empty;
+      ItemEffect.Array_ = new ItemEffect[dts.Tables["ItemEffect"].Rows.Count];
+      int row__ = 0;
       foreach (System.Data.DataRow row in dts.Tables["ItemEffect"].Rows)
       {
         ItemEffect table = new ItemEffect
@@ -1021,8 +1026,8 @@ namespace TBL.ItemTable
         ,System.Convert.ToSingle(row["Duration"].ToString())
         ,row["Description"].ToString()
         );
-        ItemEffect._map.Add(table.Index, table);
-        ItemEffect._array.Add(table);
+        ItemEffect.Map_ = ItemEffect.Map_.Add(table.Index, table);
+        ItemEffect.Array_[row__++] = table;
       }
       return true;
     }
@@ -1044,7 +1049,7 @@ namespace TBL.ItemTable
       try
       {
         rows = imp.GetSheet("ItemEffect", language);
-        var array__ = new System.Collections.Generic.List<ItemEffect>(rows.GetLength(0) - 3);
+        var list__ = new System.Collections.Generic.List<ItemEffect>(rows.GetLength(0) - 3);
         for (i = 3; i < rows.GetLength(0); i++)
         {
           j=0;
@@ -1097,18 +1102,18 @@ namespace TBL.ItemTable
           j = 10;
           Description = rows[i,10];
           ItemEffect values = new ItemEffect(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description);
-          foreach (var preValues in array__)
+          foreach (var preValues in list__)
           {
-            if (preValues.Index == Index)
+            if (preValues.Index.Equals(Index))
             {
               i=0;j=0;
               throw new System.Exception("ItemEffect.Index:" + preValues.Index.ToString() + ") Duplicated!!");
             }
           }
-          array__.Add(values);
+          list__.Add(values);
         }
-        ArrayToMap(array__);
-        _array = array__;
+        Array_ = list__.ToArray();
+        ArrayToMap(Array_);
       }catch(System.Exception e)
       {
         if( rows == null ) throw;
@@ -1131,7 +1136,7 @@ namespace TBL.ItemTable
       table.Columns.Add("Time", typeof(float));
       table.Columns.Add("Duration", typeof(float));
       table.Columns.Add("Description", typeof(string));
-      foreach(var item in _array )
+      foreach(var item in Array_ )
       {
         table.Rows.Add(
         item.Index
@@ -1150,9 +1155,9 @@ namespace TBL.ItemTable
     #endif
     public static void ReadStream(System.IO.BinaryReader __reader)
     {
-      var array__ = new System.Collections.Generic.List<ItemEffect>();
-      int __count = __reader.ReadInt32();
-      for (int __i=0;__i<__count;__i++)
+      var count__ = __reader.ReadInt32();
+      var array__ = new ItemEffect[count__];
+      for (var __i=0;__i<array__.Length;__i++)
       {
         var Index = __reader.ReadInt32();
         var Item_ID = __reader.ReadInt32();
@@ -1165,10 +1170,10 @@ namespace TBL.ItemTable
         var Duration = __reader.ReadSingle();
         var Description = __reader.ReadString();
         ItemEffect __table = new ItemEffect(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description);
-        array__.Add(__table);
+        array__[__i] = __table;
       }
+      Array_ = array__;
       ArrayToMap(array__);
-      _array = array__;
     }
   public ItemEffect (int Index,int Item_ID,int Effect_type,float Effect_min,float Effect_max,int Time_type,float Time_rate,float Time,float Duration,string Description) : base(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description){}
   }
@@ -1179,33 +1184,34 @@ namespace TBL.ItemTable
   #endif
   public partial class ItemEnchant : BaseClasses.ItemEnchant
   {
-    public static System.Collections.Generic.List<ItemEnchant> _array = null;
-    public static System.Collections.Generic.Dictionary<int,ItemEnchant> _map = null;
+  public static ItemEnchant[] Array_ { get; private set; }= null;
+  public static System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant> Map_ { get; private set; }= null;
     
 
-    public static void ArrayToMap(System.Collections.Generic.List<ItemEnchant> array__)
+    public static void ArrayToMap(ItemEnchant[] array__)
     {
-      _map = new System.Collections.Generic.Dictionary<int,ItemEnchant> (array__.Count,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,ItemEnchant> (array__.Length,default(global::TBL.IntEqualityComparer));
       ItemEnchant __table = null;
-      for( int __i=0;__i<array__.Count;__i++)
+      for( int __i=0;__i<array__.Length;__i++)
       {
         __table = array__[__i];
         try{
-          _map.Add(__table.Index, __table);
+          map_.Add(__table.Index, __table);
         }catch(System.Exception e)
         {
           throw new System.Exception(__table.Index.ToString() + " " + e.Message);
         }
       }
+      Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant>.Empty.AddRange(map_);
     }
     
 
     public static void WriteStream(System.IO.BinaryWriter __writer)
     {
-      __writer.Write(_array.Count);
-      for (var __i=0;__i<_array.Count;__i++)
+      __writer.Write(Array_.Length);
+      for (var __i=0;__i<Array_.Length;__i++)
       {
-        var __table = _array[__i];
+        var __table = Array_[__i];
         __writer.Write(__table.Index);
         __writer.Write(__table.Item_ID);
         __writer.Write(__table.Enchant_lv);
@@ -1227,8 +1233,9 @@ namespace TBL.ItemTable
     #if !UNITY_5_3_OR_NEWER
     public static bool SetDataSet(System.Data.DataSet dts)
     {
-      ItemEnchant._map = new System.Collections.Generic.Dictionary<int,ItemEnchant>();
-      ItemEnchant._array = new System.Collections.Generic.List<ItemEnchant>();
+      ItemEnchant.Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant>.Empty;
+      ItemEnchant.Array_ = new ItemEnchant[dts.Tables["ItemEnchant"].Rows.Count];
+      int row__ = 0;
       foreach (System.Data.DataRow row in dts.Tables["ItemEnchant"].Rows)
       {
         ItemEnchant table = new ItemEnchant
@@ -1262,8 +1269,8 @@ namespace TBL.ItemTable
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["Require_gold"].ToString())))
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["Require_cash"].ToString())))
         );
-        ItemEnchant._map.Add(table.Index, table);
-        ItemEnchant._array.Add(table);
+        ItemEnchant.Map_ = ItemEnchant.Map_.Add(table.Index, table);
+        ItemEnchant.Array_[row__++] = table;
       }
       return true;
     }
@@ -1289,7 +1296,7 @@ namespace TBL.ItemTable
       try
       {
         rows = imp.GetSheet("ItemEnchant", language);
-        var array__ = new System.Collections.Generic.List<ItemEnchant>(rows.GetLength(0) - 3);
+        var list__ = new System.Collections.Generic.List<ItemEnchant>(rows.GetLength(0) - 3);
         for (i = 3; i < rows.GetLength(0); i++)
         {
           j=0;
@@ -1304,121 +1311,121 @@ namespace TBL.ItemTable
           {
           Item_ID = 0;}else {Item_ID = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,1])));
           }
+          j = 8;
+          if(string.IsNullOrEmpty(rows[i,8]))
+          {
+          Enchant_lv = 0;}else {Enchant_lv = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,8])));
+          }
           j = 9;
           if(string.IsNullOrEmpty(rows[i,9]))
           {
-          Enchant_lv = 0;}else {Enchant_lv = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,9])));
+          Physical_attack = 0;}else {Physical_attack = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,9])));
           }
           j = 10;
           if(string.IsNullOrEmpty(rows[i,10]))
           {
-          Physical_attack = 0;}else {Physical_attack = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,10])));
+          Physical_defense = 0;}else {Physical_defense = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,10])));
           }
           j = 11;
           if(string.IsNullOrEmpty(rows[i,11]))
           {
-          Physical_defense = 0;}else {Physical_defense = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,11])));
+          Magic_attack = 0;}else {Magic_attack = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,11])));
           }
           j = 12;
           if(string.IsNullOrEmpty(rows[i,12]))
           {
-          Magic_attack = 0;}else {Magic_attack = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,12])));
+          Magic_defense = 0;}else {Magic_defense = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,12])));
           }
           j = 13;
           if(string.IsNullOrEmpty(rows[i,13]))
           {
-          Magic_defense = 0;}else {Magic_defense = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,13])));
+          Critical = 0;}else {Critical = System.Convert.ToSingle(rows[i,13]);
           }
           j = 14;
           if(string.IsNullOrEmpty(rows[i,14]))
           {
-          Critical = 0;}else {Critical = System.Convert.ToSingle(rows[i,14]);
+          HP = 0;}else {HP = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,14])));
           }
           j = 15;
           if(string.IsNullOrEmpty(rows[i,15]))
           {
-          HP = 0;}else {HP = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,15])));
-          }
-          j = 16;
-          if(string.IsNullOrEmpty(rows[i,16]))
-          {
-          KnockBack_resist = 0;}else {KnockBack_resist = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,16])));
+          KnockBack_resist = 0;}else {KnockBack_resist = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,15])));
           }
           Material_IDS = new int[5];
+          j = 16;
+          {
+            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,16])) 
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,16]))); Material_IDS[0] = outvalue;
+          }
+          Material_quantitys = new int[5];
           j = 17;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,17])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,17]))); Material_IDS[0] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,17]))); Material_quantitys[0] = outvalue;
           }
-          Material_quantitys = new int[5];
           j = 18;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,18])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,18]))); Material_quantitys[0] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,18]))); Material_IDS[1] = outvalue;
           }
           j = 19;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,19])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,19]))); Material_IDS[1] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,19]))); Material_quantitys[1] = outvalue;
           }
           j = 20;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,20])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,20]))); Material_quantitys[1] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,20]))); Material_IDS[2] = outvalue;
           }
           j = 21;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,21])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,21]))); Material_IDS[2] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,21]))); Material_quantitys[2] = outvalue;
           }
           j = 22;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,22])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,22]))); Material_quantitys[2] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,22]))); Material_IDS[3] = outvalue;
           }
           j = 23;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,23])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,23]))); Material_IDS[3] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,23]))); Material_quantitys[3] = outvalue;
           }
           j = 24;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,24])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,24]))); Material_quantitys[3] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,24]))); Material_IDS[4] = outvalue;
           }
           j = 25;
           {
             int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,25])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,25]))); Material_IDS[4] = outvalue;
+            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,25]))); Material_quantitys[4] = outvalue;
           }
           j = 26;
+          if(string.IsNullOrEmpty(rows[i,26]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,26])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,26]))); Material_quantitys[4] = outvalue;
+          Require_gold = 0;}else {Require_gold = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,26])));
           }
           j = 27;
           if(string.IsNullOrEmpty(rows[i,27]))
           {
-          Require_gold = 0;}else {Require_gold = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,27])));
-          }
-          j = 28;
-          if(string.IsNullOrEmpty(rows[i,28]))
-          {
-          Require_cash = 0;}else {Require_cash = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,28])));
+          Require_cash = 0;}else {Require_cash = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,27])));
           }
           ItemEnchant values = new ItemEnchant(Index,Item_ID,Enchant_lv,Physical_attack,Physical_defense,Magic_attack,Magic_defense,Critical,HP,KnockBack_resist,Material_IDS,Material_quantitys,Require_gold,Require_cash);
-          foreach (var preValues in array__)
+          foreach (var preValues in list__)
           {
-            if (preValues.Index == Index)
+            if (preValues.Index.Equals(Index))
             {
               i=0;j=0;
               throw new System.Exception("ItemEnchant.Index:" + preValues.Index.ToString() + ") Duplicated!!");
             }
           }
-          array__.Add(values);
+          list__.Add(values);
         }
-        ArrayToMap(array__);
-        _array = array__;
+        Array_ = list__.ToArray();
+        ArrayToMap(Array_);
       }catch(System.Exception e)
       {
         if( rows == null ) throw;
@@ -1453,7 +1460,7 @@ namespace TBL.ItemTable
       table.Columns.Add("Material_quantitys4", typeof(int));
       table.Columns.Add("Require_gold", typeof(int));
       table.Columns.Add("Require_cash", typeof(int));
-      foreach(var item in _array )
+      foreach(var item in Array_ )
       {
         table.Rows.Add(
         item.Index
@@ -1484,9 +1491,9 @@ namespace TBL.ItemTable
     #endif
     public static void ReadStream(System.IO.BinaryReader __reader)
     {
-      var array__ = new System.Collections.Generic.List<ItemEnchant>();
-      int __count = __reader.ReadInt32();
-      for (int __i=0;__i<__count;__i++)
+      var count__ = __reader.ReadInt32();
+      var array__ = new ItemEnchant[count__];
+      for (var __i=0;__i<array__.Length;__i++)
       {
         var Index = __reader.ReadInt32();
         var Item_ID = __reader.ReadInt32();
@@ -1513,10 +1520,10 @@ namespace TBL.ItemTable
         var Require_gold = __reader.ReadInt32();
         var Require_cash = __reader.ReadInt32();
         ItemEnchant __table = new ItemEnchant(Index,Item_ID,Enchant_lv,Physical_attack,Physical_defense,Magic_attack,Magic_defense,Critical,HP,KnockBack_resist,Material_IDS,Material_quantitys,Require_gold,Require_cash);
-        array__.Add(__table);
+        array__[__i] = __table;
       }
+      Array_ = array__;
       ArrayToMap(array__);
-      _array = array__;
     }
      public static int Material_IDS_Length { get { return 5; } }
      public static int Material_quantitys_Length { get { return 5; } }
@@ -1529,33 +1536,34 @@ namespace TBL.ItemTable
   #endif
   public partial class ItemManufacture : BaseClasses.ItemManufacture
   {
-    public static System.Collections.Generic.List<ItemManufacture> _array = null;
-    public static System.Collections.Generic.Dictionary<int,ItemManufacture> _map = null;
+  public static ItemManufacture[] Array_ { get; private set; }= null;
+  public static System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture> Map_ { get; private set; }= null;
     
 
-    public static void ArrayToMap(System.Collections.Generic.List<ItemManufacture> array__)
+    public static void ArrayToMap(ItemManufacture[] array__)
     {
-      _map = new System.Collections.Generic.Dictionary<int,ItemManufacture> (array__.Count,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,ItemManufacture> (array__.Length,default(global::TBL.IntEqualityComparer));
       ItemManufacture __table = null;
-      for( int __i=0;__i<array__.Count;__i++)
+      for( int __i=0;__i<array__.Length;__i++)
       {
         __table = array__[__i];
         try{
-          _map.Add(__table.Index, __table);
+          map_.Add(__table.Index, __table);
         }catch(System.Exception e)
         {
           throw new System.Exception(__table.Index.ToString() + " " + e.Message);
         }
       }
+      Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture>.Empty.AddRange(map_);
     }
     
 
     public static void WriteStream(System.IO.BinaryWriter __writer)
     {
-      __writer.Write(_array.Count);
-      for (var __i=0;__i<_array.Count;__i++)
+      __writer.Write(Array_.Length);
+      for (var __i=0;__i<Array_.Length;__i++)
       {
-        var __table = _array[__i];
+        var __table = Array_[__i];
         __writer.Write(__table.Index);
         __writer.Write(__table.Subject_item_ID);
         __writer.Write(__table.Material_item_ID);
@@ -1565,8 +1573,9 @@ namespace TBL.ItemTable
     #if !UNITY_5_3_OR_NEWER
     public static bool SetDataSet(System.Data.DataSet dts)
     {
-      ItemManufacture._map = new System.Collections.Generic.Dictionary<int,ItemManufacture>();
-      ItemManufacture._array = new System.Collections.Generic.List<ItemManufacture>();
+      ItemManufacture.Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture>.Empty;
+      ItemManufacture.Array_ = new ItemManufacture[dts.Tables["ItemManufacture"].Rows.Count];
+      int row__ = 0;
       foreach (System.Data.DataRow row in dts.Tables["ItemManufacture"].Rows)
       {
         ItemManufacture table = new ItemManufacture
@@ -1576,8 +1585,8 @@ namespace TBL.ItemTable
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["Material_item_ID"].ToString())))
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["Material_quantity"].ToString())))
         );
-        ItemManufacture._map.Add(table.Index, table);
-        ItemManufacture._array.Add(table);
+        ItemManufacture.Map_ = ItemManufacture.Map_.Add(table.Index, table);
+        ItemManufacture.Array_[row__++] = table;
       }
       return true;
     }
@@ -1593,7 +1602,7 @@ namespace TBL.ItemTable
       try
       {
         rows = imp.GetSheet("ItemManufacture", language);
-        var array__ = new System.Collections.Generic.List<ItemManufacture>(rows.GetLength(0) - 3);
+        var list__ = new System.Collections.Generic.List<ItemManufacture>(rows.GetLength(0) - 3);
         for (i = 3; i < rows.GetLength(0); i++)
         {
           j=0;
@@ -1619,18 +1628,18 @@ namespace TBL.ItemTable
           Material_quantity = 0;}else {Material_quantity = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,4])));
           }
           ItemManufacture values = new ItemManufacture(Index,Subject_item_ID,Material_item_ID,Material_quantity);
-          foreach (var preValues in array__)
+          foreach (var preValues in list__)
           {
-            if (preValues.Index == Index)
+            if (preValues.Index.Equals(Index))
             {
               i=0;j=0;
               throw new System.Exception("ItemManufacture.Index:" + preValues.Index.ToString() + ") Duplicated!!");
             }
           }
-          array__.Add(values);
+          list__.Add(values);
         }
-        ArrayToMap(array__);
-        _array = array__;
+        Array_ = list__.ToArray();
+        ArrayToMap(Array_);
       }catch(System.Exception e)
       {
         if( rows == null ) throw;
@@ -1647,7 +1656,7 @@ namespace TBL.ItemTable
       table.Columns.Add("Subject_item_ID", typeof(int));
       table.Columns.Add("Material_item_ID", typeof(int));
       table.Columns.Add("Material_quantity", typeof(int));
-      foreach(var item in _array )
+      foreach(var item in Array_ )
       {
         table.Rows.Add(
         item.Index
@@ -1660,19 +1669,19 @@ namespace TBL.ItemTable
     #endif
     public static void ReadStream(System.IO.BinaryReader __reader)
     {
-      var array__ = new System.Collections.Generic.List<ItemManufacture>();
-      int __count = __reader.ReadInt32();
-      for (int __i=0;__i<__count;__i++)
+      var count__ = __reader.ReadInt32();
+      var array__ = new ItemManufacture[count__];
+      for (var __i=0;__i<array__.Length;__i++)
       {
         var Index = __reader.ReadInt32();
         var Subject_item_ID = __reader.ReadInt32();
         var Material_item_ID = __reader.ReadInt32();
         var Material_quantity = __reader.ReadInt32();
         ItemManufacture __table = new ItemManufacture(Index,Subject_item_ID,Material_item_ID,Material_quantity);
-        array__.Add(__table);
+        array__[__i] = __table;
       }
+      Array_ = array__;
       ArrayToMap(array__);
-      _array = array__;
     }
   public ItemManufacture (int Index,int Subject_item_ID,int Material_item_ID,int Material_quantity) : base(Index,Subject_item_ID,Material_item_ID,Material_quantity){}
   }
@@ -1683,47 +1692,48 @@ namespace TBL.ItemTable
   #endif
   public partial class RandomBoxGroup : BaseClasses.RandomBoxGroup
   {
-    public static System.Collections.Generic.List<RandomBoxGroup> _array = null;
-    public static System.Collections.Generic.Dictionary<int,RandomBoxGroup> _map = null;
+  public static RandomBoxGroup[] Array_ { get; private set; }= null;
+  public static System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup> Map_ { get; private set; }= null;
     
 
-    public static void ArrayToMap(System.Collections.Generic.List<RandomBoxGroup> array__)
+    public static void ArrayToMap(RandomBoxGroup[] array__)
     {
-      _map = new System.Collections.Generic.Dictionary<int,RandomBoxGroup> (array__.Count,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,RandomBoxGroup> (array__.Length,default(global::TBL.IntEqualityComparer));
       RandomBoxGroup __table = null;
-      for( int __i=0;__i<array__.Count;__i++)
+      for( int __i=0;__i<array__.Length;__i++)
       {
         __table = array__[__i];
         try{
-          _map.Add(__table.ID, __table);
+          map_.Add(__table.ID, __table);
         }catch(System.Exception e)
         {
           throw new System.Exception(__table.ID.ToString() + " " + e.Message);
         }
       }
+      Map_ = System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup>.Empty.AddRange(map_);
     }
     
 
     public static void WriteStream(System.IO.BinaryWriter __writer)
     {
-      __writer.Write(_array.Count);
-      for (var __i=0;__i<_array.Count;__i++)
+      __writer.Write(Array_.Length);
+      for (var __i=0;__i<Array_.Length;__i++)
       {
-        var __table = _array[__i];
+        var __table = Array_[__i];
         __writer.Write(__table.ID);
         __writer.Write(__table.RandomItemGroup_NO);
         __writer.Write(__table.ClassType);
         __writer.Write(__table.Item_ID);
-        TBL.Encoder.Write7BitEncodedInt(__writer,__table.RatioAmount.Length);
-        for(var j__=0;j__<__table.RatioAmount.Length;++j__){__writer.Write(__table.RatioAmount[j__]);}
+        __writer.Write(__table.RatioAmount);
         __writer.Write(__table.Item_Quantity);
       }
     }
     #if !UNITY_5_3_OR_NEWER
     public static bool SetDataSet(System.Data.DataSet dts)
     {
-      RandomBoxGroup._map = new System.Collections.Generic.Dictionary<int,RandomBoxGroup>();
-      RandomBoxGroup._array = new System.Collections.Generic.List<RandomBoxGroup>();
+      RandomBoxGroup.Map_ = System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup>.Empty;
+      RandomBoxGroup.Array_ = new RandomBoxGroup[dts.Tables["RandomBoxGroup"].Rows.Count];
+      int row__ = 0;
       foreach (System.Data.DataRow row in dts.Tables["RandomBoxGroup"].Rows)
       {
         RandomBoxGroup table = new RandomBoxGroup
@@ -1732,14 +1742,11 @@ namespace TBL.ItemTable
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["RandomItemGroup_NO"].ToString())))
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["ClassType"].ToString())))
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["Item_ID"].ToString())))
-        ,new int[]
-        {
-          System.Convert.ToInt32(System.Math.Round(double.Parse(row["RatioAmount0"].ToString())))
-        }
+        ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["RatioAmount"].ToString())))
         ,System.Convert.ToInt32(System.Math.Round(double.Parse(row["Item_Quantity"].ToString())))
         );
-        RandomBoxGroup._map.Add(table.ID, table);
-        RandomBoxGroup._array.Add(table);
+        RandomBoxGroup.Map_ = RandomBoxGroup.Map_.Add(table.ID, table);
+        RandomBoxGroup.Array_[row__++] = table;
       }
       return true;
     }
@@ -1752,12 +1759,12 @@ namespace TBL.ItemTable
       int RandomItemGroup_NO;
       int ClassType;
       int Item_ID;
-      int[] RatioAmount;
+      int RatioAmount;
       int Item_Quantity;
       try
       {
         rows = imp.GetSheet("RandomBoxGroup", language);
-        var array__ = new System.Collections.Generic.List<RandomBoxGroup>(rows.GetLength(0) - 3);
+        var list__ = new System.Collections.Generic.List<RandomBoxGroup>(rows.GetLength(0) - 3);
         for (i = 3; i < rows.GetLength(0); i++)
         {
           j=0;
@@ -1782,11 +1789,10 @@ namespace TBL.ItemTable
           {
           Item_ID = 0;}else {Item_ID = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,4])));
           }
-          RatioAmount = new int[1];
           j = 5;
+          if(string.IsNullOrEmpty(rows[i,5]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,5])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,5]))); RatioAmount[0] = outvalue;
+          RatioAmount = 0;}else {RatioAmount = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,5])));
           }
           j = 6;
           if(string.IsNullOrEmpty(rows[i,6]))
@@ -1794,18 +1800,18 @@ namespace TBL.ItemTable
           Item_Quantity = 0;}else {Item_Quantity = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,6])));
           }
           RandomBoxGroup values = new RandomBoxGroup(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity);
-          foreach (var preValues in array__)
+          foreach (var preValues in list__)
           {
-            if (preValues.ID == ID)
+            if (preValues.ID.Equals(ID))
             {
               i=0;j=0;
               throw new System.Exception("RandomBoxGroup.ID:" + preValues.ID.ToString() + ") Duplicated!!");
             }
           }
-          array__.Add(values);
+          list__.Add(values);
         }
-        ArrayToMap(array__);
-        _array = array__;
+        Array_ = list__.ToArray();
+        ArrayToMap(Array_);
       }catch(System.Exception e)
       {
         if( rows == null ) throw;
@@ -1822,16 +1828,16 @@ namespace TBL.ItemTable
       table.Columns.Add("RandomItemGroup_NO", typeof(int));
       table.Columns.Add("ClassType", typeof(int));
       table.Columns.Add("Item_ID", typeof(int));
-      table.Columns.Add("RatioAmount0", typeof(int));
+      table.Columns.Add("RatioAmount", typeof(int));
       table.Columns.Add("Item_Quantity", typeof(int));
-      foreach(var item in _array )
+      foreach(var item in Array_ )
       {
         table.Rows.Add(
         item.ID
         ,item.RandomItemGroup_NO
         ,item.ClassType
         ,item.Item_ID
-        ,item.RatioAmount[0]
+        ,item.RatioAmount
         ,item.Item_Quantity
         );
       }
@@ -1839,28 +1845,22 @@ namespace TBL.ItemTable
     #endif
     public static void ReadStream(System.IO.BinaryReader __reader)
     {
-      var array__ = new System.Collections.Generic.List<RandomBoxGroup>();
-      int __count = __reader.ReadInt32();
-      for (int __i=0;__i<__count;__i++)
+      var count__ = __reader.ReadInt32();
+      var array__ = new RandomBoxGroup[count__];
+      for (var __i=0;__i<array__.Length;__i++)
       {
         var ID = __reader.ReadInt32();
         var RandomItemGroup_NO = __reader.ReadInt32();
         var ClassType = __reader.ReadInt32();
         var Item_ID = __reader.ReadInt32();
-        int[] RatioAmount = null;
-        {
-          var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);
-          RatioAmount = new int[arrayCount__];
-          for(var __j=0;__j<arrayCount__;++__j)RatioAmount[__j] = __reader.ReadInt32();
-        }
+        var RatioAmount = __reader.ReadInt32();
         var Item_Quantity = __reader.ReadInt32();
         RandomBoxGroup __table = new RandomBoxGroup(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity);
-        array__.Add(__table);
+        array__[__i] = __table;
       }
+      Array_ = array__;
       ArrayToMap(array__);
-      _array = array__;
     }
-     public static int RatioAmount_Length { get { return 1; } }
-  public RandomBoxGroup (int ID,int RandomItemGroup_NO,int ClassType,int Item_ID,int[] RatioAmount,int Item_Quantity) : base(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity){}
+  public RandomBoxGroup (int ID,int RandomItemGroup_NO,int ClassType,int Item_ID,int RatioAmount,int Item_Quantity) : base(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity){}
   }
 }

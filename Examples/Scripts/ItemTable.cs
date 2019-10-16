@@ -1,5 +1,6 @@
 // generate ItemTable.cs
 // DO NOT TOUCH SOURCE....
+#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018
 namespace TBL.ItemTable.BaseClasses
 {
   #if !UNITY_2018_2_OR_NEWER
@@ -8,7 +9,7 @@ namespace TBL.ItemTable.BaseClasses
     /// <summary>
     /// Key Column
     /// </summary>
-    int Item_ID {get;}
+    ItemID Item_ID {get;}
     string Name {get;}
     int Item_grade {get;}
     int Require_lv {get;}
@@ -63,7 +64,7 @@ namespace TBL.ItemTable.BaseClasses
     /// <summary>
     /// Key Column
     /// </summary>
-      public readonly int Item_ID;
+      public readonly ItemID Item_ID;
       public readonly string Name;
       public readonly int Item_grade;
       public readonly int Require_lv;
@@ -111,7 +112,7 @@ namespace TBL.ItemTable.BaseClasses
       public readonly int Sub_Item;
       public readonly int WeaponType;
       public readonly int[] RandomBoxGroup_NO;
-    public Item (int Item_ID__,string Name__,int Item_grade__,int Require_lv__,int Enchant_lv__,int PhysicalAttack__,int PhysicalDefense__,int MagicalAttack__,int MagicalDefense__,float Critical__,int HP__,int KnockBackResist__,eDictionaryType DictionaryType__,int ItemType__,short Gear_Score__,short InventoryType__,bool UsageType__,short Socket_quantity__,int Removal_cost__,short Belonging__,short Sub_stats_quantity__,int Stack__,int DesignScroll_ID__,int BindingSkill_ID__,int BindingAttack_ID__,int Manufacture_gold__,int Manufacture_cash__,int SummonCompanion_ID__,int Next_itemID__,int Next_item_price__,int[] Next_Item_material__,int[] Next_Item_material_quantity__,string Resource_Path__,string WeaponName__,short WeaponIndex__,string[] PartName__,short[] PartIndex__,string Icon_path__,int EXP__,int Buy_cost__,int Sell_reward__,int Consignment_maxprice__,int QuestBringer__,int ItemEvent_ID__,string Description__,int Sub_Item__,int WeaponType__,int[] RandomBoxGroup_NO__)
+    public Item (ItemID Item_ID__,string Name__,int Item_grade__,int Require_lv__,int Enchant_lv__,int PhysicalAttack__,int PhysicalDefense__,int MagicalAttack__,int MagicalDefense__,float Critical__,int HP__,int KnockBackResist__,eDictionaryType DictionaryType__,int ItemType__,short Gear_Score__,short InventoryType__,bool UsageType__,short Socket_quantity__,int Removal_cost__,short Belonging__,short Sub_stats_quantity__,int Stack__,int DesignScroll_ID__,int BindingSkill_ID__,int BindingAttack_ID__,int Manufacture_gold__,int Manufacture_cash__,int SummonCompanion_ID__,int Next_itemID__,int Next_item_price__,int[] Next_Item_material__,int[] Next_Item_material_quantity__,string Resource_Path__,string WeaponName__,short WeaponIndex__,string[] PartName__,short[] PartIndex__,string Icon_path__,int EXP__,int Buy_cost__,int Sell_reward__,int Consignment_maxprice__,int QuestBringer__,int ItemEvent_ID__,string Description__,int Sub_Item__,int WeaponType__,int[] RandomBoxGroup_NO__)
     {
       this.Item_ID = Item_ID__;
       this.Name = Name__;
@@ -308,7 +309,7 @@ namespace TBL.ItemTable.BaseClasses
     int RandomItemGroup_NO {get;}
     int ClassType {get;}
     int Item_ID {get;}
-    int[] RatioAmount {get;}
+    int RatioAmount {get;}
     int Item_Quantity {get;}
   }
   #endif
@@ -321,9 +322,9 @@ namespace TBL.ItemTable.BaseClasses
       public readonly int RandomItemGroup_NO;
       public readonly int ClassType;
       public readonly int Item_ID;
-      public readonly int[] RatioAmount;
+      public readonly int RatioAmount;
       public readonly int Item_Quantity;
-    public RandomBoxGroup (int ID__,int RandomItemGroup_NO__,int ClassType__,int Item_ID__,int[] RatioAmount__,int Item_Quantity__)
+    public RandomBoxGroup (int ID__,int RandomItemGroup_NO__,int ClassType__,int Item_ID__,int RatioAmount__,int Item_Quantity__)
     {
       this.ID = ID__;
       this.RandomItemGroup_NO = RandomItemGroup_NO__;

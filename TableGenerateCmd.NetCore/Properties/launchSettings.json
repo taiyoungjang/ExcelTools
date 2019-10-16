@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TableGenerateCmd": {
+      "commandName": "Project",
+      "commandLineArgs": "-i TableGenerateCmd.ini -c c# table -l kor -a ctp -p 1 -k true -f DungeonTable.xlsm",
+      "workingDirectory": "F:\\Source\\trunk\\Server"
+    }
+  }
+}
