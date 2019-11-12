@@ -341,7 +341,7 @@ namespace TableGenerate
             _writer.WriteLineEx($"map_.Add(__table.{primitiveName}, __table);");
             _writer.WriteLineEx($"}}catch(System.Exception e)");
             _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"throw new System.Exception(__table.{primitiveName}.ToString() + \" \" + e.Message);");
+            _writer.WriteLineEx($"throw new System.Exception(__table.{primitiveName}.ToString() + \" row:\"+ __i + \" \" + e.Message);");
             _writer.WriteLineEx($"}}");
             _writer.WriteLineEx( "}");
             _writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map_);");
@@ -581,8 +581,7 @@ namespace TableGenerate
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"if (preValues.{key_column.var_name}.Equals({key_column.var_name}))");
             _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"i=0;j=0;");
-            _writer.WriteLineEx($"throw new System.Exception(\"{sheetName}.{key_column.var_name}:\" + preValues.{key_column.var_name}.ToString() + \") Duplicated!!\");");
+            _writer.WriteLineEx($"throw new System.Exception(\"row:\" + i + \" {sheetName}.{key_column.var_name}:\" + preValues.{key_column.var_name}.ToString() + \") Duplicated!!\");");
             _writer.WriteLineEx("}");
             _writer.WriteLineEx( "}");
 
