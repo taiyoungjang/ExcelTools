@@ -4,10 +4,9 @@
     using System.Runtime.CompilerServices;
     public interface ILoader
     {
-        void Init();
         void ReadStream(System.IO.Stream stream);
 #if !UNITY_5_3_OR_NEWER && !NO_EXCEL_LOADER
-    void ExcelLoad(string path, string language);
+        void ExcelLoad(string path, string language);
 #endif
         void CheckReplaceFile(string tempFileName, string fileName);
         string GetFileName();

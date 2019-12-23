@@ -80,12 +80,6 @@ namespace TableGenerate
                     _writer.WriteLineEx( "{");
                     _writer.WriteLineEx( "public class Loader : global::TBL.ILoader");
                     _writer.WriteLineEx( "{");
-                    _writer.WriteLineEx( "public static Loader Instance = new Loader();");
-
-                    _writer.WriteLineEx("public void Init()");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("Instance = this;");
-                    _writer.WriteLineEx("}");
 
                     _writer.WriteLineEx($"#if !{UNITY_DEFINE}");
                     _writer.WriteLineEx("public System.Data.DataSet DataSet");
@@ -328,23 +322,28 @@ namespace TableGenerate
             _writer.WriteLineEx();
             _writer.WriteLineEx($"public static void ArrayToMap({sheetName}[] array__)");
             _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"var map_ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length{(string.IsNullOrEmpty(equality_type) ? string.Empty : $",{equality_type}")});");
+            _writer.WriteLineEx($"var map_ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length);");
             //_writer.WriteLineEx($"array.Sort(delegate({sheetName} a,{sheetName} b)");
             //_writer.WriteLineEx( "{");
             //_writer.WriteLineEx($"return a.{primitiveName}.CompareTo(b.{primitiveName});");
             //_writer.WriteLineEx("});");
             _writer.WriteLineEx($"{sheetName} __table = null;");
-            _writer.WriteLineEx("for( int __i=0;__i<array__.Length;__i++)");
+            _writer.WriteLineEx("int __i=0;");
+            _writer.WriteLineEx($"try{{");
+            _writer.WriteLineEx("for(__i=0;__i<array__.Length;__i++)");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"__table = array__[__i];");
-            _writer.WriteLineEx($"try{{");
             _writer.WriteLineEx($"map_.Add(__table.{primitiveName}, __table);");
+            _writer.WriteLineEx( "}");
             _writer.WriteLineEx($"}}catch(System.Exception e)");
             _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"throw new System.Exception(__table.{primitiveName}.ToString() + \" row:\"+ __i + \" \" + e.Message);");
+            _writer.WriteLineEx($"      throw new System.Exception($\"{{__table.{primitiveName}}} row:{{__i}} {{e.Message}}\");");
             _writer.WriteLineEx($"}}");
-            _writer.WriteLineEx( "}");
             _writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map_);");
+            if(!string.IsNullOrEmpty(equality_type))
+            {
+                _writer.WriteLineEx($"Map_ = Map_.WithComparers({equality_type});");
+            }
             _writer.WriteLineEx( "}");
             _writer.WriteLineEx();
             WriteStreamFunction(_writer, filename, sheetName,columns);
