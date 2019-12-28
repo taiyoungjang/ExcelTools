@@ -1,0 +1,17 @@
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\Examples.deps.json
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\Examples.runtimeconfig.json
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\Examples.runtimeconfig.dev.json
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\Examples.dll
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\Examples.pdb
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.1\Examples.csprojAssemblyReference.cache
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.1\Examples.AssemblyInfoInputs.cache
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.1\Examples.AssemblyInfo.cs
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.1\Examples.dll
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.1\Examples.pdb
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\linux\native\brolib_x64.so
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\linux\native\brolib_x86.so
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\osx\native\brolib_x64.dylib
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\win\native\brolib_x64.dll
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\win\native\brolib_x64.pdb
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\win\native\brolib_x86.dll
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.1\runtimes\win\native\brolib_x86.pdb

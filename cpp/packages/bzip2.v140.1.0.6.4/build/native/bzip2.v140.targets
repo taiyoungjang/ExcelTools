@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup Condition="'$(PlatformToolset)' == 'v140' And '$(Configuration)' == 'Debug'">
+        <_Bzip2LibSuffix>d</_Bzip2LibSuffix>
+    </PropertyGroup>
+    <ItemDefinitionGroup Condition="'$(PlatformToolset)' == 'v140'">
+        <ClCompile>
+            <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+        </ClCompile>
+        <Link>
+            <AdditionalDependencies>libbz2$(_Bzip2LibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+        </Link>
+    </ItemDefinitionGroup>
+    <Target Name="Bzip2_CopyDLLs_v140" AfterTargets="Build" Condition="'$(PlatformToolset)' == 'v140'">
+        <Copy SourceFiles="$(MSBuildThisFileDirectory)\bin\$(Platform)\$(Configuration)\bzip2$(_Bzip2LibSuffix).dll"
+              DestinationFolder="$(OutDir)"
+              SkipUnchangedFiles="true"/>
+    </Target>
+    <Target Name="Bzip2_RemoveDlls_v140" BeforeTargets="Clean" Condition="'$(PlatformToolset)' == 'v140'">
+        <Delete Files="$(OutDir)\bzip2$(_Bzip2LibSuffix).dll"/>
+    </Target>
+</Project>

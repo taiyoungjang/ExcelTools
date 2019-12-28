@@ -1,0 +1,110 @@
+{
+  "format": 1,
+  "restore": {
+    "F:\\Source\\trunk\\Common\\Tools\\TableGenerateCmd.NetCore\\TableGenerateCmd.csproj": {}
+  },
+  "projects": {
+    "F:\\Source\\trunk\\Common\\Tools\\TableGenerateCmd.NetCore\\TableGenerateCmd.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "F:\\Source\\trunk\\Common\\Tools\\TableGenerateCmd.NetCore\\TableGenerateCmd.csproj",
+        "projectName": "TableGenerateCmd",
+        "projectPath": "F:\\Source\\trunk\\Common\\Tools\\TableGenerateCmd.NetCore\\TableGenerateCmd.csproj",
+        "packagesPath": "C:\\Users\\StairGames-D01\\.nuget\\packages\\",
+        "outputPath": "F:\\Source\\trunk\\Common\\Tools\\TableGenerateCmd.NetCore\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\StairGames-D01\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\StairGames-D01\\.dotnet\\NuGetFallbackFolder": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://dotnet.myget.org/F/dotnet-corefxlab/": {},
+          "https://dotnet.myget.org/F/open-xml-sdk/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.0": {
+          "dependencies": {
+            "DocumentFormat.OpenXml": {
+              "target": "Package",
+              "version": "[2.9.1, )"
+            },
+            "Microsoft.CodeAnalysis.CSharp.Scripting": {
+              "target": "Package",
+              "version": "[3.3.1, )"
+            },
+            "Microsoft.Extensions.DependencyModel": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "SharpZipLib.NETStandard": {
+              "target": "Package",
+              "version": "[1.0.7, )"
+            },
+            "System.Collections.Immutable": {
+              "target": "Package",
+              "version": "[1.6.0, )"
+            },
+            "System.Data.Common": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Reflection": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Runtime.Loader": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[3.0.1, 3.0.1]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[3.0.1, 3.0.1]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -23,7 +23,7 @@ namespace TBL
         float Critical;
         int HP;
         int KnockBackResist;
-        short DictionaryType;
+        int DictionaryType;
         int ItemType;
         short Gear_Score;
         short InventoryType;
@@ -93,17 +93,37 @@ namespace TBL
           Read(stream__, SummonCompanion_ID);
           Read(stream__, Next_itemID);
           Read(stream__, Next_item_price);
-          Read(stream__, Next_Item_material[0]);
-          Read(stream__, Next_Item_material[1]);
-          Read(stream__, Next_Item_material[2]);
-          Read(stream__, Next_Item_material_quantity[0]);
-          Read(stream__, Next_Item_material_quantity[1]);
-          Read(stream__, Next_Item_material_quantity[2]);
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, Next_Item_material[arrayIndex__]);
+            }
+          }
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, Next_Item_material_quantity[arrayIndex__]);
+            }
+          }
           Read(stream__, Resource_Path);
           Read(stream__, WeaponName);
           Read(stream__, WeaponIndex);
-          Read(stream__, PartName[0]);
-          Read(stream__, PartIndex[0]);
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, PartName[arrayIndex__]);
+            }
+          }
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, PartIndex[arrayIndex__]);
+            }
+          }
           Read(stream__, Icon_path);
           Read(stream__, EXP);
           Read(stream__, Buy_cost);
@@ -114,11 +134,13 @@ namespace TBL
           Read(stream__, Description);
           Read(stream__, Sub_Item);
           Read(stream__, WeaponType);
-          Read(stream__, RandomBoxGroup_NO[0]);
-          Read(stream__, RandomBoxGroup_NO[1]);
-          Read(stream__, RandomBoxGroup_NO[2]);
-          Read(stream__, RandomBoxGroup_NO[3]);
-          Read(stream__, RandomBoxGroup_NO[4]);
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, RandomBoxGroup_NO[arrayIndex__]);
+            }
+          }
           ItemPtr item__ = ItemPtr(new Item(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO));
           array[i__] = item__;
           map.insert( std::pair<int,ItemPtr>(Item_ID,item__));
@@ -223,16 +245,20 @@ namespace TBL
           Read(stream__, Critical);
           Read(stream__, HP);
           Read(stream__, KnockBack_resist);
-          Read(stream__, Material_IDS[0]);
-          Read(stream__, Material_IDS[1]);
-          Read(stream__, Material_IDS[2]);
-          Read(stream__, Material_IDS[3]);
-          Read(stream__, Material_IDS[4]);
-          Read(stream__, Material_quantitys[0]);
-          Read(stream__, Material_quantitys[1]);
-          Read(stream__, Material_quantitys[2]);
-          Read(stream__, Material_quantitys[3]);
-          Read(stream__, Material_quantitys[4]);
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, Material_IDS[arrayIndex__]);
+            }
+          }
+          {
+            int arrayCount__ = Read7BitEncodedInt(stream__);
+            for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+            {
+              Read(stream__, Material_quantitys[arrayIndex__]);
+            }
+          }
           Read(stream__, Require_gold);
           Read(stream__, Require_cash);
           ItemEnchantPtr item__ = ItemEnchantPtr(new ItemEnchant(Index,Item_ID,Enchant_lv,Physical_attack,Physical_defense,Magic_attack,Magic_defense,Critical,HP,KnockBack_resist,Material_IDS,Material_quantitys,Require_gold,Require_cash));

@@ -16,7 +16,7 @@ Item::Item (const int& Item_ID__
 ,const float& Critical__
 ,const int& HP__
 ,const int& KnockBackResist__
-,const short& DictionaryType__
+,const int& DictionaryType__
 ,const int& ItemType__
 ,const short& Gear_Score__
 ,const short& InventoryType__

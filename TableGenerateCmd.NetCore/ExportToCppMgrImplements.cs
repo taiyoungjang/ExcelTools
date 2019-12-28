@@ -16,9 +16,8 @@ namespace TableGenerate
         {
             string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableManager.cpp");
 
-            using( var _stream = new MemoryStream(32767))
+            using (MemoryStream _stream = new MemoryStream())
             {
-
                 var _writer = new StreamWriter(_stream, new System.Text.ASCIIEncoding());
                 {
 
@@ -26,7 +25,7 @@ namespace TableGenerate
 
                     string[] sheets = imp.GetSheetList();
 
-                    filename = filename.Replace(".cpp", String.Empty);
+                    filename = filename.Replace(".cpp", string.Empty);
 
                     //            writer.WriteLine("#include <Base/properties.h>");
                     //            writer.WriteLine("#include <Base/service.h>");
@@ -35,7 +34,7 @@ namespace TableGenerate
 
                     _writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}");
                     _writer.WriteLineEx($"{{");
-                    _writer.WriteLineEx($"namespace {filename.Replace(" ", "_").Replace("TableManager", String.Empty)}");
+                    _writer.WriteLineEx($"namespace {filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     _writer.WriteLineEx($"{{");
 
                     max = sheets.GetLength(0);
@@ -79,7 +78,7 @@ namespace TableGenerate
                     _writer.WriteLineEx($"}};");
                     _writer.WriteLineEx($"}};");
                     _writer.WriteLineEx($"}};");
-
+                    _writer.Flush();
                 }
                 ExportBaseUtil.CheckReplaceFile(_stream, $"{outputPath}/{createFileName}");
             }
@@ -166,18 +165,20 @@ namespace TableGenerate
                     continue;
                 if (column.array_index == 0)
                 {
-                    int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
-                    for(int i=0;i<array_count;i++)
-                    {
-                        if(column.base_type == eBaseType.Boolean)
-                            _writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Read(stream__, element__); {column.var_name}[{i}] = element__; }}");
-                        else if (column.base_type == eBaseType.TimeSpan)
-                            _writer.WriteLineEx($"  {{ long long element__; Read(stream__, element__); {column.var_name}[{i}] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
-                        else if (column.base_type == eBaseType.DateTime)
-                            _writer.WriteLineEx($"  {{ long long element__; Read(stream__, element__); {column.var_name}[{i}] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
-                        else
-                            _writer.WriteLineEx($"Read(stream__, {column.var_name}[{i}]);");
-                    }
+                    _writer.WriteLineEx("{");
+                    _writer.WriteLineEx($"int arrayCount__ = Read7BitEncodedInt(stream__);");
+                    _writer.WriteLineEx($"for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)");
+                    _writer.WriteLineEx("{");
+                    if (column.base_type == eBaseType.Boolean)
+                        _writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Read(stream__, element__); {column.var_name}[arrayIndex__] = element__; }}");
+                    else if (column.base_type == eBaseType.TimeSpan)
+                        _writer.WriteLineEx($"  {{ long long element__; Read(stream__, element__); {column.var_name}[arrayIndex__] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
+                    else if (column.base_type == eBaseType.DateTime)
+                        _writer.WriteLineEx($"  {{ long long element__; Read(stream__, element__); {column.var_name}[arrayIndex__] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                    else
+                        _writer.WriteLineEx($"Read(stream__, {column.var_name}[arrayIndex__]);");
+                    _writer.WriteLineEx("}");
+                    _writer.WriteLineEx("}");
                 }
                 else
                 {

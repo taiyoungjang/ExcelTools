@@ -6,7 +6,6 @@ namespace ClassUtil
     public class ExcelImporter : IDisposable
     {
         private string _fileName = String.Empty;
-        private string _selectedSheet = String.Empty;
         private string[,] _dt = null;
         private string[] _sheetList = null;
         private ExcelOLEClient _client = null;
@@ -71,11 +70,9 @@ namespace ClassUtil
             try
             {
                 _dt = _client.GetSheet(sheetName, rowCount, colCount);
-                _selectedSheet = sheetName;
             }
             catch (Exception)
             {
-                _selectedSheet = String.Empty;
                 _dt = null;
                 return null;
             }

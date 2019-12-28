@@ -33,7 +33,7 @@ namespace TBL
             const float Critical;
             const int HP;
             const int KnockBackResist;
-            const short DictionaryType;
+            const int DictionaryType;
             const int ItemType;
             const short Gear_Score;
             const short InventoryType;
@@ -69,7 +69,7 @@ namespace TBL
             const int Sub_Item;
             const int WeaponType;
             const std::vector<int> RandomBoxGroup_NO;
-            Item (const int& Item_ID__,const std::wstring& Name__,const int& Item_grade__,const int& Require_lv__,const int& Enchant_lv__,const int& PhysicalAttack__,const int& PhysicalDefense__,const int& MagicalAttack__,const int& MagicalDefense__,const float& Critical__,const int& HP__,const int& KnockBackResist__,const short& DictionaryType__,const int& ItemType__,const short& Gear_Score__,const short& InventoryType__,const bool& UsageType__,const short& Socket_quantity__,const int& Removal_cost__,const short& Belonging__,const short& Sub_stats_quantity__,const int& Stack__,const int& DesignScroll_ID__,const int& BindingSkill_ID__,const int& BindingAttack_ID__,const int& Manufacture_gold__,const int& Manufacture_cash__,const int& SummonCompanion_ID__,const int& Next_itemID__,const int& Next_item_price__,const std::vector<int>& Next_Item_material__,const std::vector<int>& Next_Item_material_quantity__,const std::wstring& Resource_Path__,const std::wstring& WeaponName__,const short& WeaponIndex__,const std::vector<std::wstring>& PartName__,const std::vector<short>& PartIndex__,const std::wstring& Icon_path__,const int& EXP__,const int& Buy_cost__,const int& Sell_reward__,const int& Consignment_maxprice__,const int& QuestBringer__,const int& ItemEvent_ID__,const std::wstring& Description__,const int& Sub_Item__,const int& WeaponType__,const std::vector<int>& RandomBoxGroup_NO__);
+            Item (const int& Item_ID__,const std::wstring& Name__,const int& Item_grade__,const int& Require_lv__,const int& Enchant_lv__,const int& PhysicalAttack__,const int& PhysicalDefense__,const int& MagicalAttack__,const int& MagicalDefense__,const float& Critical__,const int& HP__,const int& KnockBackResist__,const int& DictionaryType__,const int& ItemType__,const short& Gear_Score__,const short& InventoryType__,const bool& UsageType__,const short& Socket_quantity__,const int& Removal_cost__,const short& Belonging__,const short& Sub_stats_quantity__,const int& Stack__,const int& DesignScroll_ID__,const int& BindingSkill_ID__,const int& BindingAttack_ID__,const int& Manufacture_gold__,const int& Manufacture_cash__,const int& SummonCompanion_ID__,const int& Next_itemID__,const int& Next_item_price__,const std::vector<int>& Next_Item_material__,const std::vector<int>& Next_Item_material_quantity__,const std::wstring& Resource_Path__,const std::wstring& WeaponName__,const short& WeaponIndex__,const std::vector<std::wstring>& PartName__,const std::vector<short>& PartIndex__,const std::wstring& Icon_path__,const int& EXP__,const int& Buy_cost__,const int& Sell_reward__,const int& Consignment_maxprice__,const int& QuestBringer__,const int& ItemEvent_ID__,const std::wstring& Description__,const int& Sub_Item__,const int& WeaponType__,const std::vector<int>& RandomBoxGroup_NO__);
         };
         class ItemEffect;
         typedef std::shared_ptr<ItemEffect> ItemEffectPtr;

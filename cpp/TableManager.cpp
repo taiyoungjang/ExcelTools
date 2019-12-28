@@ -204,7 +204,7 @@ int Read7BitEncodedInt(std::istream& stream) {
 	} while ((b & 0x80) != 0);
 	return count;
 }
-std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 
 std::istream& TBL::TableManager::Read(std::istream& stream, std::wstring& data)
 {

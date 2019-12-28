@@ -59,12 +59,13 @@ function Building_Table
         $Project_Table_Generater_Path = "${CurrentDirectory}\..\TableGenerateCmd.NetCore\bin\Debug\netcoreapp3.0\" 
         $Project_Table_Generater_File = "${Project_Table_Generater_Path}TableGenerateCmd.dll"
         $Project_Table_Generater_INI_File = "${CurrentDirectory}\TableGenerateCmd.ini" 
-        [array] $Project_Table_Generater_Command = "-i", $Project_Table_Generater_INI_File, "-c", "c#", "table", "-l", "$LangVer", "-a", "unity3d", "-p", $CPU_Count
+        [array] $Project_Table_Generater_Command = "-i", $Project_Table_Generater_INI_File, "-c", "c#", "c++", "table", "-l", "$LangVer", "-a", "unity3d", "-p", $CPU_Count
     
         $Project_Table_Binaries_Path = "${CurrentDirectory}\Bytes\${LangVer}\" 
         $Project_CS_DLL_Path = "${Project_Source_Path}BytesDll" 
 
 	    $CShsarp_Table_Path = "${CurrentDirectory}\Scripts\"
+	    $CPP_Table_Path = "${CurrentDirectory}\..\cpp\generated\table\"
 	
 		if( $ExcelFile -eq "")
 		{
@@ -85,6 +86,10 @@ function Building_Table
             "TableFile=$Project_Table_Binaries_Path", 
 		    "CS=$CShsarp_Table_Path",
 		    "CSMGR=$CShsarp_Table_Path",
+		    "HPP=$CPP_Table_Path",
+		    "HPPMGR=$CPP_Table_Path",
+		    "CPP=$CPP_Table_Path",
+		    "CPPMGR=$CPP_Table_Path",
 			"ENUMTYPES=$EnumTypesPath"
     # } // Table
 

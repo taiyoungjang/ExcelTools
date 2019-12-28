@@ -276,7 +276,6 @@ namespace TableGenerateCmd
                     {
                         System.Console.WriteLine("[XLS[{0}] open failure...", xls.FullPath);
                         imp.Dispose();
-                        imp = null;
                         return;
                     }
                 }
@@ -299,7 +298,6 @@ namespace TableGenerateCmd
                 if (imp != null)
                 {
                     imp.Dispose();
-                    imp = null;
                 }
 
                 WriteLog(xls.FullPath, xls.LastWriteTime);

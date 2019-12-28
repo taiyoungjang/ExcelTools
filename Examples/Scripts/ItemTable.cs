@@ -9,7 +9,7 @@ namespace TBL.ItemTable.BaseClasses
     /// <summary>
     /// Key Column
     /// </summary>
-    ItemID Item_ID {get;}
+    int Item_ID {get;}
     string Name {get;}
     int Item_grade {get;}
     int Require_lv {get;}
@@ -64,7 +64,7 @@ namespace TBL.ItemTable.BaseClasses
     /// <summary>
     /// Key Column
     /// </summary>
-      public readonly ItemID Item_ID;
+      public readonly int Item_ID;
       public readonly string Name;
       public readonly int Item_grade;
       public readonly int Require_lv;
@@ -112,7 +112,7 @@ namespace TBL.ItemTable.BaseClasses
       public readonly int Sub_Item;
       public readonly int WeaponType;
       public readonly int[] RandomBoxGroup_NO;
-    public Item (ItemID Item_ID__,string Name__,int Item_grade__,int Require_lv__,int Enchant_lv__,int PhysicalAttack__,int PhysicalDefense__,int MagicalAttack__,int MagicalDefense__,float Critical__,int HP__,int KnockBackResist__,eDictionaryType DictionaryType__,int ItemType__,short Gear_Score__,short InventoryType__,bool UsageType__,short Socket_quantity__,int Removal_cost__,short Belonging__,short Sub_stats_quantity__,int Stack__,int DesignScroll_ID__,int BindingSkill_ID__,int BindingAttack_ID__,int Manufacture_gold__,int Manufacture_cash__,int SummonCompanion_ID__,int Next_itemID__,int Next_item_price__,int[] Next_Item_material__,int[] Next_Item_material_quantity__,string Resource_Path__,string WeaponName__,short WeaponIndex__,string[] PartName__,short[] PartIndex__,string Icon_path__,int EXP__,int Buy_cost__,int Sell_reward__,int Consignment_maxprice__,int QuestBringer__,int ItemEvent_ID__,string Description__,int Sub_Item__,int WeaponType__,int[] RandomBoxGroup_NO__)
+    public Item (int Item_ID__,string Name__,int Item_grade__,int Require_lv__,int Enchant_lv__,int PhysicalAttack__,int PhysicalDefense__,int MagicalAttack__,int MagicalDefense__,float Critical__,int HP__,int KnockBackResist__,eDictionaryType DictionaryType__,int ItemType__,short Gear_Score__,short InventoryType__,bool UsageType__,short Socket_quantity__,int Removal_cost__,short Belonging__,short Sub_stats_quantity__,int Stack__,int DesignScroll_ID__,int BindingSkill_ID__,int BindingAttack_ID__,int Manufacture_gold__,int Manufacture_cash__,int SummonCompanion_ID__,int Next_itemID__,int Next_item_price__,int[] Next_Item_material__,int[] Next_Item_material_quantity__,string Resource_Path__,string WeaponName__,short WeaponIndex__,string[] PartName__,short[] PartIndex__,string Icon_path__,int EXP__,int Buy_cost__,int Sell_reward__,int Consignment_maxprice__,int QuestBringer__,int ItemEvent_ID__,string Description__,int Sub_Item__,int WeaponType__,int[] RandomBoxGroup_NO__)
     {
       this.Item_ID = Item_ID__;
       this.Name = Name__;

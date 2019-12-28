@@ -18,7 +18,7 @@ namespace TableGenerate
             set { _async = value; }
         }
 
-        public static String NameSpace = string.Empty;
+        public static string s_nameSpace = string.Empty;
         public int m_current = 0;
         public eGenType _gen_type = eGenType.cpp;
 
@@ -29,35 +29,33 @@ namespace TableGenerate
                 string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".cpp");
                 string filename = System.IO.Path.GetFileName(createFileName);
                 string @namespace = $"{ ExportToCSMgr.NameSpace }::{filename.Replace(".cpp", string.Empty)}";
-                using (MemoryStream stream = new MemoryStream())
+                using MemoryStream stream = new MemoryStream();
+                var _writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
                 {
-                    var _writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
+
+                    _writer.WriteLineEx($"// generate {filename}");
+                    _writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
+                    _writer.WriteLineEx($"#include \"{filename.Replace(".cpp", ".h")}\"");
+                    _writer.WriteLineEx($"using namespace {@namespace};");
+
+                    string[] sheets = imp.GetSheetList();
+
+                    filename = filename.Replace(".cs", string.Empty);
+
+                    max = sheets.GetLength(0);
+                    current = 0;
+
+                    foreach (string sheetName in sheets)
                     {
-
-                        _writer.WriteLineEx($"// generate {filename}");
-                        _writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
-                        _writer.WriteLineEx($"#include \"{filename.Replace(".cpp",".h")}\"");
-                        _writer.WriteLineEx($"using namespace {@namespace};");
-
-                        string[] sheets = imp.GetSheetList();
-
-                        filename = filename.Replace(".cs", string.Empty);
-
-                        max = sheets.GetLength(0);
-                        current = 0;
-
-                        foreach (string sheetName in sheets)
-                        {
-                            current++;
-                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            var rows = imp.GetSheetShortCut(sheetName, language);
-                            var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                            SheetProcess(_writer, filename, trimSheetName, columns);
-                        }
-                        _writer.Flush();
+                        current++;
+                        string trimSheetName = sheetName.Trim().Replace(" ", "_");
+                        var rows = imp.GetSheetShortCut(sheetName, language);
+                        var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
+                        SheetProcess(_writer, trimSheetName, columns);
                     }
-                    ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
+                    _writer.Flush();
                 }
+                ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
             }
             catch (System.Exception ex)
             {
@@ -67,7 +65,7 @@ namespace TableGenerate
             return true;
         }
 
-        private void SheetProcess(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void SheetProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)
         {
             SheetConstructorProcess(_writer, sheetName, columns);
             SheetFindFunction(_writer, sheetName, columns);

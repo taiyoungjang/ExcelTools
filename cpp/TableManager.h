@@ -41,3 +41,4 @@ namespace TBL
 	};
 };
 
+int Read7BitEncodedInt(std::istream& stream);

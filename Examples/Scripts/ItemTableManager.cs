@@ -34,11 +34,6 @@ namespace TBL.ItemTable
 {
   public class Loader : global::TBL.ILoader
   {
-    public static Loader Instance = new Loader();
-    public void Init()
-    {
-      Instance = this;
-    }
     #if !UNITY_2018_2_OR_NEWER
     public System.Data.DataSet DataSet
     {
@@ -82,7 +77,7 @@ namespace TBL.ItemTable
     {
       container.Remove( "ItemTable.Item.Map_");
       container.Remove( "ItemTable.Item.Array_");
-      container.Add( "ItemTable.Item.Map_", new System.Collections.Immutable.ImmutableDictionary<ItemID,Item>(Item.Map_));
+      container.Add( "ItemTable.Item.Map_", new System.Collections.Immutable.ImmutableDictionary<int,Item>(Item.Map_,default(global::TBL.IntEqualityComparer)));
       container.Add( "ItemTable.Item.Array_",Item.Array_);
       container.Remove( "ItemTable.ItemEffect.Map_");
       container.Remove( "ItemTable.ItemEffect.Array_");
@@ -224,25 +219,27 @@ namespace TBL.ItemTable
   #endif
   public partial class Item : BaseClasses.Item
   {
-  public static Item[] Array_ { get; private set; }= null;
-  public static System.Collections.Immutable.ImmutableDictionary<ItemID,Item> Map_ { get; private set; }= null;
+    public static Item[] Array_ = null;
+    public static System.Collections.Immutable.ImmutableDictionary<int,Item> Map_ = null;
     
 
     public static void ArrayToMap(Item[] array__)
     {
-      var map_ = new System.Collections.Generic.Dictionary<ItemID,Item> (array__.Length);
+      var map_ = new System.Collections.Generic.Dictionary<int,Item> (array__.Length);
       Item __table = null;
-      for( int __i=0;__i<array__.Length;__i++)
-      {
-        __table = array__[__i];
-        try{
-          map_.Add(__table.Item_ID, __table);
-        }catch(System.Exception e)
+      int __i=0;
+      try{
+        for(__i=0;__i<array__.Length;__i++)
         {
-          throw new System.Exception(__table.Item_ID.ToString() + " " + e.Message);
+          __table = array__[__i];
+          map_.Add(__table.Item_ID, __table);
         }
+      }catch(System.Exception e)
+      {
+        throw new System.Exception($"{__table.Item_ID} row:{__i} {e.Message}");
       }
-      Map_ = System.Collections.Immutable.ImmutableDictionary<ItemID,Item>.Empty.AddRange(map_);
+      Map_ = System.Collections.Immutable.ImmutableDictionary<int,Item>.Empty.AddRange(map_);
+      Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
     }
     
 
@@ -252,7 +249,7 @@ namespace TBL.ItemTable
       for (var __i=0;__i<Array_.Length;__i++)
       {
         var __table = Array_[__i];
-        __writer.Write((int)__table.Item_ID);
+        __writer.Write(__table.Item_ID);
         __writer.Write(__table.Name);
         __writer.Write(__table.Item_grade);
         __writer.Write(__table.Require_lv);
@@ -310,7 +307,7 @@ namespace TBL.ItemTable
     #if !UNITY_5_3_OR_NEWER
     public static bool SetDataSet(System.Data.DataSet dts)
     {
-      Item.Map_ = System.Collections.Immutable.ImmutableDictionary<ItemID,Item>.Empty;
+      Item.Map_ = System.Collections.Immutable.ImmutableDictionary<int,Item>.Empty;
       Item.Array_ = new Item[dts.Tables["Item"].Rows.Count];
       int row__ = 0;
       foreach (System.Data.DataRow row in dts.Tables["Item"].Rows)
@@ -399,7 +396,7 @@ namespace TBL.ItemTable
     {
       var i=0; var j=0;
       string[,] rows = null;
-      ItemID Item_ID;
+      int Item_ID;
       string Name;
       int Item_grade;
       int Require_lv;
@@ -727,8 +724,7 @@ namespace TBL.ItemTable
           {
             if (preValues.Item_ID.Equals(Item_ID))
             {
-              i=0;j=0;
-              throw new System.Exception("Item.Item_ID:" + preValues.Item_ID.ToString() + ") Duplicated!!");
+              throw new System.Exception("row:" + i + " Item.Item_ID:" + preValues.Item_ID.ToString() + ") Duplicated!!");
             }
           }
           list__.Add(values);
@@ -747,7 +743,7 @@ namespace TBL.ItemTable
     public static void GetDataTable(System.Data.DataSet dts)
     {
       System.Data.DataTable table = dts.Tables.Add("Item");
-      table.Columns.Add("Item_ID", typeof(ItemID));
+      table.Columns.Add("Item_ID", typeof(int));
       table.Columns.Add("Name", typeof(string));
       table.Columns.Add("Item_grade", typeof(int));
       table.Columns.Add("Require_lv", typeof(int));
@@ -872,7 +868,7 @@ namespace TBL.ItemTable
       var array__ = new Item[count__];
       for (var __i=0;__i<array__.Length;__i++)
       {
-        var Item_ID = (ItemID)__reader.ReadInt32();
+        var Item_ID = __reader.ReadInt32();
         var Name = __reader.ReadString();
         var Item_grade = __reader.ReadInt32();
         var Require_lv = __reader.ReadInt32();
@@ -956,7 +952,7 @@ namespace TBL.ItemTable
      public static int PartName_Length { get { return 1; } }
      public static int PartIndex_Length { get { return 1; } }
      public static int RandomBoxGroup_NO_Length { get { return 5; } }
-  public Item (ItemID Item_ID,string Name,int Item_grade,int Require_lv,int Enchant_lv,int PhysicalAttack,int PhysicalDefense,int MagicalAttack,int MagicalDefense,float Critical,int HP,int KnockBackResist,eDictionaryType DictionaryType,int ItemType,short Gear_Score,short InventoryType,bool UsageType,short Socket_quantity,int Removal_cost,short Belonging,short Sub_stats_quantity,int Stack,int DesignScroll_ID,int BindingSkill_ID,int BindingAttack_ID,int Manufacture_gold,int Manufacture_cash,int SummonCompanion_ID,int Next_itemID,int Next_item_price,int[] Next_Item_material,int[] Next_Item_material_quantity,string Resource_Path,string WeaponName,short WeaponIndex,string[] PartName,short[] PartIndex,string Icon_path,int EXP,int Buy_cost,int Sell_reward,int Consignment_maxprice,int QuestBringer,int ItemEvent_ID,string Description,int Sub_Item,int WeaponType,int[] RandomBoxGroup_NO) : base(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO){}
+  public Item (int Item_ID,string Name,int Item_grade,int Require_lv,int Enchant_lv,int PhysicalAttack,int PhysicalDefense,int MagicalAttack,int MagicalDefense,float Critical,int HP,int KnockBackResist,eDictionaryType DictionaryType,int ItemType,short Gear_Score,short InventoryType,bool UsageType,short Socket_quantity,int Removal_cost,short Belonging,short Sub_stats_quantity,int Stack,int DesignScroll_ID,int BindingSkill_ID,int BindingAttack_ID,int Manufacture_gold,int Manufacture_cash,int SummonCompanion_ID,int Next_itemID,int Next_item_price,int[] Next_Item_material,int[] Next_Item_material_quantity,string Resource_Path,string WeaponName,short WeaponIndex,string[] PartName,short[] PartIndex,string Icon_path,int EXP,int Buy_cost,int Sell_reward,int Consignment_maxprice,int QuestBringer,int ItemEvent_ID,string Description,int Sub_Item,int WeaponType,int[] RandomBoxGroup_NO) : base(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO){}
   }
   
 
@@ -965,25 +961,27 @@ namespace TBL.ItemTable
   #endif
   public partial class ItemEffect : BaseClasses.ItemEffect
   {
-  public static ItemEffect[] Array_ { get; private set; }= null;
-  public static System.Collections.Immutable.ImmutableDictionary<int,ItemEffect> Map_ { get; private set; }= null;
+    public static ItemEffect[] Array_ = null;
+    public static System.Collections.Immutable.ImmutableDictionary<int,ItemEffect> Map_ = null;
     
 
     public static void ArrayToMap(ItemEffect[] array__)
     {
-      var map_ = new System.Collections.Generic.Dictionary<int,ItemEffect> (array__.Length,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,ItemEffect> (array__.Length);
       ItemEffect __table = null;
-      for( int __i=0;__i<array__.Length;__i++)
-      {
-        __table = array__[__i];
-        try{
-          map_.Add(__table.Index, __table);
-        }catch(System.Exception e)
+      int __i=0;
+      try{
+        for(__i=0;__i<array__.Length;__i++)
         {
-          throw new System.Exception(__table.Index.ToString() + " " + e.Message);
+          __table = array__[__i];
+          map_.Add(__table.Index, __table);
         }
+      }catch(System.Exception e)
+      {
+        throw new System.Exception($"{__table.Index} row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEffect>.Empty.AddRange(map_);
+      Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
     }
     
 
@@ -1106,8 +1104,7 @@ namespace TBL.ItemTable
           {
             if (preValues.Index.Equals(Index))
             {
-              i=0;j=0;
-              throw new System.Exception("ItemEffect.Index:" + preValues.Index.ToString() + ") Duplicated!!");
+              throw new System.Exception("row:" + i + " ItemEffect.Index:" + preValues.Index.ToString() + ") Duplicated!!");
             }
           }
           list__.Add(values);
@@ -1184,25 +1181,27 @@ namespace TBL.ItemTable
   #endif
   public partial class ItemEnchant : BaseClasses.ItemEnchant
   {
-  public static ItemEnchant[] Array_ { get; private set; }= null;
-  public static System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant> Map_ { get; private set; }= null;
+    public static ItemEnchant[] Array_ = null;
+    public static System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant> Map_ = null;
     
 
     public static void ArrayToMap(ItemEnchant[] array__)
     {
-      var map_ = new System.Collections.Generic.Dictionary<int,ItemEnchant> (array__.Length,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,ItemEnchant> (array__.Length);
       ItemEnchant __table = null;
-      for( int __i=0;__i<array__.Length;__i++)
-      {
-        __table = array__[__i];
-        try{
-          map_.Add(__table.Index, __table);
-        }catch(System.Exception e)
+      int __i=0;
+      try{
+        for(__i=0;__i<array__.Length;__i++)
         {
-          throw new System.Exception(__table.Index.ToString() + " " + e.Message);
+          __table = array__[__i];
+          map_.Add(__table.Index, __table);
         }
+      }catch(System.Exception e)
+      {
+        throw new System.Exception($"{__table.Index} row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant>.Empty.AddRange(map_);
+      Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
     }
     
 
@@ -1418,8 +1417,7 @@ namespace TBL.ItemTable
           {
             if (preValues.Index.Equals(Index))
             {
-              i=0;j=0;
-              throw new System.Exception("ItemEnchant.Index:" + preValues.Index.ToString() + ") Duplicated!!");
+              throw new System.Exception("row:" + i + " ItemEnchant.Index:" + preValues.Index.ToString() + ") Duplicated!!");
             }
           }
           list__.Add(values);
@@ -1536,25 +1534,27 @@ namespace TBL.ItemTable
   #endif
   public partial class ItemManufacture : BaseClasses.ItemManufacture
   {
-  public static ItemManufacture[] Array_ { get; private set; }= null;
-  public static System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture> Map_ { get; private set; }= null;
+    public static ItemManufacture[] Array_ = null;
+    public static System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture> Map_ = null;
     
 
     public static void ArrayToMap(ItemManufacture[] array__)
     {
-      var map_ = new System.Collections.Generic.Dictionary<int,ItemManufacture> (array__.Length,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,ItemManufacture> (array__.Length);
       ItemManufacture __table = null;
-      for( int __i=0;__i<array__.Length;__i++)
-      {
-        __table = array__[__i];
-        try{
-          map_.Add(__table.Index, __table);
-        }catch(System.Exception e)
+      int __i=0;
+      try{
+        for(__i=0;__i<array__.Length;__i++)
         {
-          throw new System.Exception(__table.Index.ToString() + " " + e.Message);
+          __table = array__[__i];
+          map_.Add(__table.Index, __table);
         }
+      }catch(System.Exception e)
+      {
+        throw new System.Exception($"{__table.Index} row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture>.Empty.AddRange(map_);
+      Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
     }
     
 
@@ -1632,8 +1632,7 @@ namespace TBL.ItemTable
           {
             if (preValues.Index.Equals(Index))
             {
-              i=0;j=0;
-              throw new System.Exception("ItemManufacture.Index:" + preValues.Index.ToString() + ") Duplicated!!");
+              throw new System.Exception("row:" + i + " ItemManufacture.Index:" + preValues.Index.ToString() + ") Duplicated!!");
             }
           }
           list__.Add(values);
@@ -1692,25 +1691,27 @@ namespace TBL.ItemTable
   #endif
   public partial class RandomBoxGroup : BaseClasses.RandomBoxGroup
   {
-  public static RandomBoxGroup[] Array_ { get; private set; }= null;
-  public static System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup> Map_ { get; private set; }= null;
+    public static RandomBoxGroup[] Array_ = null;
+    public static System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup> Map_ = null;
     
 
     public static void ArrayToMap(RandomBoxGroup[] array__)
     {
-      var map_ = new System.Collections.Generic.Dictionary<int,RandomBoxGroup> (array__.Length,default(global::TBL.IntEqualityComparer));
+      var map_ = new System.Collections.Generic.Dictionary<int,RandomBoxGroup> (array__.Length);
       RandomBoxGroup __table = null;
-      for( int __i=0;__i<array__.Length;__i++)
-      {
-        __table = array__[__i];
-        try{
-          map_.Add(__table.ID, __table);
-        }catch(System.Exception e)
+      int __i=0;
+      try{
+        for(__i=0;__i<array__.Length;__i++)
         {
-          throw new System.Exception(__table.ID.ToString() + " " + e.Message);
+          __table = array__[__i];
+          map_.Add(__table.ID, __table);
         }
+      }catch(System.Exception e)
+      {
+        throw new System.Exception($"{__table.ID} row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup>.Empty.AddRange(map_);
+      Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
     }
     
 
@@ -1804,8 +1805,7 @@ namespace TBL.ItemTable
           {
             if (preValues.ID.Equals(ID))
             {
-              i=0;j=0;
-              throw new System.Exception("RandomBoxGroup.ID:" + preValues.ID.ToString() + ") Duplicated!!");
+              throw new System.Exception("row:" + i + " RandomBoxGroup.ID:" + preValues.ID.ToString() + ") Duplicated!!");
             }
           }
           list__.Add(values);

@@ -1,0 +1,10 @@
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.0\Examples.deps.json
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.0\Examples.runtimeconfig.json
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.0\Examples.runtimeconfig.dev.json
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.0\Examples.dll
+F:\Source\trunk\Common\Tools\Examples\bin\Release\netcoreapp2.0\Examples.pdb
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.0\Examples.csprojAssemblyReference.cache
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.0\Examples.AssemblyInfoInputs.cache
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.0\Examples.AssemblyInfo.cs
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.0\Examples.dll
+F:\Source\trunk\Common\Tools\Examples\obj\Release\netcoreapp2.0\Examples.pdb

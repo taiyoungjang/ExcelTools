@@ -1,0 +1,11 @@
+F:\Source\trunk\Common\BytesEditor\BytesEditor.exe.config
+F:\Source\trunk\Common\BytesEditor\BytesEditor.exe
+F:\Source\trunk\Common\BytesEditor\BytesEditor.pdb
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.csprojAssemblyReference.cache
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.exe.config
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.BytesEditor.resources
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.Properties.Resources.resources
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.csproj.GenerateResource.cache
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.csproj.CopyComplete
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.exe
+F:\Source\trunk\Common\Tools\BytesEditor\obj\Release\BytesEditor.pdb
