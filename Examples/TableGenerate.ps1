@@ -59,7 +59,7 @@ function Building_Table
         $Project_Table_Generater_Path = "${CurrentDirectory}\..\TableGenerateCmd.NetCore\bin\Debug\netcoreapp3.0\" 
         $Project_Table_Generater_File = "${Project_Table_Generater_Path}TableGenerateCmd.dll"
         $Project_Table_Generater_INI_File = "${CurrentDirectory}\TableGenerateCmd.ini" 
-        [array] $Project_Table_Generater_Command = "-i", $Project_Table_Generater_INI_File, "-c", "c#", "c++", "table", "-l", "$LangVer", "-a", "unity3d", "-p", $CPU_Count
+        [array] $Project_Table_Generater_Command = "-i", $Project_Table_Generater_INI_File, "-c", "c#", "table", "-l", "$LangVer", "-a", "unity3d", "-p", $CPU_Count, "-k", "true"
     
         $Project_Table_Binaries_Path = "${CurrentDirectory}\Bytes\${LangVer}\" 
         $Project_CS_DLL_Path = "${Project_Source_Path}BytesDll" 

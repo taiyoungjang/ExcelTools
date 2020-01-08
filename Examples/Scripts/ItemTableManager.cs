@@ -217,7 +217,7 @@ namespace TBL.ItemTable
   #if !ENCRYPT
   [System.Serializable]
   #endif
-  public partial class Item : BaseClasses.Item
+  public partial struct Item
   {
     public static Item[] Array_ = null;
     public static System.Collections.Immutable.ImmutableDictionary<int,Item> Map_ = null;
@@ -226,7 +226,7 @@ namespace TBL.ItemTable
     public static void ArrayToMap(Item[] array__)
     {
       var map_ = new System.Collections.Generic.Dictionary<int,Item> (array__.Length);
-      Item __table = null;
+      Item __table;
       int __i=0;
       try{
         for(__i=0;__i<array__.Length;__i++)
@@ -236,7 +236,7 @@ namespace TBL.ItemTable
         }
       }catch(System.Exception e)
       {
-        throw new System.Exception($"{__table.Item_ID} row:{__i} {e.Message}");
+          throw new System.Exception($"Row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,Item>.Empty.AddRange(map_);
       Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
@@ -599,38 +599,82 @@ namespace TBL.ItemTable
           {
           Next_item_price = 0;}else {Next_item_price = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,33])));
           }
-          Next_Item_material = new int[3];
+          var Next_Item_material_list__ = new System.Collections.Generic.List<int>();
+          bool not_empty_Next_Item_material__ = false;
           j = 34;
+          if(!string.IsNullOrEmpty(rows[i,34]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,34])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,34]))); Next_Item_material[0] = outvalue;
+            Next_Item_material_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,34]))));
+          }
+          else
+          {
+            not_empty_Next_Item_material__ = true;
           }
           j = 35;
+          if(!string.IsNullOrEmpty(rows[i,35]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,35])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,35]))); Next_Item_material[1] = outvalue;
+            if(not_empty_Next_Item_material__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Next_Item_material_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,35]))));
+          }
+          else
+          {
+            not_empty_Next_Item_material__ = true;
           }
           j = 36;
+          if(!string.IsNullOrEmpty(rows[i,36]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,36])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,36]))); Next_Item_material[2] = outvalue;
+            if(not_empty_Next_Item_material__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Next_Item_material_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,36]))));
           }
-          Next_Item_material_quantity = new int[3];
-          j = 37;
+          else
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,37])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,37]))); Next_Item_material_quantity[0] = outvalue;
+            not_empty_Next_Item_material__ = true;
+          }
+          Next_Item_material = Next_Item_material_list__.ToArray();
+          var Next_Item_material_quantity_list__ = new System.Collections.Generic.List<int>();
+          bool not_empty_Next_Item_material_quantity__ = false;
+          j = 37;
+          if(!string.IsNullOrEmpty(rows[i,37]))
+          {
+            Next_Item_material_quantity_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,37]))));
+          }
+          else
+          {
+            not_empty_Next_Item_material_quantity__ = true;
           }
           j = 38;
+          if(!string.IsNullOrEmpty(rows[i,38]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,38])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,38]))); Next_Item_material_quantity[1] = outvalue;
+            if(not_empty_Next_Item_material_quantity__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Next_Item_material_quantity_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,38]))));
+          }
+          else
+          {
+            not_empty_Next_Item_material_quantity__ = true;
           }
           j = 39;
+          if(!string.IsNullOrEmpty(rows[i,39]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,39])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,39]))); Next_Item_material_quantity[2] = outvalue;
+            if(not_empty_Next_Item_material_quantity__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Next_Item_material_quantity_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,39]))));
           }
+          else
+          {
+            not_empty_Next_Item_material_quantity__ = true;
+          }
+          Next_Item_material_quantity = Next_Item_material_quantity_list__.ToArray();
           j = 40;
           Resource_Path = rows[i,40];
           j = 41;
@@ -640,15 +684,30 @@ namespace TBL.ItemTable
           {
           WeaponIndex = 0;}else {WeaponIndex = System.Convert.ToInt16(System.Math.Round(double.Parse(rows[i,42])));
           }
-          PartName = new string[1];
+          var PartName_list__ = new System.Collections.Generic.List<string>();
+          bool not_empty_PartName__ = false;
           j = 43;
-          PartName[0] = rows[i,43];
-          PartIndex = new short[1];
-          j = 44;
+          if(!string.IsNullOrEmpty(rows[i,43]))
           {
-            short outvalue = 0; if(!string.IsNullOrEmpty(rows[i,44])) 
-            outvalue = System.Convert.ToInt16(System.Math.Round(double.Parse(rows[i,44]))); PartIndex[0] = outvalue;
+            PartName_list__.Add(rows[i,43]);
           }
+          else
+          {
+            not_empty_PartName__ = true;
+          }
+          PartName = PartName_list__.ToArray();
+          var PartIndex_list__ = new System.Collections.Generic.List<short>();
+          bool not_empty_PartIndex__ = false;
+          j = 44;
+          if(!string.IsNullOrEmpty(rows[i,44]))
+          {
+            PartIndex_list__.Add(System.Convert.ToInt16(System.Math.Round(double.Parse(rows[i,44]))));
+          }
+          else
+          {
+            not_empty_PartIndex__ = true;
+          }
+          PartIndex = PartIndex_list__.ToArray();
           j = 45;
           Icon_path = rows[i,45];
           j = 46;
@@ -693,31 +752,73 @@ namespace TBL.ItemTable
           {
           WeaponType = 0;}else {WeaponType = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,54])));
           }
-          RandomBoxGroup_NO = new int[5];
+          var RandomBoxGroup_NO_list__ = new System.Collections.Generic.List<int>();
+          bool not_empty_RandomBoxGroup_NO__ = false;
           j = 55;
+          if(!string.IsNullOrEmpty(rows[i,55]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,55])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,55]))); RandomBoxGroup_NO[0] = outvalue;
+            RandomBoxGroup_NO_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,55]))));
+          }
+          else
+          {
+            not_empty_RandomBoxGroup_NO__ = true;
           }
           j = 56;
+          if(!string.IsNullOrEmpty(rows[i,56]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,56])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,56]))); RandomBoxGroup_NO[1] = outvalue;
+            if(not_empty_RandomBoxGroup_NO__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            RandomBoxGroup_NO_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,56]))));
+          }
+          else
+          {
+            not_empty_RandomBoxGroup_NO__ = true;
           }
           j = 57;
+          if(!string.IsNullOrEmpty(rows[i,57]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,57])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,57]))); RandomBoxGroup_NO[2] = outvalue;
+            if(not_empty_RandomBoxGroup_NO__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            RandomBoxGroup_NO_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,57]))));
+          }
+          else
+          {
+            not_empty_RandomBoxGroup_NO__ = true;
           }
           j = 58;
+          if(!string.IsNullOrEmpty(rows[i,58]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,58])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,58]))); RandomBoxGroup_NO[3] = outvalue;
+            if(not_empty_RandomBoxGroup_NO__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            RandomBoxGroup_NO_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,58]))));
+          }
+          else
+          {
+            not_empty_RandomBoxGroup_NO__ = true;
           }
           j = 59;
+          if(!string.IsNullOrEmpty(rows[i,59]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,59])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,59]))); RandomBoxGroup_NO[4] = outvalue;
+            if(not_empty_RandomBoxGroup_NO__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            RandomBoxGroup_NO_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,59]))));
+          }
+          else
+          {
+            not_empty_RandomBoxGroup_NO__ = true;
+          }
+          RandomBoxGroup_NO = RandomBoxGroup_NO_list__.ToArray();
+          if( Next_Item_material.Length != Next_Item_material_quantity.Length)
+          {
+              throw new System.Exception(string.Format("mismatch group:{0}","material"));
           }
           Item values = new Item(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO);
           foreach (var preValues in list__)
@@ -952,14 +1053,13 @@ namespace TBL.ItemTable
      public static int PartName_Length { get { return 1; } }
      public static int PartIndex_Length { get { return 1; } }
      public static int RandomBoxGroup_NO_Length { get { return 5; } }
-  public Item (int Item_ID,string Name,int Item_grade,int Require_lv,int Enchant_lv,int PhysicalAttack,int PhysicalDefense,int MagicalAttack,int MagicalDefense,float Critical,int HP,int KnockBackResist,eDictionaryType DictionaryType,int ItemType,short Gear_Score,short InventoryType,bool UsageType,short Socket_quantity,int Removal_cost,short Belonging,short Sub_stats_quantity,int Stack,int DesignScroll_ID,int BindingSkill_ID,int BindingAttack_ID,int Manufacture_gold,int Manufacture_cash,int SummonCompanion_ID,int Next_itemID,int Next_item_price,int[] Next_Item_material,int[] Next_Item_material_quantity,string Resource_Path,string WeaponName,short WeaponIndex,string[] PartName,short[] PartIndex,string Icon_path,int EXP,int Buy_cost,int Sell_reward,int Consignment_maxprice,int QuestBringer,int ItemEvent_ID,string Description,int Sub_Item,int WeaponType,int[] RandomBoxGroup_NO) : base(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO){}
   }
   
 
   #if !ENCRYPT
   [System.Serializable]
   #endif
-  public partial class ItemEffect : BaseClasses.ItemEffect
+  public partial struct ItemEffect
   {
     public static ItemEffect[] Array_ = null;
     public static System.Collections.Immutable.ImmutableDictionary<int,ItemEffect> Map_ = null;
@@ -968,7 +1068,7 @@ namespace TBL.ItemTable
     public static void ArrayToMap(ItemEffect[] array__)
     {
       var map_ = new System.Collections.Generic.Dictionary<int,ItemEffect> (array__.Length);
-      ItemEffect __table = null;
+      ItemEffect __table;
       int __i=0;
       try{
         for(__i=0;__i<array__.Length;__i++)
@@ -978,7 +1078,7 @@ namespace TBL.ItemTable
         }
       }catch(System.Exception e)
       {
-        throw new System.Exception($"{__table.Index} row:{__i} {e.Message}");
+          throw new System.Exception($"Row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEffect>.Empty.AddRange(map_);
       Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
@@ -1172,14 +1272,13 @@ namespace TBL.ItemTable
       Array_ = array__;
       ArrayToMap(array__);
     }
-  public ItemEffect (int Index,int Item_ID,int Effect_type,float Effect_min,float Effect_max,int Time_type,float Time_rate,float Time,float Duration,string Description) : base(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description){}
   }
   
 
   #if !ENCRYPT
   [System.Serializable]
   #endif
-  public partial class ItemEnchant : BaseClasses.ItemEnchant
+  public partial struct ItemEnchant
   {
     public static ItemEnchant[] Array_ = null;
     public static System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant> Map_ = null;
@@ -1188,7 +1287,7 @@ namespace TBL.ItemTable
     public static void ArrayToMap(ItemEnchant[] array__)
     {
       var map_ = new System.Collections.Generic.Dictionary<int,ItemEnchant> (array__.Length);
-      ItemEnchant __table = null;
+      ItemEnchant __table;
       int __i=0;
       try{
         for(__i=0;__i<array__.Length;__i++)
@@ -1198,7 +1297,7 @@ namespace TBL.ItemTable
         }
       }catch(System.Exception e)
       {
-        throw new System.Exception($"{__table.Index} row:{__i} {e.Message}");
+          throw new System.Exception($"Row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemEnchant>.Empty.AddRange(map_);
       Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
@@ -1350,58 +1449,134 @@ namespace TBL.ItemTable
           {
           KnockBack_resist = 0;}else {KnockBack_resist = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,15])));
           }
-          Material_IDS = new int[5];
+          var Material_IDS_list__ = new System.Collections.Generic.List<int>();
+          bool not_empty_Material_IDS__ = false;
           j = 16;
+          if(!string.IsNullOrEmpty(rows[i,16]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,16])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,16]))); Material_IDS[0] = outvalue;
+            Material_IDS_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,16]))));
           }
-          Material_quantitys = new int[5];
-          j = 17;
+          else
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,17])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,17]))); Material_quantitys[0] = outvalue;
+            not_empty_Material_IDS__ = true;
+          }
+          var Material_quantitys_list__ = new System.Collections.Generic.List<int>();
+          bool not_empty_Material_quantitys__ = false;
+          j = 17;
+          if(!string.IsNullOrEmpty(rows[i,17]))
+          {
+            Material_quantitys_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,17]))));
+          }
+          else
+          {
+            not_empty_Material_quantitys__ = true;
           }
           j = 18;
+          if(!string.IsNullOrEmpty(rows[i,18]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,18])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,18]))); Material_IDS[1] = outvalue;
+            if(not_empty_Material_IDS__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_IDS_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,18]))));
+          }
+          else
+          {
+            not_empty_Material_IDS__ = true;
           }
           j = 19;
+          if(!string.IsNullOrEmpty(rows[i,19]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,19])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,19]))); Material_quantitys[1] = outvalue;
+            if(not_empty_Material_quantitys__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_quantitys_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,19]))));
+          }
+          else
+          {
+            not_empty_Material_quantitys__ = true;
           }
           j = 20;
+          if(!string.IsNullOrEmpty(rows[i,20]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,20])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,20]))); Material_IDS[2] = outvalue;
+            if(not_empty_Material_IDS__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_IDS_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,20]))));
+          }
+          else
+          {
+            not_empty_Material_IDS__ = true;
           }
           j = 21;
+          if(!string.IsNullOrEmpty(rows[i,21]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,21])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,21]))); Material_quantitys[2] = outvalue;
+            if(not_empty_Material_quantitys__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_quantitys_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,21]))));
+          }
+          else
+          {
+            not_empty_Material_quantitys__ = true;
           }
           j = 22;
+          if(!string.IsNullOrEmpty(rows[i,22]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,22])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,22]))); Material_IDS[3] = outvalue;
+            if(not_empty_Material_IDS__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_IDS_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,22]))));
+          }
+          else
+          {
+            not_empty_Material_IDS__ = true;
           }
           j = 23;
+          if(!string.IsNullOrEmpty(rows[i,23]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,23])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,23]))); Material_quantitys[3] = outvalue;
+            if(not_empty_Material_quantitys__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_quantitys_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,23]))));
+          }
+          else
+          {
+            not_empty_Material_quantitys__ = true;
           }
           j = 24;
+          if(!string.IsNullOrEmpty(rows[i,24]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,24])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,24]))); Material_IDS[4] = outvalue;
+            if(not_empty_Material_IDS__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_IDS_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,24]))));
           }
+          else
+          {
+            not_empty_Material_IDS__ = true;
+          }
+          Material_IDS = Material_IDS_list__.ToArray();
           j = 25;
+          if(!string.IsNullOrEmpty(rows[i,25]))
           {
-            int outvalue = 0; if(!string.IsNullOrEmpty(rows[i,25])) 
-            outvalue = System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,25]))); Material_quantitys[4] = outvalue;
+            if(not_empty_Material_quantitys__)
+            {
+              throw new System.Exception(string.Format("i:{0} j:{1} before is empty text",i,j));
+            }
+            Material_quantitys_list__.Add(System.Convert.ToInt32(System.Math.Round(double.Parse(rows[i,25]))));
           }
+          else
+          {
+            not_empty_Material_quantitys__ = true;
+          }
+          Material_quantitys = Material_quantitys_list__.ToArray();
           j = 26;
           if(string.IsNullOrEmpty(rows[i,26]))
           {
@@ -1525,14 +1700,13 @@ namespace TBL.ItemTable
     }
      public static int Material_IDS_Length { get { return 5; } }
      public static int Material_quantitys_Length { get { return 5; } }
-  public ItemEnchant (int Index,int Item_ID,int Enchant_lv,int Physical_attack,int Physical_defense,int Magic_attack,int Magic_defense,float Critical,int HP,int KnockBack_resist,int[] Material_IDS,int[] Material_quantitys,int Require_gold,int Require_cash) : base(Index,Item_ID,Enchant_lv,Physical_attack,Physical_defense,Magic_attack,Magic_defense,Critical,HP,KnockBack_resist,Material_IDS,Material_quantitys,Require_gold,Require_cash){}
   }
   
 
   #if !ENCRYPT
   [System.Serializable]
   #endif
-  public partial class ItemManufacture : BaseClasses.ItemManufacture
+  public partial struct ItemManufacture
   {
     public static ItemManufacture[] Array_ = null;
     public static System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture> Map_ = null;
@@ -1541,7 +1715,7 @@ namespace TBL.ItemTable
     public static void ArrayToMap(ItemManufacture[] array__)
     {
       var map_ = new System.Collections.Generic.Dictionary<int,ItemManufacture> (array__.Length);
-      ItemManufacture __table = null;
+      ItemManufacture __table;
       int __i=0;
       try{
         for(__i=0;__i<array__.Length;__i++)
@@ -1551,7 +1725,7 @@ namespace TBL.ItemTable
         }
       }catch(System.Exception e)
       {
-        throw new System.Exception($"{__table.Index} row:{__i} {e.Message}");
+          throw new System.Exception($"Row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,ItemManufacture>.Empty.AddRange(map_);
       Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
@@ -1682,14 +1856,13 @@ namespace TBL.ItemTable
       Array_ = array__;
       ArrayToMap(array__);
     }
-  public ItemManufacture (int Index,int Subject_item_ID,int Material_item_ID,int Material_quantity) : base(Index,Subject_item_ID,Material_item_ID,Material_quantity){}
   }
   
 
   #if !ENCRYPT
   [System.Serializable]
   #endif
-  public partial class RandomBoxGroup : BaseClasses.RandomBoxGroup
+  public partial struct RandomBoxGroup
   {
     public static RandomBoxGroup[] Array_ = null;
     public static System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup> Map_ = null;
@@ -1698,7 +1871,7 @@ namespace TBL.ItemTable
     public static void ArrayToMap(RandomBoxGroup[] array__)
     {
       var map_ = new System.Collections.Generic.Dictionary<int,RandomBoxGroup> (array__.Length);
-      RandomBoxGroup __table = null;
+      RandomBoxGroup __table;
       int __i=0;
       try{
         for(__i=0;__i<array__.Length;__i++)
@@ -1708,7 +1881,7 @@ namespace TBL.ItemTable
         }
       }catch(System.Exception e)
       {
-        throw new System.Exception($"{__table.ID} row:{__i} {e.Message}");
+          throw new System.Exception($"Row:{__i} {e.Message}");
       }
       Map_ = System.Collections.Immutable.ImmutableDictionary<int,RandomBoxGroup>.Empty.AddRange(map_);
       Map_ = Map_.WithComparers(default(global::TBL.IntEqualityComparer));
@@ -1861,6 +2034,5 @@ namespace TBL.ItemTable
       Array_ = array__;
       ArrayToMap(array__);
     }
-  public RandomBoxGroup (int ID,int RandomItemGroup_NO,int ClassType,int Item_ID,int RatioAmount,int Item_Quantity) : base(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity){}
   }
 }

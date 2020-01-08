@@ -1,7 +1,7 @@
 // generate ItemTable.cs
 // DO NOT TOUCH SOURCE....
 #pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018
-namespace TBL.ItemTable.BaseClasses
+namespace TBL.ItemTable
 {
   #if !UNITY_2018_2_OR_NEWER
   public interface IItem
@@ -59,7 +59,7 @@ namespace TBL.ItemTable.BaseClasses
     int[] RandomBoxGroup_NO {get;}
   }
   #endif
-  public class Item
+  public partial struct Item
   {
     /// <summary>
     /// Key Column
@@ -182,7 +182,7 @@ namespace TBL.ItemTable.BaseClasses
     string Description {get;}
   }
   #endif
-  public class ItemEffect
+  public partial struct ItemEffect
   {
     /// <summary>
     /// Key Column
@@ -233,7 +233,7 @@ namespace TBL.ItemTable.BaseClasses
     int Require_cash {get;}
   }
   #endif
-  public class ItemEnchant
+  public partial struct ItemEnchant
   {
     /// <summary>
     /// Key Column
@@ -282,7 +282,7 @@ namespace TBL.ItemTable.BaseClasses
     int Material_quantity {get;}
   }
   #endif
-  public class ItemManufacture
+  public partial struct ItemManufacture
   {
     /// <summary>
     /// Key Column
@@ -313,7 +313,7 @@ namespace TBL.ItemTable.BaseClasses
     int Item_Quantity {get;}
   }
   #endif
-  public class RandomBoxGroup
+  public partial struct RandomBoxGroup
   {
     /// <summary>
     /// Key Column

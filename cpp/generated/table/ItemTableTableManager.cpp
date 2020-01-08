@@ -12,7 +12,6 @@ namespace TBL
         Read(stream__,count__);
         if(count__ == 0) return true;
         int Item_ID;
-        std::wstring Name;
         int Item_grade;
         int Require_lv;
         int Enchant_lv;
@@ -55,7 +54,6 @@ namespace TBL
         int Consignment_maxprice;
         int QuestBringer;
         int ItemEvent_ID;
-        std::wstring Description;
         int Sub_Item;
         int WeaponType;
         std::vector<int> RandomBoxGroup_NO; RandomBoxGroup_NO.resize(5);
@@ -64,7 +62,6 @@ namespace TBL
         for(int i__=0;i__<count__;++i__)
         {
           Read(stream__, Item_ID);
-          Read(stream__, Name);
           Read(stream__, Item_grade);
           Read(stream__, Require_lv);
           Read(stream__, Enchant_lv);
@@ -131,7 +128,6 @@ namespace TBL
           Read(stream__, Consignment_maxprice);
           Read(stream__, QuestBringer);
           Read(stream__, ItemEvent_ID);
-          Read(stream__, Description);
           Read(stream__, Sub_Item);
           Read(stream__, WeaponType);
           {
@@ -141,7 +137,7 @@ namespace TBL
               Read(stream__, RandomBoxGroup_NO[arrayIndex__]);
             }
           }
-          ItemPtr item__ = ItemPtr(new Item(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO));
+          ItemPtr item__ = ItemPtr(new Item(Item_ID,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Sub_Item,WeaponType,RandomBoxGroup_NO));
           array[i__] = item__;
           map.insert( std::pair<int,ItemPtr>(Item_ID,item__));
         }
@@ -176,7 +172,6 @@ namespace TBL
         float Time_rate;
         float Time;
         float Duration;
-        std::wstring Description;
         ItemEffect::Array array; array.resize(count__);
         ItemEffect::Map map;
         for(int i__=0;i__<count__;++i__)
@@ -190,8 +185,7 @@ namespace TBL
           Read(stream__, Time_rate);
           Read(stream__, Time);
           Read(stream__, Duration);
-          Read(stream__, Description);
-          ItemEffectPtr item__ = ItemEffectPtr(new ItemEffect(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description));
+          ItemEffectPtr item__ = ItemEffectPtr(new ItemEffect(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration));
           array[i__] = item__;
           map.insert( std::pair<int,ItemEffectPtr>(Index,item__));
         }

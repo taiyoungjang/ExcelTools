@@ -5,7 +5,6 @@ using namespace TBL::ItemTable;
 const Item::Array Item::array;
 const Item::Map Item::map;
 Item::Item (const int& Item_ID__
-,const std::wstring& Name__
 ,const int& Item_grade__
 ,const int& Require_lv__
 ,const int& Enchant_lv__
@@ -48,12 +47,10 @@ Item::Item (const int& Item_ID__
 ,const int& Consignment_maxprice__
 ,const int& QuestBringer__
 ,const int& ItemEvent_ID__
-,const std::wstring& Description__
 ,const int& Sub_Item__
 ,const int& WeaponType__
 ,const std::vector<int>& RandomBoxGroup_NO__)
 :Item_ID(Item_ID__)
-,Name(Name__)
 ,Item_grade(Item_grade__)
 ,Require_lv(Require_lv__)
 ,Enchant_lv(Enchant_lv__)
@@ -96,7 +93,6 @@ Item::Item (const int& Item_ID__
 ,Consignment_maxprice(Consignment_maxprice__)
 ,QuestBringer(QuestBringer__)
 ,ItemEvent_ID(ItemEvent_ID__)
-,Description(Description__)
 ,Sub_Item(Sub_Item__)
 ,WeaponType(WeaponType__)
 ,RandomBoxGroup_NO(RandomBoxGroup_NO__)
@@ -121,8 +117,7 @@ ItemEffect::ItemEffect (const int& Index__
 ,const int& Time_type__
 ,const float& Time_rate__
 ,const float& Time__
-,const float& Duration__
-,const std::wstring& Description__)
+,const float& Duration__)
 :Index(Index__)
 ,Item_ID(Item_ID__)
 ,Effect_type(Effect_type__)
@@ -132,7 +127,6 @@ ItemEffect::ItemEffect (const int& Index__
 ,Time_rate(Time_rate__)
 ,Time(Time__)
 ,Duration(Duration__)
-,Description(Description__)
 {
 }
 ItemEffectPtr ItemEffect::Find(const int& Index)

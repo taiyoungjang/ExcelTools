@@ -315,7 +315,7 @@ namespace TableGenerate
                 _writer.WriteLineEx($"#endif");
             }
             string primitiveName = key_column.var_name;
-            _writer.WriteLineEx($"public partial class {sheetName} : BaseClasses.{sheetName}");
+            _writer.WriteLineEx($"public partial class {sheetName}");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"public static {sheetName}[] Array_ = null;");
             _writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_ = null;");
@@ -327,7 +327,7 @@ namespace TableGenerate
             //_writer.WriteLineEx( "{");
             //_writer.WriteLineEx($"return a.{primitiveName}.CompareTo(b.{primitiveName});");
             //_writer.WriteLineEx("});");
-            _writer.WriteLineEx($"{sheetName} __table = null;");
+            _writer.WriteLineEx($"{sheetName} __table;");
             _writer.WriteLineEx("int __i=0;");
             _writer.WriteLineEx($"try{{");
             _writer.WriteLineEx("for(__i=0;__i<array__.Length;__i++)");
@@ -337,7 +337,7 @@ namespace TableGenerate
             _writer.WriteLineEx( "}");
             _writer.WriteLineEx($"}}catch(System.Exception e)");
             _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"      throw new System.Exception($\"{{__table.{primitiveName}}} row:{{__i}} {{e.Message}}\");");
+            _writer.WriteLineEx($"      throw new System.Exception($\"Row:{{__i}} {{e.Message}}\");");
             _writer.WriteLineEx($"}}");
             _writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map_);");
             if(!string.IsNullOrEmpty(equality_type))
@@ -356,7 +356,7 @@ namespace TableGenerate
             _writer.WriteLineEx("#endif");
             ReadStreamFunction(_writer, filename, sheetName, columns);
             ArrayCountFunction(_writer, filename, sheetName, columns);
-            SheetConstructorProcess(_writer, sheetName, columns);
+            //SheetConstructorProcess(_writer, sheetName, columns);
             if (_async == "unity3d")
             {
                 //PropertyFunction(_writer, filename, sheetName, columns);
@@ -840,7 +840,7 @@ namespace TableGenerate
 
                 if (column.array_index >= 0)
                 {
-                    _writer.WriteLineEx($"{type} {column.var_name} = null;");
+                    _writer.WriteLineEx($"{type} {column.var_name};");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);");
                     _writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[arrayCount__];");

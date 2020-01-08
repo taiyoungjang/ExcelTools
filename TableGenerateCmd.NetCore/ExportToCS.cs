@@ -46,7 +46,7 @@ namespace TableGenerate
                         max = sheets.GetLength(0);
                         current = 0;
 
-                        _writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}.{filename}.BaseClasses");
+                        _writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}.{filename}");
                         _writer.WriteLineEx("{");
 
                         foreach (string sheetName in sheets)
@@ -75,7 +75,7 @@ namespace TableGenerate
         {
             InterfacePropertySheetProcess(sheetName, _writer, columns);
 
-            _writer.WriteLineEx($"public class {sheetName}");
+            _writer.WriteLineEx($"public partial class {sheetName}");
             _writer.WriteLineEx("{");
             InnerSheetProcess(_writer, columns);
             SheetConstructorProcess(_writer, sheetName, columns);
