@@ -62,22 +62,42 @@ namespace TBL
     
 public static class Encoder
     {
+        public static void Write(this System.IO.BinaryWriter writer__, string value)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(value);
+            Write7BitEncodedInt(writer__, bytes.Length);
+            if(bytes.Length>0)
+            {
+                writer__.Write(bytes, 0, bytes.Length);
+            }
+        }
+        public static string ReadString(ref System.IO.BinaryReader reader__)
+        {
+            int count = Read7BitEncodedInt(ref reader__);
+            byte[] bytes = reader__.ReadBytes(count);
+            if (count > 0)
+            {
+                return System.Text.Encoding.UTF8.GetString(bytes);
+            }
+            return string.Empty;
+        }
         public static void Write7BitEncodedInt(System.IO.BinaryWriter writer__, int value)
         {
-            // Write out an int 7 bits at a time.  The high bit of the byte,
-            // when on, tells reader to continue reading more bytes.
-            uint v = (uint)value;   // support negative numbers
+#if ENCODED
+            uint v = (uint) value;   // support negative numbers
             while (v >= 0x80)
             {
-                writer__.Write((byte)(v | 0x80));
+                writer__.Write((byte) (v | 0x80));
                 v >>= 7;
             }
-            writer__.Write((byte)v);
+            writer__.Write((byte) v);
+#else
+            writer__.Write(value);
+#endif
         }
         public static int Read7BitEncodedInt(ref System.IO.BinaryReader reader__)
         {
-            // Read out an Int32 7 bits at a time.  The high bit
-            // of the byte when on means to continue reading more bytes.
+#if ENCODED
             var count = 0;
             var shift = 0;
             byte b;
@@ -87,15 +107,18 @@ public static class Encoder
                 // In a future version, add a DataFormatException.
                 if (shift == 5 * 7)  // 5 bytes max per Int32, shift += 7
                 {
-                    throw new System.Exception();
+                    //throw new FormatException();
                 }
 
                 // ReadByte handles end of stream cases for us.
                 b = reader__.ReadByte();
-                    count |= (b & 0x7F) << shift;
-                    shift += 7;
-			} while ((b & 0x80) != 0);
-			return count;
+                count |= (b & 0x7F) << shift;
+                shift += 7;
+            } while ((b & 0x80) != 0);
+            return count;
+#else
+            return reader__.ReadInt32();
+#endif
 		}
 	}
 	  
@@ -206,7 +229,7 @@ public static class Encoder
             string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location);
 
             StringBuilder str = new StringBuilder();
-            string folder = (System.IO.Path.DirectorySeparatorChar == '/' ? "/" : string.Empty) + System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(TableGenerate.ExportBase)).CodeBase.Replace("file:///", String.Empty));
+            string folder = (System.IO.Path.DirectorySeparatorChar == '/' ? "/" : string.Empty) + System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(TableGenerate.ExportBase)).Location.Replace("file:///", String.Empty));
             //string folder = System.IO.Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName).ToString();
             string[] refAssemblies = new string[] {
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}DocumentFormat.OpenXml.dll",
@@ -218,6 +241,8 @@ public static class Encoder
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Xml.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Data.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Data.Common.dll",
+                $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Threading.Tasks.Parallel.dll",
+                $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Collections.Concurrent.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}TableGenerateCmd.dll"
             };
             foreach(string enumTypeFileName in enumTypeFileNames)
@@ -314,10 +339,10 @@ public static class Encoder
             {
                 assembly = CompileFiles(str.ToString(), refAssemblies);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.IO.File.WriteAllText($"{viewFilename}err.cs", str.ToString());
-                System.IO.File.WriteAllText($"{viewFilename}ex.cs", ex.ToString());
+                //System.IO.File.WriteAllText($"{viewFilename}err.cs", str.ToString());
+                //System.IO.File.WriteAllText($"{viewFilename}ex.cs", ex.ToString());
                 throw;
             }
             //using (var fs = System.IO.File.OpenRead(outputPath + "/" + str_class + ".dll"))
@@ -347,7 +372,7 @@ public static class Encoder
                 int status = script.ExtractFromExcel(imp.GetFileName(), outputPath);
                 if (status == 1)
                 {
-                    System.IO.File.WriteAllText($"{viewFilename}err.cs", str.ToString());
+                    //System.IO.File.WriteAllText($"{viewFilename}err.cs", str.ToString());
                     throw new System.Exception(viewFilename.ToString());
                 }
             }

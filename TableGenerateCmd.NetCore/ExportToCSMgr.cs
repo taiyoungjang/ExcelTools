@@ -10,7 +10,9 @@ namespace TableGenerate
 {
     public class ExportToCSMgr : ExportBase
     {
-        public static String NameSpace = string.Empty;
+        private readonly string _unityDefine = "UNITY_2018_2_OR_NEWER";
+
+        public static string NameSpace = string.Empty;
         public int m_current = 0;
         public eGenType _gen_type = eGenType.cs;
         private string _async = string.Empty;
@@ -18,6 +20,11 @@ namespace TableGenerate
         {
             //set { _async = "unity3d"; }
             set { _async = value; }
+        }
+
+        public ExportToCSMgr(string unityDefine)
+        {
+            _unityDefine = unityDefine;
         }
 
         public override bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
@@ -81,7 +88,7 @@ namespace TableGenerate
                     _writer.WriteLineEx( "public class Loader : global::TBL.ILoader");
                     _writer.WriteLineEx( "{");
 
-                    _writer.WriteLineEx($"#if !{UNITY_DEFINE}");
+                    _writer.WriteLineEx($"#if !{_unityDefine}");
                     _writer.WriteLineEx("public System.Data.DataSet DataSet");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("get");
@@ -107,17 +114,26 @@ namespace TableGenerate
                     _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
                     _writer.WriteLineEx("public void ExcelLoad(string path, string language)");
                     _writer.WriteLineEx("{");
+                    _writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
+                    _writer.WriteLineEx("{");
                     _writer.WriteLineEx("language = language.Trim();");
                     _writer.WriteLineEx("string directoryName = System.IO.Path.GetDirectoryName(path);");
                     _writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
                     _writer.WriteLineEx("imp.Open(path);");
-                    foreach (string sheetName in sheets)
+                    _writer.WriteLineEx("switch (excelName)");
+                    _writer.WriteLineEx("{");
+                    var sheetNames = sheets.Select(sheetName => sheetName.Trim().Replace(" ", "_"));
+                    foreach (string sheetName in sheetNames)
                     {
-                        string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.ExcelLoad(imp,directoryName,language);");
+                        _writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad(imp,directoryName,language);");
+                        _writer.WriteLineEx("break;");
                     }
-                    _writer.WriteLineEx("imp.Dispose();");
                     _writer.WriteLineEx("}");
+                    _writer.WriteLineEx("imp.Dispose();");
+                    _writer.WriteLineEx("};");
+                    _writer.WriteLineEx($"System.Threading.Tasks.Parallel.ForEach(new string[]{{{(string.Join(',', sheetNames.Select(t => $@"""{t}""")))}}},excelAction);");
+                    _writer.WriteLineEx("}");
+
                     _writer.WriteLineEx("#endif");
                     _writer.WriteLineEx("#endif");
 
@@ -347,7 +363,7 @@ namespace TableGenerate
             _writer.WriteLineEx( "}");
             _writer.WriteLineEx();
             WriteStreamFunction(_writer, filename, sheetName,columns);
-            _writer.WriteLineEx("#if !UNITY_5_3_OR_NEWER");
+            _writer.WriteLineEx($"#if !{_unityDefine}");
             SetDataTableFunction(_writer, filename, sheetName, columns);
             _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
             ExcelLoadFunction(_writer, filename, sheetName, columns);
@@ -770,7 +786,7 @@ namespace TableGenerate
         {
             _writer.WriteLineEx("public static void WriteStream(System.IO.BinaryWriter __writer)");
             _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"__writer.Write(Array_.Length);"); ;
+            _writer.WriteLineEx($"__writer.Write(Array_.Length);");
             _writer.WriteLineEx($"for (var __i=0;__i<Array_.Length;__i++)");
             _writer.WriteLineEx( "{");
             _writer.WriteLineEx($"var __table = Array_[__i];");
@@ -797,8 +813,14 @@ namespace TableGenerate
                         string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
                         _writer.Write($"__writer.Write(({primitive_type})__table.{column.var_name}[j__]);");
                     }
+                    else if(column.IsString())
+                    {
+                        _writer.Write($"TBL.Encoder.Write(__writer,__table.{column.var_name}[j__]);");
+                    }
                     else
+                    {
                         _writer.Write($"__writer.Write(__table.{column.var_name}[j__]);");
+                    }
                     _writer.Write("}");
                     _writer.WriteLineEx("");
                 }
@@ -813,8 +835,14 @@ namespace TableGenerate
                         string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
                         _writer.WriteLineEx($"__writer.Write(({primitive_type})__table.{column.var_name});");
                     }
+                    else if (column.IsString())
+                    {
+                        _writer.Write($"TBL.Encoder.Write(__writer,__table.{column.var_name});");
+                    }
                     else
+                    {
                         _writer.WriteLineEx($"__writer.Write(__table.{column.var_name});");
+                    }
                 }
             }
             _writer.WriteLineEx( "}");

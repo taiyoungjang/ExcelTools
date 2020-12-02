@@ -27,7 +27,7 @@ namespace TableGenerateCmd
         public static string EXT_TYPE = ".xls";
         public static string TABLE_DIR = $"Data{System.IO.Path.DirectorySeparatorChar}Table";
         public static string ICECPP_DIR = $"Source{System.IO.Path.DirectorySeparatorChar}cpp/generated{System.IO.Path.DirectorySeparatorChar}table";
-        public static string ICECS_DIR = $"Server{System.IO.Path.DirectorySeparatorChar}WebTools{System.IO.Path.DirectorySeparatorChar}App_Code{System.IO.Path.DirectorySeparatorChar}table";
+        public static string CS_DIR = $"Server{System.IO.Path.DirectorySeparatorChar}WebTools{System.IO.Path.DirectorySeparatorChar}App_Code{System.IO.Path.DirectorySeparatorChar}table";
         public static string TF_DIR = $"engine{System.IO.Path.DirectorySeparatorChar}table";
         public static string DLL_DIR = $"engine{System.IO.Path.DirectorySeparatorChar}table";
         public static string DB_DIR = $"Server{System.IO.Path.DirectorySeparatorChar}engine{System.IO.Path.DirectorySeparatorChar}table{System.IO.Path.DirectorySeparatorChar}DB";

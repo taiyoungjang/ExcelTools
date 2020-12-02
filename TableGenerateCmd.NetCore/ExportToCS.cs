@@ -10,7 +10,7 @@ namespace TableGenerate
 {
     public class ExportToCS : ExportBase
     {
-        protected string iceFileDir;
+        private readonly string _unityDefine = "UNITY_2018_2_OR_NEWER";
 
         private string _async = string.Empty;
         public string SetAsync
@@ -22,6 +22,10 @@ namespace TableGenerate
         public static String NameSpace = string.Empty;
         public int m_current = 0;
         public eGenType _gen_type = eGenType.cs;
+        public ExportToCS(string unityDefine)
+        {
+            _unityDefine = unityDefine;
+        }
 
         public override bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
@@ -83,7 +87,7 @@ namespace TableGenerate
         }
         private void InterfacePropertySheetProcess(string sheetName, IndentedTextWriter _writer, List<Column> columns)
         {
-            _writer.WriteLineEx($"#if !UNITY_2018_2_OR_NEWER");
+            _writer.WriteLineEx($"#if !{_unityDefine}");
             _writer.WriteLineEx($"public interface I{sheetName}");
             _writer.WriteLineEx("{");
             foreach (var column in columns)

@@ -190,7 +190,7 @@ namespace ClassUtil
                                 if (sheet[r, c] == null)
                                     throw new System.Exception($"sheet[r:{r},{c}]");
 
-                                string data = sheet[r, c].Trim().ToString();
+                                string data = sheet[r, c].Replace("_x000D_", string.Empty).Trim().ToString();
                                 rows[r, rows_col_index] = data;
                             }
                             rows_col_index++;
@@ -202,7 +202,7 @@ namespace ClassUtil
                         {
                             if (sheet[r, c] == null)
                                 continue;
-                            string data = sheet[r, c].Trim().ToString();
+                            string data = sheet[r, c].Replace("_x000D_",string.Empty).Trim().ToString();
                             rows[r, rows_col_index] = data;
                         }
                         rows_col_index++;

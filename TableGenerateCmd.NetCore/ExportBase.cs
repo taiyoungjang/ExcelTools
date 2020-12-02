@@ -52,7 +52,6 @@ namespace TableGenerate
 
     public abstract class ExportBase
     {
-        public const string UNITY_DEFINE = "UNITY_2018_2_OR_NEWER";
         abstract public bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
     }
 
@@ -328,6 +327,7 @@ namespace TableGenerate
         public static bool IsTimeSpan(this Column column) => column.base_type == eBaseType.TimeSpan;
         public static bool IsEnumType(this Column column) => column.base_type == eBaseType.Enum;
         public static bool IsStructType(this Column column) => column.base_type == eBaseType.Struct;
+        public static bool IsString(this Column column) => column.base_type == eBaseType.String;
 
         public static string GetSqlitekitFunction(this Column column)
         {
@@ -395,7 +395,7 @@ namespace TableGenerate
                 case eBaseType.Int64: returnTypeName = $"__reader.ReadInt64()"; break;
                 case eBaseType.Int32: returnTypeName = $"__reader.ReadInt32()"; break;
                 case eBaseType.Int16: returnTypeName = $"__reader.ReadInt16()"; break;
-                case eBaseType.String: returnTypeName = $"__reader.ReadString()"; break;
+                case eBaseType.String: returnTypeName = $"TBL.Encoder.ReadString(ref __reader)"; break;
                 case eBaseType.Float: returnTypeName = $"__reader.ReadSingle()"; break;
                 case eBaseType.Double: returnTypeName = $"__reader.ReadDouble()"; break;
                 case eBaseType.Int8: returnTypeName = $"__reader.ReadByte()"; break;

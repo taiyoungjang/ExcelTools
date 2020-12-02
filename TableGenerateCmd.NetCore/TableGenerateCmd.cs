@@ -21,7 +21,7 @@ namespace TableGenerateCmd
         protected string _iniFile;
         protected IniFile _historyIni;
         protected bool _isWriteLog;
-        protected int _cmd;
+        protected int _cmdMask;
         protected string _async;
         List<XlsFileName> _xlsList;
         List<JobItem> _JobList;
@@ -30,13 +30,14 @@ namespace TableGenerateCmd
         protected string _outputPath, _version, _lang, _dllOutputPath;
         protected string _extType, _ignoreCase;
         protected List<string> _except = new List<string>();
+        protected string _srcDir;
 
         public TableGenerateCmd(int cmd, string iniFile, string srcDir, string lang, string version, string async)
         {
-            this._cmd = cmd;
+            this._cmdMask = cmd;
             this._iniFile = iniFile;
             this._version = version;
-            //this._srcDir = srcDir;
+            this._srcDir = srcDir;
             this._lang = lang;
             this._async = async;
             _historyIni = null;
@@ -45,23 +46,30 @@ namespace TableGenerateCmd
 
             _xlsList = new List<XlsFileName>();
             _JobList = new List<JobItem>();
-
-            _JobList.Add(new JobImportTable(0, ProgramCmd.TABLE_DIR, "TableGenerate", "TableInput", srcDir));        // JobList의 Index 0은 항상 Import Table 정보를 저장함.
-            if ((cmd & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(), ProgramCmd.EXPORT_CS, ProgramCmd.ICECS_DIR, "Directory", "CS", "C#_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_CSMGR) > 0) _JobList.Add(new JobExportData(new ExportToCSMgr(), ProgramCmd.EXPORT_CSMGR, ProgramCmd.ICECS_DIR, "Directory", "CSMGR", "C#_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_CPP) > 0) _JobList.Add(new JobExportData(new ExportToCPP(), ProgramCmd.EXPORT_CPP, ProgramCmd.ICECPP_DIR, "Directory", "CPP", "CPP_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_CPPHEADER) > 0) _JobList.Add(new JobExportData(new ExportToCPPHeader(), ProgramCmd.EXPORT_CPPHEADER, ProgramCmd.ICECPP_DIR, "Directory", "HPP", "CPP_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_HPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrHeader(), ProgramCmd.EXPORT_HPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "HPPMGR", "CPP_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_CPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrImplements(), ProgramCmd.EXPORT_CPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "CPPMGR", "CPP_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_TABLE) > 0) _JobList.Add(new JobExportData(new ExportToTF(), ProgramCmd.EXPORT_TABLE, ProgramCmd.TF_DIR, "Directory", "TableFile", "TF_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_SQLITE) > 0) _JobList.Add(new JobExportData(new ExportToSQLLite(), ProgramCmd.EXPORT_SQLITE, ProgramCmd.DB_DIR, "Directory", "SQLITE", "SQLITE_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_MSSQL) > 0) _JobList.Add(new JobExportData(new ExportToMSSQL(), ProgramCmd.EXPORT_MSSQL, ProgramCmd.DB_DIR, "Directory", "MSSQL", "MSSQL_FILES"));
-            if ((cmd & ProgramCmd.EXPORT_MYSQL) > 0) _JobList.Add(new JobExportData(new ExportToMySQL(), ProgramCmd.EXPORT_MYSQL, ProgramCmd.DB_DIR, "Directory", "MYSQL", "MYSQL_FILES"));
         }
 
         public bool InitJob()
         {
             Ini.IniFile ini = new Ini.IniFile(_iniFile);
+
+            var unityDefine = ini.IniReadValue("TableGenerate", "UNITY_DEFINE");
+            if(string.IsNullOrEmpty(unityDefine))
+            {
+                unityDefine = "UNITY_2018_2_OR_NEWER";
+            }
+
+            _JobList.Add(new JobImportTable(0, ProgramCmd.TABLE_DIR, "TableGenerate", "TableInput", _srcDir));        // JobList의 Index 0은 항상 Import Table 정보를 저장함.
+            if ((_cmdMask & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(unityDefine), ProgramCmd.EXPORT_CS, ProgramCmd.CS_DIR, "Directory", "CS", "C#_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_CSMGR) > 0) _JobList.Add(new JobExportData(new ExportToCSMgr(unityDefine), ProgramCmd.EXPORT_CSMGR, ProgramCmd.CS_DIR, "Directory", "CSMGR", "C#_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_CPP) > 0) _JobList.Add(new JobExportData(new ExportToCPP(), ProgramCmd.EXPORT_CPP, ProgramCmd.ICECPP_DIR, "Directory", "CPP", "CPP_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_CPPHEADER) > 0) _JobList.Add(new JobExportData(new ExportToCPPHeader(), ProgramCmd.EXPORT_CPPHEADER, ProgramCmd.ICECPP_DIR, "Directory", "HPP", "CPP_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_HPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrHeader(), ProgramCmd.EXPORT_HPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "HPPMGR", "CPP_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_CPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrImplements(), ProgramCmd.EXPORT_CPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "CPPMGR", "CPP_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_TABLE) > 0) _JobList.Add(new JobExportData(new ExportToTF(), ProgramCmd.EXPORT_TABLE, ProgramCmd.TF_DIR, "Directory", "TableFile", "TF_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_SQLITE) > 0) _JobList.Add(new JobExportData(new ExportToSQLLite(), ProgramCmd.EXPORT_SQLITE, ProgramCmd.DB_DIR, "Directory", "SQLITE", "SQLITE_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_MSSQL) > 0) _JobList.Add(new JobExportData(new ExportToMSSQL(), ProgramCmd.EXPORT_MSSQL, ProgramCmd.DB_DIR, "Directory", "MSSQL", "MSSQL_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_MYSQL) > 0) _JobList.Add(new JobExportData(new ExportToMySQL(), ProgramCmd.EXPORT_MYSQL, ProgramCmd.DB_DIR, "Directory", "MYSQL", "MYSQL_FILES"));
+
             //_inputPath = ini.IniReadValue("TableGenerate", "InputPath");
             _dllOutputPath = ini.IniReadValue("TableGenerate", "DllOutputPath").Replace("//", "/"); 
             _outputPath = ini.IniReadValue("TableGenerate", "OutputPath").Replace("//", "/");
@@ -282,7 +290,7 @@ namespace TableGenerateCmd
                 for (int i = 1; i < _JobList.Count; i++)     // index 0은 Import Table 디렉토리 정보이므로...
                 {
                     var job = _JobList[i];
-                    if ((_cmd & job.GetJobType()) == 0)
+                    if ((_cmdMask & job.GetJobType()) == 0)
                         continue;
                     if (job.GetFileList().Count == 0 || (job.GetFileList().IndexOf(xls.FileName) >= 0))
                     {

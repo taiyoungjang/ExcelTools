@@ -206,7 +206,7 @@ namespace ClassUtil
                 currentCount++;
             }
         }
-
+       
         private string ReadExcelCell(Cell cell)
         {
             var cellValue = cell.CellValue;
@@ -451,15 +451,14 @@ namespace ClassUtil
                     .GetPartById(sheet.Id)).Worksheet;
 
             var sheetData = workSheet.Elements<SheetData>().First();
-            var rows = sheetData.Elements<Row>().ToList();
+            var rows = sheetData.Elements<Row>();
 
             int i = 0;
             int j = 0;
             try
             {
-                for (i = 0; i < rowCount; i++)
+                foreach (var row in rows)
                 {
-                    var row = rows[i];
                     var cellEnumerator = GetExcelCellEnumerator(row);
                     for (j = 0; j < cols; j++)
                     {
@@ -474,6 +473,7 @@ namespace ClassUtil
                             rowList[i, j] = string.Empty;
                         }
                     }
+                    i++;
                 }
             }
             catch (Exception e)
