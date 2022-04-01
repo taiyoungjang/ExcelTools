@@ -30,7 +30,8 @@ namespace TableGenerate
         mssql,
         mysql,
         sqllite,
-        tf
+        tf,
+        proto,
     };
 
     public class Column
@@ -692,6 +693,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<long long>"; break;
                                 case eGenType.cs: returnTypeName = "long[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated int64"; break;
                                 case eGenType.mssql: returnTypeName = "bigint"; break;
                                 case eGenType.mysql: returnTypeName = "bigint"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -704,6 +706,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<int>"; break;
                                 case eGenType.cs: returnTypeName = "int[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated int32"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
                                 case eGenType.mysql: returnTypeName = "int"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -716,6 +719,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<short>"; break;
                                 case eGenType.cs: returnTypeName = "short[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated int32"; break;
                                 case eGenType.mssql: returnTypeName = "smallint"; break;
                                 case eGenType.mysql: returnTypeName = "smallint"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -728,6 +732,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<std::wstring>"; break;
                                 case eGenType.cs: returnTypeName = "string[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated string"; break;
                                 case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
                                 case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                                 case eGenType.sqllite: returnTypeName = "text"; break;
@@ -740,6 +745,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<float>"; break;
                                 case eGenType.cs: returnTypeName = "float[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated float"; break;
                                 case eGenType.mssql: returnTypeName = "float"; break;
                                 case eGenType.mysql: returnTypeName = "float"; break;
                                 case eGenType.sqllite: returnTypeName = "real"; break;
@@ -753,6 +759,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<double>"; break;
                                 case eGenType.cs: returnTypeName = "double[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated double"; break;
                                 case eGenType.mssql: returnTypeName = "double"; break;
                                 case eGenType.mysql: returnTypeName = "double"; break;
                                 case eGenType.sqllite: returnTypeName = "real"; break;
@@ -765,6 +772,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<BYTE>"; break;
                                 case eGenType.cs: returnTypeName = "byte[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated int8"; break;
                                 case eGenType.mssql: returnTypeName = "tinyint"; break;
                                 case eGenType.mysql: returnTypeName = "tinyint"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -777,6 +785,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<bool>"; break;
                                 case eGenType.cs: returnTypeName = "bool[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated bool"; break;
                                 case eGenType.mssql: returnTypeName = "bit"; break;
                                 case eGenType.mysql: returnTypeName = "bool"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -789,6 +798,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<time_t>"; break;
                                 case eGenType.cs: returnTypeName = "System.DateTime[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated int64"; break;
                                 case eGenType.mssql: returnTypeName = "datetime"; break;
                                 case eGenType.mysql: returnTypeName = "datetime"; break;
                                 case eGenType.sqllite: returnTypeName = "text"; break;
@@ -801,6 +811,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<double>"; break;
                                 case eGenType.cs: returnTypeName = "System.TimeSpan[]"; break;
+                                case eGenType.proto: returnTypeName = "repeated int64"; break;
                                 case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                                 case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                                 case eGenType.sqllite: returnTypeName = "text"; break;
@@ -814,6 +825,7 @@ namespace TableGenerate
                             {
                                 case eGenType.cpp: returnTypeName = "std::vector<int>"; break;
                                 case eGenType.cs: returnTypeName = $"{column.type_name}[]"; break;
+                                case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
                                 case eGenType.mysql: returnTypeName = "int"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -832,6 +844,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "long long"; break;
                             case eGenType.cs: returnTypeName = "long"; break;
+                            case eGenType.proto: returnTypeName = "int64"; break;
                             case eGenType.mssql: returnTypeName = "bigint"; break;
                             case eGenType.mysql: returnTypeName = "bigint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -844,6 +857,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "int"; break;
                             case eGenType.cs: returnTypeName = "int"; break;
+                            case eGenType.proto: returnTypeName = "int32"; break;
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -856,6 +870,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "short"; break;
                             case eGenType.cs: returnTypeName = "short"; break;
+                            case eGenType.proto: returnTypeName = "int32"; break;
                             case eGenType.mssql: returnTypeName = "smallint"; break;
                             case eGenType.mysql: returnTypeName = "smallint"; break;
                             case eGenType.sqllite: returnTypeName = "smallint"; break;
@@ -868,6 +883,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "std::wstring"; break;
                             case eGenType.cs: returnTypeName = "string"; break;
+                            case eGenType.proto: returnTypeName = "string"; break;
                             case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
@@ -880,6 +896,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "float"; break;
                             case eGenType.cs: returnTypeName = "float"; break;
+                            case eGenType.proto: returnTypeName = "float"; break;
                             case eGenType.mssql: returnTypeName = "float"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
                         }
@@ -892,6 +909,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "double"; break;
                             case eGenType.cs: returnTypeName = "double"; break;
+                            case eGenType.proto: returnTypeName = "double"; break;
                             case eGenType.mssql: returnTypeName = "double"; break;
                             case eGenType.mysql: returnTypeName = "double"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
@@ -904,6 +922,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "BYTE"; break;
                             case eGenType.cs: returnTypeName = "byte"; break;
+                            case eGenType.proto: returnTypeName = "byte"; break;
                             case eGenType.mssql: returnTypeName = "tinyint"; break;
                             case eGenType.mysql: returnTypeName = "tinyint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -916,6 +935,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "bool"; break;
                             case eGenType.cs: returnTypeName = "bool"; break;
+                            case eGenType.proto: returnTypeName = "bool"; break;
                             case eGenType.mssql: returnTypeName = "bit"; break;
                             case eGenType.mysql: returnTypeName = "bool"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -928,6 +948,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "time_t"; break;
                             case eGenType.cs: returnTypeName = "System.DateTime"; break;
+                            case eGenType.proto: returnTypeName = "int64"; break;
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
@@ -940,6 +961,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "double"; break;
                             case eGenType.cs: returnTypeName = "System.TimeSpan"; break;
+                            case eGenType.proto: returnTypeName = "int64"; break;
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
@@ -953,6 +975,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "int"; break;
                             case eGenType.cs: returnTypeName = column.type_name; break;
+                            case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -1058,6 +1081,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "bool"; break;
                             case eGenType.cs: returnTypeName = "bool"; break;
+                            case eGenType.proto: returnTypeName = "bool"; break;
                             case eGenType.mssql: returnTypeName = "bit"; break;
                             case eGenType.mysql: returnTypeName = "bool"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
@@ -1202,6 +1226,7 @@ namespace TableGenerate
                         {
                             case eGenType.cpp: returnTypeName = "bool"; break;
                             case eGenType.cs: returnTypeName = "bool"; break;
+                            case eGenType.proto: returnTypeName = "bool"; break;
                             case eGenType.mssql: returnTypeName = "bit"; break;
                             case eGenType.mysql: returnTypeName = "bool"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;

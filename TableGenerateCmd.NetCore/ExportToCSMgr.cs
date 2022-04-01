@@ -871,7 +871,7 @@ namespace TableGenerate
                     _writer.WriteLineEx($"{type} {column.var_name};");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);");
-                    _writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[arrayCount__];");
+                    _writer.WriteLineEx($"{column.var_name} = arrayCount__ > 0?new {column.GenerateBaseType(_gen_type)}[arrayCount__]:System.Array.Empty<{column.GenerateBaseType(_gen_type)}>();");
                     _writer.WriteLineEx($"for(var __j=0;__j<arrayCount__;++__j){column.var_name}[__j] = {convert_funtion};");
                     _writer.WriteLineEx("}");
                 }

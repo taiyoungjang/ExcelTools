@@ -18,7 +18,7 @@ namespace TableGenerateCmd
         public static int EXPORT_HPPMGR     = 16;    // 0000001000
         public static int EXPORT_CSMGR      = 32;    // 0000010000
         public static int EXPORT_TABLE      = 64;    // 0000100000
-        public static int EXPORT_STRING     = 128;   // 0001000000
+        public static int EXPORT_PROTO      = 128;   // 0001000000
         public static int EXPORT_SQLITE     = 256;   // 0010000000
         public static int EXPORT_MSSQL      = 512;   // 0100000000
         public static int EXPORT_MYSQL      = 1024;  // 0111111111
@@ -263,8 +263,8 @@ namespace TableGenerateCmd
 //                return EXPORT_CS | EXPORT_CSMGR;
             else if (cmd == "table" || cmd == "tbl" || cmd == "bytes")
                 return EXPORT_TABLE;
-            else if (cmd == "string")
-                return EXPORT_STRING;
+            else if (cmd == "proto")
+                return EXPORT_PROTO;
             else if (cmd == "sqlite" || cmd == "sqllite")
                 return EXPORT_SQLITE;
             else if (cmd == "mssql")

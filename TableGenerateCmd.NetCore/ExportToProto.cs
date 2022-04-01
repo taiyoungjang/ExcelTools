@@ -8,7 +8,7 @@ using System.CodeDom.Compiler;
 
 namespace TableGenerate
 {
-    public class ExportToCS : ExportBase
+    public class ExportToProto : ExportBase
     {
         private readonly string _unityDefine = "UNITY_2018_2_OR_NEWER";
 
@@ -21,9 +21,9 @@ namespace TableGenerate
 
         public static String NameSpace = string.Empty;
         public int m_current = 0;
-        public eGenType _gen_type = eGenType.cs;
+        public eGenType _gen_type = eGenType.proto;
         private bool _useInterface;
-        public ExportToCS(string unityDefine, bool useInterface)
+        public ExportToProto(string unityDefine, bool useInterface)
         {
             _unityDefine = unityDefine;
             _useInterface = useInterface;
@@ -33,7 +33,7 @@ namespace TableGenerate
         {
             try
             {
-                string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".cs");
+                string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".proto");
 
                 using (MemoryStream stream = new MemoryStream())
                 {
@@ -41,9 +41,9 @@ namespace TableGenerate
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
 
-                        _writer.WriteLineEx($"// generate {filename}");
-                        _writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
-                        _writer.WriteLineEx("#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
+                        _writer.WriteLineEx($"syntax = \"proto3\";");
+                        _writer.WriteLineEx($"import \"enum.proto\";");
+                        _writer.WriteLineEx($"option csharp_namespace = \"Excel.{createFileName.Split('.')[0]}\";");
 
                         string[] sheets = imp.GetSheetList();
 
@@ -51,9 +51,6 @@ namespace TableGenerate
 
                         max = sheets.GetLength(0);
                         current = 0;
-
-                        _writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}.{filename}");
-                        _writer.WriteLineEx("{");
 
                         foreach (string sheetName in sheets)
                         {
@@ -63,7 +60,6 @@ namespace TableGenerate
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                             SheetProcess(_writer, filename, trimSheetName, columns);
                         }
-                        _writer.WriteLineEx("};");
                         _writer.Flush();
                     }
                     ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
@@ -84,10 +80,10 @@ namespace TableGenerate
                 InterfacePropertySheetProcess(sheetName, _writer, columns);
             }
 
-            _writer.WriteLineEx($"public partial class {sheetName}");
+            _writer.WriteLineEx($"message {sheetName}");
             _writer.WriteLineEx("{");
             InnerSheetProcess(_writer, columns);
-            SheetConstructorProcess(_writer, sheetName, columns);
+            //SheetConstructorProcess(_writer, sheetName, columns);
             _writer.WriteLineEx("}");
         }
         private void InterfacePropertySheetProcess(string sheetName, IndentedTextWriter _writer, List<Column> columns)
@@ -128,6 +124,7 @@ namespace TableGenerate
 
         private void InnerSheetProcess(IndentedTextWriter _writer, List<Column> columns)
         {
+            int i = 0;
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -140,19 +137,19 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                if(column.is_key)
-                {
-                    _writer.WriteLineEx($"/// <summary>");
-                    _writer.WriteLineEx($"/// Key Column");
-                    _writer.WriteLineEx($"/// </summary>");
-                }
+                //if(column.is_key)
+                //{
+                //    _writer.WriteLineEx($"/// <summary>");
+                //    _writer.WriteLineEx($"/// Key Column");
+                //    _writer.WriteLineEx($"/// </summary>");
+                //}
                 //if (_async == "unity3d")
                 //{
                 //    _writer.WriteLineEx($"public abstract {type} {name} {{get;}}");
                 //}
                 //else
                 {
-                    _writer.WriteLineEx($"  public readonly {type} {name};");
+                    _writer.WriteLineEx($"  {type} {name} = {++i};");
                 }
             }
         }

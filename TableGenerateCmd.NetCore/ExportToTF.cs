@@ -245,12 +245,13 @@ public static class Encoder
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Collections.Concurrent.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}TableGenerateCmd.dll"
             };
+            List<string> compileFiles = new List<string>();
             foreach(string enumTypeFileName in enumTypeFileNames)
             {
-                str.AppendLine(System.IO.File.ReadAllText(enumTypeFileName, enc));
+                compileFiles.Add(System.IO.File.ReadAllText(enumTypeFileName, enc));
             }
-            str.AppendLine(System.IO.File.ReadAllText(csFileName, enc));
-            str.AppendLine(System.IO.File.ReadAllText(csMngFileName, enc));
+            compileFiles.Add(System.IO.File.ReadAllText(csFileName, enc));
+            compileFiles.Add(System.IO.File.ReadAllText(csMngFileName, enc));
 
             string str_class = string.Empty;
             string str_loader_class = string.Empty;
@@ -260,7 +261,7 @@ public static class Encoder
                 str_loader_class = $"{ExportToCSMgr.NameSpace}.{str_class}.Loader";
 
             object[] objects = { imp.GetFileName(), outputPath };
-            str.AppendLine(include_str);
+            compileFiles.Add(include_str);
             str.AppendLine("namespace ScriptLibrary ");
             str.AppendLine("{");
             str.AppendLine("public class Script ");
@@ -329,7 +330,7 @@ public static class Encoder
             str.AppendLine("    }");
             str.AppendLine("}");
             str.AppendLine("}");
-
+            compileFiles.Add(str.ToString());
             System.Reflection.Assembly assembly = null;
             if (System.IO.Directory.Exists(_dllOutputDir) == false)
             {
@@ -337,7 +338,7 @@ public static class Encoder
             }
             try
             {
-                assembly = CompileFiles(str.ToString(), refAssemblies);
+                assembly = CompileFiles(compileFiles, refAssemblies);
             }
             catch (Exception)
             {
@@ -380,10 +381,14 @@ public static class Encoder
 
             return true;
         }
-        public static System.Reflection.Assembly CompileFiles(string text, string[] refAssemblies)
+        public static System.Reflection.Assembly CompileFiles(List<string> textList, string[] refAssemblies)
         {
             string output_path = System.IO.Path.GetTempFileName() + ".dll";
-            SyntaxTree[] syntaxTree = new SyntaxTree[] { CSharpSyntaxTree.ParseText(text) };
+            SyntaxTree[] syntaxTrees = new SyntaxTree[textList.Count];
+            for(int i=0;i<textList.Count;++i)
+            {
+                syntaxTrees[i] = CSharpSyntaxTree.ParseText(textList[i]);
+            };
             string assemblyName = Path.GetRandomFileName();
             var references = refAssemblies.Where( t => System.IO.File.Exists(t) ).Select(t => MetadataReference.CreateFromFile(t)).ToList();
             string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
@@ -391,6 +396,7 @@ public static class Encoder
             references.Add(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(System.Numerics.Vector3).GetTypeInfo().Assembly.Location));
+            references.Add(MetadataReference.CreateFromFile(typeof(Google.Protobuf.Reflection.FieldDescriptor).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "mscorlib.dll")));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Runtime.dll")));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.IO.dll")));
@@ -406,7 +412,7 @@ public static class Encoder
             CSharpCompilation compilation =
                 CSharpCompilation.Create(assemblyName)
                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                .AddSyntaxTrees(syntaxTree)
+                .AddSyntaxTrees(syntaxTrees)
                 .AddReferences(references);
             //using (var symbols = new MemoryStream())
             {

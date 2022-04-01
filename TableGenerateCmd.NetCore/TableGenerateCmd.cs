@@ -57,9 +57,15 @@ namespace TableGenerateCmd
             {
                 unityDefine = "UNITY_2018_2_OR_NEWER";
             }
+            bool useInterface = false;
+            string strUseInterface = ini.IniReadValue("TableGenerate", "USE_INTERFACE");
+            if (!string.IsNullOrEmpty(strUseInterface) && bool.TryParse(strUseInterface,out useInterface))
+            {
+            }
 
             _JobList.Add(new JobImportTable(0, ProgramCmd.TABLE_DIR, "TableGenerate", "TableInput", _srcDir));        // JobList의 Index 0은 항상 Import Table 정보를 저장함.
-            if ((_cmdMask & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(unityDefine), ProgramCmd.EXPORT_CS, ProgramCmd.CS_DIR, "Directory", "CS", "C#_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_PROTO) > 0) _JobList.Add(new JobExportData(new ExportToProto(unityDefine, useInterface), ProgramCmd.EXPORT_PROTO, ProgramCmd.CS_DIR, "Directory", "PROTO", "PROTO_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(unityDefine, useInterface), ProgramCmd.EXPORT_CS, ProgramCmd.CS_DIR, "Directory", "CS", "C#_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CSMGR) > 0) _JobList.Add(new JobExportData(new ExportToCSMgr(unityDefine), ProgramCmd.EXPORT_CSMGR, ProgramCmd.CS_DIR, "Directory", "CSMGR", "C#_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CPP) > 0) _JobList.Add(new JobExportData(new ExportToCPP(), ProgramCmd.EXPORT_CPP, ProgramCmd.ICECPP_DIR, "Directory", "CPP", "CPP_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CPPHEADER) > 0) _JobList.Add(new JobExportData(new ExportToCPPHeader(), ProgramCmd.EXPORT_CPPHEADER, ProgramCmd.ICECPP_DIR, "Directory", "HPP", "CPP_FILES"));
@@ -79,12 +85,12 @@ namespace TableGenerateCmd
             System.Reflection.Assembly _Assembly = null;
             if (!string.IsNullOrEmpty(_enumFilePath))
             {
-                StringBuilder sb = new StringBuilder();
+                List<string> textList = new List<string>();
                 foreach(var text in System.IO.Directory.GetFiles(_enumFilePath, "*.cs"))
                 {
-                    sb.AppendLine(System.IO.File.ReadAllText(text));
+                    textList.Add(System.IO.File.ReadAllText(text));
                 }
-                _Assembly = CompileFiles(sb.ToString());
+                _Assembly = CompileFiles(textList);
             }
 
             _except = ini.IniReadValue("TableGenerate", "Except").Split(',').Select( item => item.Trim().ToLower()).ToList();
@@ -171,10 +177,14 @@ namespace TableGenerateCmd
             }
             return true;
         }
-        public static System.Reflection.Assembly CompileFiles(string text)
+        public static System.Reflection.Assembly CompileFiles(List<string> textList)
         {
             string output_path = System.IO.Path.GetTempFileName() + ".dll";
-            SyntaxTree[] syntaxTree = new SyntaxTree[] { CSharpSyntaxTree.ParseText(text) };
+            SyntaxTree[] syntaxTrees = new SyntaxTree[textList.Count()];
+            for(int i=0;i< syntaxTrees.Count();++i)
+            {
+                syntaxTrees[i] = CSharpSyntaxTree.ParseText(textList[i]);
+            };
             string assemblyName = Path.GetRandomFileName();
             List<MetadataReference> references = new List<MetadataReference>();
             string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
@@ -182,6 +192,7 @@ namespace TableGenerateCmd
             references.Add(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(System.Numerics.Vector3).GetTypeInfo().Assembly.Location));
+            references.Add(MetadataReference.CreateFromFile(typeof(Google.Protobuf.Reflection.FieldDescriptor).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "mscorlib.dll")));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Runtime.dll")));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "netstandard.dll")));
@@ -192,7 +203,7 @@ namespace TableGenerateCmd
             CSharpCompilation compilation =
                 CSharpCompilation.Create(assemblyName)
                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                .AddSyntaxTrees(syntaxTree)
+                .AddSyntaxTrees(syntaxTrees)
                 .AddReferences(references);
             //using (var symbols = new MemoryStream())
             {
