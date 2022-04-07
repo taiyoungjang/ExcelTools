@@ -5,6 +5,9 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Text.RegularExpressions;
 using System.IO;
+using DocumentFormat.OpenXml;
+using TableGenerate;
+using TableGenerateCmd;
 
 namespace ClassUtil
 {
@@ -108,6 +111,7 @@ namespace ClassUtil
         private WorkbookPart workbookPart;
         private IEnumerable<SharedStringItem> sharedStringItem;
         private MemoryStream _stream = null;
+        private static readonly Comment s_emptyComment = new Comment(){CommentText = new CommentText(string.Empty)}; 
 
         private string _fileName;
         //private int maxRowReadCount = 3;
@@ -206,7 +210,6 @@ namespace ClassUtil
                 currentCount++;
             }
         }
-       
         private string ReadExcelCell(Cell cell)
         {
             var cellValue = cell.CellValue;
@@ -335,31 +338,51 @@ namespace ClassUtil
             return count;
         }
 
-        public string[,] GetSheet(string sheetName)
+        public StringWithDesc[,] GetSheet(string sheetName)
         {
             int rows = GetSheetRowCount(sheetName);
             return GetSheet(sheetName, rows);
         }
 
-        public string[,] GetSheet(string sheetName, int rows)
+        public StringWithDesc[,] GetSheet(string sheetName, int rows)
         {
             int cols = GetSheetColumnCount(sheetName);
             return GetSheet(sheetName, rows, cols);
         }
 
-        public string[,] GetSheet(string sheetName, int rowCount, int cols)
+        public StringWithDesc[,] GetSheet(string sheetName, int rowCount, int cols)
         {
-            string[,] rowList = new string[rowCount, cols];
+            StringWithDesc[,] rowList = new StringWithDesc[rowCount, cols];
 
-            var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(t => t.Name.ToString() == sheetName);
+            var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(t => t.Name?.ToString() == sheetName);
             var workSheet = ((WorksheetPart)workbookPart
                     .GetPartById(sheet.Id)).Worksheet;
 
             var sheetData = workSheet.Elements<SheetData>().First();
             var rows = sheetData.Elements<Row>().ToList();
-
-            int i = 0;
-            int j = 0;
+            Dictionary<string,Comment> lstComments = null;
+            try
+            {
+                foreach (WorksheetPart sh in workbookPart.WorksheetParts.Where( t => t.Worksheet == workSheet))
+                {
+                    foreach (WorksheetCommentsPart commentsPart in sh.GetPartsOfType<WorksheetCommentsPart>())
+                    {
+                        foreach (Comment comment in commentsPart.Comments.CommentList)
+                        {
+                            lstComments ??= new Dictionary<string, Comment>();
+                            if(!lstComments.ContainsKey(comment.Reference.Value))
+                                lstComments.Add(comment.Reference.Value,comment);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
+            var i = 0;
+            var j = 0;
             try
             {
                 for (i = 0; i < rowCount; i++)
@@ -368,15 +391,29 @@ namespace ClassUtil
                     var cellEnumerator = GetExcelCellEnumerator(row);
                     for (j = 0; j < cols; j++)
                     {
-                        if (cellEnumerator.MoveNext())
+                        if (cellEnumerator.MoveNext() )
                         {
                             var cell = cellEnumerator.Current;
+                            var comment = s_emptyComment;
                             var text = ReadExcelCell(cell).Trim();
-                            rowList[i, j] = text;
+                            if (
+                                cell != null && 
+                                lstComments != null && 
+                                cell.CellReference != null &&
+                                !string.IsNullOrEmpty(cell.CellReference.Value) &&
+                                lstComments.TryGetValue(cell.CellReference.Value, out comment))
+                            {
+                                rowList[i, j] = new StringWithDesc(Text: text,Desc: comment.CommentText.InnerText.Replace("\n",string.Empty));
+                            }
+                            else
+                            {
+                                rowList[i, j] = new StringWithDesc(Text: text,Desc: string.Empty);
+                            }
+                            
                         }
                         else
                         {
-                            rowList[i, j] = string.Empty;
+                            rowList[i, j] = new StringWithDesc(Text: string.Empty,Desc: string.Empty);
                         }
                     }
                 }

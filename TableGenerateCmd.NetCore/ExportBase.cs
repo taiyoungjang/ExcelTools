@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TableGenerateCmd;
 
 namespace TableGenerate
 {
@@ -49,6 +51,7 @@ namespace TableGenerate
         public string type_name;
         public eBaseType primitive_type;
         public string min_value;
+        public string desc;
     };
 
     public abstract class ExportBase
@@ -144,14 +147,15 @@ namespace TableGenerate
         }
 
 
-        public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, string[,] rows, List<string> except)
+        public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
         {
             var columns = new List<Column>();
             for (int i = 0; i < rows.GetLength(1); i++)
             {
-                string name = rows[0,i].Trim().Replace(' ', '_');
-                string generate = rows[1,i].Trim().Replace(' ', '_').ToLower();
-                string type = rows[2,i].Trim().Replace(' ', '_');
+                string name = rows[0,i].Text.Trim().Replace(' ', '_');
+                string desc = rows[0, i].Desc;
+                string generate = rows[1,i].Text.Trim().Replace(' ', '_').ToLower();
+                string type = rows[2,i].Text.Trim().Replace(' ', '_');
                 if (name.Length == 0)
                     continue;
 
@@ -165,7 +169,8 @@ namespace TableGenerate
                     is_out_string = type.IndexOf("out_string") >= 0,
                     array_group_name = null,
                     array_index = -1,
-                    is_array = false,
+                    is_array = false, 
+                    desc = desc
                 };
 
                 GetBaseType(ref column, refAssem, mscorlibAssembly, type);

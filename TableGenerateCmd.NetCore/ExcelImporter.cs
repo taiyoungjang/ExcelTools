@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using TableGenerate;
+using TableGenerateCmd;
 
 namespace ClassUtil
 {
     public class ExcelImporter : IDisposable
     {
-        private string _fileName = String.Empty;
-        private string[,] _dt = null;
+        private string _fileName = string.Empty;
+        private StringWithDesc[,] _dt = null;
         private string[] _sheetList = null;
         private ExcelOLEClient _client = null;
 
@@ -14,7 +16,7 @@ namespace ClassUtil
         {
         }
 
-        public bool Open(String excelFileName)
+        public bool Open(string excelFileName)
         {
             try
             {
@@ -43,7 +45,7 @@ namespace ClassUtil
             return _sheetList;
         }
 
-        public void SetSheetList(string[] sheets, List<String> checkDupList)
+        public void SetSheetList(string[] sheets, List<string> checkDupList)
         {
             if (_client == null)
                 return;
@@ -65,7 +67,7 @@ namespace ClassUtil
             //}
         }
 
-        protected string[,] GetDataTable(string sheetName, int rowCount, int colCount)
+        protected StringWithDesc[,] GetDataTable(string sheetName, int rowCount, int colCount)
         {
             try
             {
@@ -94,7 +96,7 @@ namespace ClassUtil
             {
                 string[] row = new string[sheet.GetLength(1)];
                 for (int i = 0; i < sheet.GetLength(1); i++)
-                    row[i] = sheet[oneBaseRowIndex, i];
+                    row[i] = sheet[oneBaseRowIndex, i].Text;
                 return row;
             }
             catch (Exception)
@@ -103,28 +105,24 @@ namespace ClassUtil
             }
         }
 
-        public string[,] GetSheet(string sheetName, string language)
+        public StringWithDesc[,] GetSheet(string sheetName, string language)
         {
             int rows = GetSheetRowCount(sheetName);
             return GetSheet(sheetName, rows, language);
         }
 
-        public string[,] GetSheetShortCut(string sheetName, string language)
+        public StringWithDesc[,] GetSheetShortCut(string sheetName, string language)
         {
             return GetSheet(sheetName, 3, language);
         }
-        public string[,] GetSheetFormula(string sheetName, int rows, int cols)
-        {
-            return _client.GetSheetFormula(sheetName, rows, cols);
-        }
 
-        public string[,] GetSheet(string sheetName, int rows, string language)
+        public StringWithDesc[,] GetSheet(string sheetName, int rows, string language)
         {
             int cols = GetSheetColumnCount(sheetName);
             return GetSheet(sheetName, rows, cols, language);
         }
 
-        protected string[,] GetSheet(string sheetName, int rowCount, int colCount, string language)
+        protected StringWithDesc[,] GetSheet(string sheetName, int rowCount, int colCount, string language)
         {
             //language.ToLower();
             var sheet = GetDataTable(sheetName, rowCount, colCount);
@@ -135,7 +133,7 @@ namespace ClassUtil
             {
                 for (int j = 0; j < sheet.GetLength(1); j++)
                 {
-                    string col_name = sheet[0, j].Trim();
+                    string col_name = sheet[0, j].Text.Trim();
                     if (col_name.IndexOf("<") >= 0 && col_name.IndexOf(">") >= 0)
                     {
                         if (col_name.IndexOf($"<{language}>") < 0)
@@ -146,7 +144,7 @@ namespace ClassUtil
                 }
             }
 
-            string[,] rows = new string[rowCount, colCount - erase_col_count];
+            StringWithDesc[,] rows = new StringWithDesc[rowCount, colCount - erase_col_count];
             try
             {
                 int rows_col_index = 0;
@@ -154,7 +152,7 @@ namespace ClassUtil
                 {
                     if (sheet[0, c] == null)
                         throw new System.Exception($"sheet[0,{c}]");
-                    string col_name = sheet[0, c].Trim();
+                    string col_name = sheet[0, c].Text.Trim();
                     if (col_name.IndexOf("<") >= 0 && col_name.IndexOf(">") >= 0)
                     {
                         if (col_name.IndexOf($"<{language}>") < 0)
@@ -162,13 +160,13 @@ namespace ClassUtil
                         }
                         else
                         {
-                            rows[0, rows_col_index] = col_name.Substring(0, col_name.IndexOf("<"));
+                            rows[0, rows_col_index] = new StringWithDesc(Text: col_name.Substring(0, col_name.IndexOf("<")), Desc: sheet[0, c].Desc);
                             rows_col_index++;
                         }
                     }
                     else
                     {
-                        rows[0, rows_col_index] = col_name;
+                        rows[0, rows_col_index] = new StringWithDesc(Text: col_name,Desc:sheet[0, c].Desc);
                         rows_col_index++;
                     }
                 }
@@ -177,7 +175,7 @@ namespace ClassUtil
                 {
                     if (sheet[0, c] == null)
                         throw new System.Exception($"sheet[0,{c}]");
-                    string col_name = sheet[0, c].Trim();
+                    string col_name = sheet[0, c].Text.Trim();
                     if (col_name.IndexOf("<") >= 0 && col_name.IndexOf(">") >= 0)
                     {
                         if (col_name.IndexOf($"<{language}>") < 0)
@@ -190,8 +188,8 @@ namespace ClassUtil
                                 if (sheet[r, c] == null)
                                     throw new System.Exception($"sheet[r:{r},{c}]");
 
-                                string data = sheet[r, c].Replace("_x000D_", string.Empty).Trim().ToString();
-                                rows[r, rows_col_index] = data;
+                                string data = sheet[r, c].Text.Replace("_x000D_", string.Empty).Trim().ToString();
+                                rows[r, rows_col_index] = new StringWithDesc(Text: data,Desc:string.Empty);
                             }
                             rows_col_index++;
                         }
@@ -202,8 +200,8 @@ namespace ClassUtil
                         {
                             if (sheet[r, c] == null)
                                 continue;
-                            string data = sheet[r, c].Replace("_x000D_",string.Empty).Trim().ToString();
-                            rows[r, rows_col_index] = data;
+                            string data = sheet[r, c].Text.Replace("_x000D_",string.Empty).Trim().ToString();
+                            rows[r, rows_col_index] = new StringWithDesc(Text: data, Desc: string.Empty);
                         }
                         rows_col_index++;
                     }
@@ -217,19 +215,19 @@ namespace ClassUtil
             }
         }
 
-        public string[,] GetRawSheet(string sheetName, string language)
+        public StringWithDesc[,] GetRawSheet(string sheetName, string language)
         {
             int rows = GetSheetRowCount(sheetName);
             return GetRawSheet(sheetName, rows, language);
         }
 
-        public string[,] GetRawSheet(string sheetName, int rows, string language)
+        public StringWithDesc[,] GetRawSheet(string sheetName, int rows, string language)
         {
             int cols = GetSheetColumnCount(sheetName);
             return GetRawSheet(sheetName, rows, cols, language);
         }
 
-        public string[,] GetRawSheet(string sheetName, int rows, int cols, string language) => GetSheet(sheetName, rows, cols, language);
+        public StringWithDesc[,] GetRawSheet(string sheetName, int rows, int cols, string language) => GetSheet(sheetName, rows, cols, language);
 
         public void Dispose()
         {
@@ -239,11 +237,8 @@ namespace ClassUtil
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                if (_client != null)
-                    _client.Dispose();
-            }
+            if (!disposing) return;
+            _client?.Dispose();
         }
     }
 }
