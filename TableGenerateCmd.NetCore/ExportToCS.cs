@@ -153,7 +153,7 @@ namespace TableGenerate
                 //}
                 //else
                 {
-                    writer.WriteLine($"/// <param name=\"{name}\">{column.desc}</param> ");
+                    writer.WriteLineNoTabs($"/// <param name=\"{name}\">{column.desc}</param> ");
                 }
             }
         }
