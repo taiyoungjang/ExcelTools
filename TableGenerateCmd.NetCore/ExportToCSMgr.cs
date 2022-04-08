@@ -219,7 +219,7 @@ namespace TableGenerate
                     _writer.WriteLineEx("#endif //NO_EXCEL_LOADER");
 
 
-                    _writer.WriteLineEx($"  public string GetFileName() {{ return \"{filename}\"; }}");
+                    _writer.WriteLineEx($"public string GetFileName() => \"{filename}\";");
                     // ReadStream function
                     _writer.WriteLineEx( "public void ReadStream(System.IO.Stream stream)");
                     _writer.WriteLineEx( "{");
@@ -237,30 +237,28 @@ namespace TableGenerate
                     //    }
                     //    _writer.WriteLineEx("}");
                     //}
-                    _writer.WriteLineEx("int streamLength = (int)stream.Length;");
-                    _writer.WriteLineEx("int hashLength = stream.ReadByte();");
-                    _writer.WriteLineEx("byte[] uncompressedSize = new byte[4];");
-                    _writer.WriteLineEx("byte[] compressedSize = new byte[4];");
-                    _writer.WriteLineEx("byte[] hashBytes = new byte[hashLength];");
+                    _writer.WriteLineEx("var streamLength = (int)stream.Length;");
+                    _writer.WriteLineEx("var hashLength = stream.ReadByte();");
+                    _writer.WriteLineEx("var uncompressedSize = new byte[4];");
+                    _writer.WriteLineEx("var compressedSize = new byte[4];");
+                    _writer.WriteLineEx("var hashBytes = new byte[hashLength];");
                     _writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
-                    _writer.WriteLineEx("byte[] bytes = new byte[streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1];");
+                    _writer.WriteLineEx("var bytes = new byte[streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1];");
                     _writer.WriteLineEx("stream.Read( uncompressedSize, 0, uncompressedSize.Length);");
                     _writer.WriteLineEx("stream.Read( compressedSize, 0, compressedSize.Length);");
                     _writer.WriteLineEx("stream.Read( bytes, 0, streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1);");
-                    _writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("byte[] dataBytes = md5.ComputeHash(bytes);");
+                    _writer.WriteLineEx("using var md5 = System.Security.Cryptography.MD5.Create();");
+                    _writer.WriteLineEx("var dataBytes = md5.ComputeHash(bytes);");
                     _writer.WriteLineEx("if(!System.Linq.Enumerable.SequenceEqual(hashBytes, dataBytes))");
-                    _writer.WriteLineEx($"throw new System.Exception(\"{filename} verify failure...\");");
+                    _writer.WriteLineEx("    {throw new System.Exception(\"{filename} verify failure...\");}");
                     _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("using (System.IO.MemoryStream __ms = new System.IO.MemoryStream(bytes))");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms))");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("int uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
+                    _writer.WriteLineEx("using var __ms = new System.IO.MemoryStream(bytes);");
+                    _writer.WriteLineEx("using var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms);");
+                    _writer.WriteLineEx("var uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
                     _writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
                     _writer.WriteLineEx("decompressStream.Read(bytes, 0, uncompressedSize__);");
-                    _writer.WriteLineEx("}");
                     _writer.WriteLineEx("}");
 
                     _writer.WriteLineEx("{");
@@ -268,8 +266,8 @@ namespace TableGenerate
                     _writer.WriteLineEx("try");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("__ms = new System.IO.MemoryStream(bytes);");
-                    _writer.WriteLineEx("using (System.IO.BinaryReader reader = new System.IO.BinaryReader(__ms))");
                     _writer.WriteLineEx("{");
+                    _writer.WriteLineEx("using var reader = new System.IO.BinaryReader(__ms);");
                     _writer.WriteLineEx("__ms = null;");
                     foreach (string sheetName in sheets)
                     {
@@ -280,7 +278,7 @@ namespace TableGenerate
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("finally");
                     _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("if(__ms != null) __ms.Dispose();");
+                    _writer.WriteLineEx("__ms?.Dispose();");
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("}");
                     _writer.WriteLineEx("}");
@@ -288,8 +286,8 @@ namespace TableGenerate
                     _writer.WriteLineEx("public byte[] GetHash(System.IO.Stream stream)");
                     _writer.WriteLineEx("{");
                     _writer.WriteLineEx("stream.Position = 0;");
-                    _writer.WriteLineEx("int hashLength = stream.ReadByte();");
-                    _writer.WriteLineEx("byte[] hashBytes = new byte[hashLength];");
+                    _writer.WriteLineEx("var hashLength = stream.ReadByte();");
+                    _writer.WriteLineEx("var hashBytes = new byte[hashLength];");
                     _writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
                     _writer.WriteLineEx("return hashBytes;");
                     _writer.WriteLineEx("}");
