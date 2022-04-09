@@ -33,7 +33,7 @@ namespace TableGenerate
 
             using(var stream = new MemoryStream())
             {
-                var _writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), " ");
+                var writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), " ");
                 {
                     string filename = System.IO.Path.GetFileName(createFileName);
                     string[] sheets = imp.GetSheetList();
@@ -41,105 +41,105 @@ namespace TableGenerate
                     filename = filename.Replace(".cs", string.Empty);
                     max = sheets.GetLength(0);
 
-                    _writer.WriteLineEx($"// generate {filename}");
-                    _writer.WriteLineEx( "// DO NOT TOUCH SOURCE....");
-                    _writer.WriteLineEx( "#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
+                    writer.WriteLineEx( "#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
 
                     if (_async == "unity3d")
                     {
-                        _writer.WriteLineEx("#if UNITY_EDITOR");
-                        _writer.WriteLineEx($"public class {filename}Manager : UnityEngine.MonoBehaviour");
-                        _writer.WriteLineEx("{");
+                        writer.WriteLineEx("#if UNITY_EDITOR");
+                        writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
+                        writer.WriteLineEx($"public class {filename}Manager : UnityEngine.MonoBehaviour");
+                        writer.WriteLineEx("{");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            _writer.WriteLineEx($"public {NameSpace}.{filename}.{trimSheetName}[] {trimSheetName} = null;");
+                            writer.WriteLineEx($"public {NameSpace}.{filename}.{trimSheetName}[] {trimSheetName} = null;");
                         }
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
 
-                        _writer.WriteLineEx($"[UnityEditor.CustomEditor(typeof({filename}Manager))]");
-                        _writer.WriteLineEx($"public class {filename}Editor : UnityEditor.Editor");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx($"public override void OnInspectorGUI()");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx($"{filename}Manager myScript = ({filename}Manager) target;");
-                        _writer.WriteLineEx("if(UnityEngine.GUILayout.Button(\"Load\"))");
-                        _writer.WriteLineEx("{");
+                        writer.WriteLineEx($"[UnityEditor.CustomEditor(typeof({filename}Manager))]");
+                        writer.WriteLineEx($"public class {filename}Editor : UnityEditor.Editor");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx($"public override void OnInspectorGUI()");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx($"{filename}Manager myScript = ({filename}Manager) target;");
+                        writer.WriteLineEx("if(UnityEngine.GUILayout.Button(\"Load\"))");
+                        writer.WriteLineEx("{");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            _writer.WriteLineEx($"myScript.{trimSheetName} = {NameSpace}.{filename}.{trimSheetName}.Array_;");
+                            writer.WriteLineEx($"myScript.{trimSheetName} = {NameSpace}.{filename}.{trimSheetName}.Array_;");
                         }
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
                         //_writer.WriteLineEx("if(UnityEngine.GUILayout.Button(\"Save\"))");
                         //_writer.WriteLineEx("{");
                         //_writer.WriteLineEx("}");
-                        _writer.WriteLineEx("DrawDefaultInspector();");
-                        _writer.WriteLineEx("}");
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx("DrawDefaultInspector();");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
 
-                        _writer.WriteLineEx("#endif");
-                        _writer.WriteLineEx();
+                        writer.WriteLineEx("#endif");
+                        writer.WriteLineEx();
                     }
 
                     // Init class
-                    _writer.WriteLineEx($"namespace {NameSpace}.{filename};");
-                    _writer.WriteLineEx( "public class Loader : global::TBL.ILoader");
-                    _writer.WriteLineEx( "{");
+                    writer.WriteLineEx($"namespace {NameSpace}.{filename};");
+                    writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
+                    writer.WriteLineEx( "public class Loader : global::TBL.ILoader");
+                    writer.WriteLineEx( "{");
 
-                    _writer.WriteLineEx($"#if !{_unityDefine}");
-                    _writer.WriteLineEx("public System.Data.DataSet DataSet");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("get");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx($"System.Data.DataSet dts = new System.Data.DataSet(\"{filename}\");");
+                    writer.WriteLineEx($"#if !{_unityDefine}");
+                    writer.WriteLineEx("public System.Data.DataSet DataSet");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("get");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx($"var dts = new System.Data.DataSet(\"{filename}\");");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.GetDataTable(dts);");
+                        writer.WriteLineEx($"{trimSheetName}.GetDataTable(dts);");
                     }
-                    _writer.WriteLineEx("return dts;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("set");
-                    _writer.WriteLineEx("{");
+                    writer.WriteLineEx("return dts;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("set");
+                    writer.WriteLineEx("{");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.SetDataSet(value);");
+                        writer.WriteLineEx($"{trimSheetName}.SetDataSet(value);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                     // ExcelLoad function
-                    _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-                    _writer.WriteLineEx("public void ExcelLoad(string path, string language)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("language = language.Trim();");
-                    _writer.WriteLineEx("string directoryName = System.IO.Path.GetDirectoryName(path);");
-                    _writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
-                    _writer.WriteLineEx("imp.Open(path);");
-                    _writer.WriteLineEx("switch (excelName)");
-                    _writer.WriteLineEx("{");
+                    writer.WriteLineEx("#if !NO_EXCEL_LOADER");
+                    writer.WriteLineEx("public void ExcelLoad(string path, string language)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("language = language.Trim();");
+                    writer.WriteLineEx("string directoryName = System.IO.Path.GetDirectoryName(path);");
+                    writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
+                    writer.WriteLineEx("imp.Open(path);");
+                    writer.WriteLineEx("switch (excelName)");
+                    writer.WriteLineEx("{");
                     var sheetNames = sheets.Select(sheetName => sheetName.Trim().Replace(" ", "_"));
                     foreach (string sheetName in sheetNames)
                     {
-                        _writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad(imp,directoryName,language);");
-                        _writer.WriteLineEx("break;");
+                        writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad(imp,directoryName,language);");
+                        writer.WriteLineEx("break;");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("imp.Dispose();");
-                    _writer.WriteLineEx("};");
-                    _writer.WriteLineEx($"System.Threading.Tasks.Parallel.ForEach(new string[]{{{(string.Join(',', sheetNames.Select(t => $@"""{t}""")))}}},excelAction);");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("imp.Dispose();");
+                    writer.WriteLineEx("};");
+                    writer.WriteLineEx($"System.Threading.Tasks.Parallel.ForEach(new string[]{{{(string.Join(',', sheetNames.Select(t => $@"""{t}""")))}}},excelAction);");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("#endif");
-                    _writer.WriteLineEx("#endif");
+                    writer.WriteLineEx("#endif");
+                    writer.WriteLineEx("#endif");
 
                     // GetStaticObject function
-                    _writer.WriteLineEx("/*");
-                    _writer.WriteLineEx("public void GetMapAndArray(System.Collections.Immutable.ImmutableDictionary<string,object> container)");
-                    _writer.WriteLineEx("{");
+                    writer.WriteLineEx("/*");
+                    writer.WriteLineEx("public void GetMapAndArray(System.Collections.Immutable.ImmutableDictionary<string,object> container)");
+                    writer.WriteLineEx("{");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
@@ -147,83 +147,83 @@ namespace TableGenerate
                         var key_column = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except).FirstOrDefault( t => t.is_key);
                         var type = key_column.GenerateType(_gen_type);
                         var equality_type = key_column.GetEqualityTypeValue(_gen_type);
-                        _writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Map_\");");
-                        _writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Array_\");");
-                        _writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Map_\", new System.Collections.Immutable.ImmutableDictionary<{type},{trimSheetName}>({trimSheetName}.Map_{(string.IsNullOrEmpty(equality_type)?string.Empty:$",{equality_type}")}));");
-                        _writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Array_\",{trimSheetName}.Array_);");
+                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Map_\");");
+                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Array_\");");
+                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Map_\", new System.Collections.Immutable.ImmutableDictionary<{type},{trimSheetName}>({trimSheetName}.Map_{(string.IsNullOrEmpty(equality_type)?string.Empty:$",{equality_type}")}));");
+                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Array_\",{trimSheetName}.Array_);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("*/");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("*/");
 
-                    _writer.WriteLineEx("public void CheckReplaceFile( string tempFileName, string fileName ) ");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.IO.File.Copy(tempFileName, fileName, true);");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("public void CheckReplaceFile( string tempFileName, string fileName ) ");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.IO.File.Copy(tempFileName, fileName, true);");
+                    writer.WriteLineEx("}");
 
                     // WriteFile function
-                    _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-                    _writer.WriteLineEx("public void WriteFile(string path)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("int uncompressedLength = 0;");
-                    _writer.WriteLineEx("System.IO.MemoryStream uncompressedMemoryStream = null;");
-                    _writer.WriteLineEx("uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);");
+                    writer.WriteLineEx("#if !NO_EXCEL_LOADER");
+                    writer.WriteLineEx("public void WriteFile(string path)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("int uncompressedLength = 0;");
+                    writer.WriteLineEx("System.IO.MemoryStream uncompressedMemoryStream = null;");
+                    writer.WriteLineEx("uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.WriteStream(uncompressedMemoryStreamWriter);");
+                        writer.WriteLineEx($"{trimSheetName}.WriteStream(uncompressedMemoryStreamWriter);");
                     }
-                    _writer.WriteLineEx("uncompressedLength = (int) uncompressedMemoryStream.Position;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("System.IO.FileStream stream = null;");
-                    _writer.WriteLineEx("try");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFile" +
+                    writer.WriteLineEx("uncompressedLength = (int) uncompressedMemoryStream.Position;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("System.IO.FileStream stream = null;");
+                    writer.WriteLineEx("try");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFile" +
                         "Name();");
-                    _writer.WriteLineEx("uncompressedMemoryStream.Position=0;");
-                    _writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);");
-                    _writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("var __compressed = __zip.ToArray();");
-                    _writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
-                    _writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
-                    _writer.WriteLineEx("stream.Write(hashBytes, 0, hashBytes.Length);");
-                    _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
-                    _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );");
-                    _writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("uncompressedMemoryStream.Position=0;");
+                    writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);");
+                    writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("var __compressed = __zip.ToArray();");
+                    writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
+                    writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
+                    writer.WriteLineEx("stream.Write(hashBytes, 0, hashBytes.Length);");
+                    writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
+                    writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );");
+                    writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("stream.Flush();");
-                    _writer.WriteLineEx("stream.Close();");
-                    _writer.WriteLineEx("stream = null;");
-                    _writer.WriteLineEx($"CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\");");
-                    _writer.WriteLineEx("}catch(System.Exception e)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.Console.WriteLine(e.ToString());");
-                    _writer.WriteLineEx("throw;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("finally");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("stream.Flush();");
+                    writer.WriteLineEx("stream.Close();");
+                    writer.WriteLineEx("stream = null;");
+                    writer.WriteLineEx($"CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\");");
+                    writer.WriteLineEx("}catch(System.Exception e)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.Console.WriteLine(e.ToString());");
+                    writer.WriteLineEx("throw;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("finally");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("#endif //NO_EXCEL_LOADER");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("#endif //NO_EXCEL_LOADER");
 
 
-                    _writer.WriteLineEx($"public string GetFileName() => \"{filename}\";");
+                    writer.WriteLineEx($"public string GetFileName() => \"{filename}\";");
                     // ReadStream function
-                    _writer.WriteLineEx( "public void ReadStream(System.IO.Stream stream)");
-                    _writer.WriteLineEx( "{");
-                    _writer.WriteLineEx( "stream.Position = 0;");
+                    writer.WriteLineEx( "public void ReadStream(System.IO.Stream stream)");
+                    writer.WriteLineEx( "{");
+                    writer.WriteLineEx( "stream.Position = 0;");
                     //if(sheets.Any())
                     //{
                     //    _writer.WriteLineEx("if(" + string.Join( "\r\n      || ", sheets.Select(sheetName => $"communicator.findObjectFactory({ExportToIceCSMgr.NameSpace}.{filename}.{sheetName.Trim().Replace(" ", "_")}.ice_staticId()) == null")) + ")");
@@ -237,62 +237,62 @@ namespace TableGenerate
                     //    }
                     //    _writer.WriteLineEx("}");
                     //}
-                    _writer.WriteLineEx("var streamLength = (int)stream.Length;");
-                    _writer.WriteLineEx("var hashLength = stream.ReadByte();");
-                    _writer.WriteLineEx("var uncompressedSize = new byte[4];");
-                    _writer.WriteLineEx("var compressedSize = new byte[4];");
-                    _writer.WriteLineEx("var hashBytes = new byte[hashLength];");
-                    _writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
-                    _writer.WriteLineEx("var bytes = new byte[streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1];");
-                    _writer.WriteLineEx("stream.Read( uncompressedSize, 0, uncompressedSize.Length);");
-                    _writer.WriteLineEx("stream.Read( compressedSize, 0, compressedSize.Length);");
-                    _writer.WriteLineEx("stream.Read( bytes, 0, streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1);");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using var md5 = System.Security.Cryptography.MD5.Create();");
-                    _writer.WriteLineEx("var dataBytes = md5.ComputeHash(bytes);");
-                    _writer.WriteLineEx("if(!System.Linq.Enumerable.SequenceEqual(hashBytes, dataBytes))");
-                    _writer.WriteLineEx("    {throw new System.Exception(\"{filename} verify failure...\");}");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using var __ms = new System.IO.MemoryStream(bytes);");
-                    _writer.WriteLineEx("using var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms);");
-                    _writer.WriteLineEx("var uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
-                    _writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
-                    _writer.WriteLineEx("decompressStream.Read(bytes, 0, uncompressedSize__);");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("var streamLength = (int)stream.Length;");
+                    writer.WriteLineEx("var hashLength = stream.ReadByte();");
+                    writer.WriteLineEx("var uncompressedSize = new byte[4];");
+                    writer.WriteLineEx("var compressedSize = new byte[4];");
+                    writer.WriteLineEx("var hashBytes = new byte[hashLength];");
+                    writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
+                    writer.WriteLineEx("var bytes = new byte[streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1];");
+                    writer.WriteLineEx("stream.Read( uncompressedSize, 0, uncompressedSize.Length);");
+                    writer.WriteLineEx("stream.Read( compressedSize, 0, compressedSize.Length);");
+                    writer.WriteLineEx("stream.Read( bytes, 0, streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using var md5 = System.Security.Cryptography.MD5.Create();");
+                    writer.WriteLineEx("var dataBytes = md5.ComputeHash(bytes);");
+                    writer.WriteLineEx("if(!System.Linq.Enumerable.SequenceEqual(hashBytes, dataBytes))");
+                    writer.WriteLineEx("    {throw new System.Exception(\"{filename} verify failure...\");}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using var __ms = new System.IO.MemoryStream(bytes);");
+                    writer.WriteLineEx("using var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms);");
+                    writer.WriteLineEx("var uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
+                    writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
+                    writer.WriteLineEx("decompressStream.Read(bytes, 0, uncompressedSize__);");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.IO.MemoryStream __ms = null;");
-                    _writer.WriteLineEx("try");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("__ms = new System.IO.MemoryStream(bytes);");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using var reader = new System.IO.BinaryReader(__ms);");
-                    _writer.WriteLineEx("__ms = null;");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.IO.MemoryStream __ms = null;");
+                    writer.WriteLineEx("try");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("__ms = new System.IO.MemoryStream(bytes);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using var reader = new System.IO.BinaryReader(__ms);");
+                    writer.WriteLineEx("__ms = null;");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.ReadStream(reader);");
+                        writer.WriteLineEx($"{trimSheetName}.ReadStream(reader);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("finally");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("__ms?.Dispose();");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("finally");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("__ms?.Dispose();");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                     // Get Hash FUnction
-                    _writer.WriteLineEx("public byte[] GetHash(System.IO.Stream stream)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("stream.Position = 0;");
-                    _writer.WriteLineEx("var hashLength = stream.ReadByte();");
-                    _writer.WriteLineEx("var hashBytes = new byte[hashLength];");
-                    _writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
-                    _writer.WriteLineEx("return hashBytes;");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("public byte[] GetHash(System.IO.Stream stream)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("stream.Position = 0;");
+                    writer.WriteLineEx("var hashLength = stream.ReadByte();");
+                    writer.WriteLineEx("var hashBytes = new byte[hashLength];");
+                    writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
+                    writer.WriteLineEx("return hashBytes;");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
 
                     current = 0;
                     foreach (string sheetName in sheets)
@@ -302,11 +302,11 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        SheetProcess(_writer, filename, trimSheetName, columns);
+                        SheetProcess(writer, filename, trimSheetName, columns);
                     }
 
                     //_writer.WriteLineEx("}");
-                    _writer.Flush();
+                    writer.Flush();
                 }
                 string tempCreateFileName = createFileName.Replace(".cs", "Manager.cs");
                 ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{tempCreateFileName}");

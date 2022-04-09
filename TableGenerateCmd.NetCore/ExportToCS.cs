@@ -41,8 +41,6 @@ namespace TableGenerate
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
 
-                        writer.WriteLineEx($"// generate {filename}");
-                        writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx("#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
 
                         string[] sheets = imp.GetSheetList();
@@ -85,6 +83,7 @@ namespace TableGenerate
             writer.WriteLineEx($"/// {sheetName}"); 
             writer.WriteLineEx($"/// </summary>");
             InnerSheetDescProcess(writer,columns);
+            writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
             writer.WriteLineEx($"public partial record {sheetName}");
             writer.WriteLineEx("(");
             InnerSheetProcess(writer, columns);
