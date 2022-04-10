@@ -183,7 +183,7 @@ namespace TableGenerate
                 //}
                 //else
                 {
-                    writer.WriteLineEx($"{(isFirst?string.Empty:",")} {type} {name}");
+                    writer.WriteLineEx($"{(isFirst?' ':',')} {type} {name}");
                 }
                 isFirst = false;
             }
