@@ -147,10 +147,10 @@ namespace TableGenerate
                         var key_column = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except).FirstOrDefault( t => t.is_key);
                         var type = key_column.GenerateType(_gen_type);
                         var equality_type = key_column.GetEqualityTypeValue(_gen_type);
-                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Map_\");");
-                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Array_\");");
-                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Map_\", new System.Collections.Immutable.ImmutableDictionary<{type},{trimSheetName}>({trimSheetName}.Map_{(string.IsNullOrEmpty(equality_type)?string.Empty:$",{equality_type}")}));");
-                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Array_\",{trimSheetName}.Array_);");
+                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.map_\");");
+                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.array_\");");
+                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.map_\", new System.Collections.Immutable.ImmutableDictionary<{type},{trimSheetName}>({trimSheetName}.map_{(string.IsNullOrEmpty(equality_type)?string.Empty:$",{equality_type}")}));");
+                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.array_\",{trimSheetName}.array_);");
                     }
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("*/");
@@ -330,12 +330,38 @@ namespace TableGenerate
             string primitiveName = keyColumn.var_name;
             writer.WriteLineEx($"public partial record {sheetName}");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"public static {sheetName}[] Array_;");
-            writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_;");
+            writer.WriteLineEx($"private static {sheetName}[] array_;");
+            writer.WriteLineEx($"public static {sheetName}[] Array_");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"get");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"if (array_ != null) return array_;");
+            writer.WriteLineEx($"if (string.IsNullOrEmpty(Base_.Path) || string.IsNullOrEmpty(Base_.Language)) throw new System.Exception(\"TBL.Base_.Path or TBL.Base_.Language is empty\");");
+            writer.WriteLineEx($"Loader loader = new();");
+            writer.WriteLineEx($"      var path = $\"{{Base_.Path}}/ScriptTable/{{Base_.Language}}/{{loader.GetFileName()}}.bytes\";");
+            writer.WriteLineEx($"using var stream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);");
+            writer.WriteLineEx($"loader.ReadStream(stream);");
+            writer.WriteLineEx($"return array_;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx($"private static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> map_;");
+            writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"get");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"if (map_ != null) return map_;");
+            writer.WriteLineEx($"if (string.IsNullOrEmpty(Base_.Path) || string.IsNullOrEmpty(Base_.Language)) throw new System.Exception(\"TBL.Base_.Path or TBL.Base_.Language is empty\");");
+            writer.WriteLineEx($"Loader loader = new();");
+            writer.WriteLineEx($"      var path = $\"{{Base_.Path}}/ScriptTable/{{Base_.Language}}/{{loader.GetFileName()}}.bytes\";");
+            writer.WriteLineEx($"using var stream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);");
+            writer.WriteLineEx($"loader.ReadStream(stream);");
+            writer.WriteLineEx($"return map_;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
             writer.WriteLineEx();
             writer.WriteLineEx($"public static void ArrayToMap({sheetName}[] array__)");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"var map_ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length);");
+            writer.WriteLineEx($"var map__ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length);");
             //_writer.WriteLineEx($"array.Sort(delegate({sheetName} a,{sheetName} b)");
             //_writer.WriteLineEx( "{");
             //_writer.WriteLineEx($"return a.{primitiveName}.CompareTo(b.{primitiveName});");
@@ -345,16 +371,16 @@ namespace TableGenerate
             writer.WriteLineEx("for(__i=0;__i<array__.Length;__i++)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"var __table = array__[__i];");
-            writer.WriteLineEx($"map_.Add(__table.{primitiveName}, __table);");
+            writer.WriteLineEx($"map__.Add(__table.{primitiveName}, __table);");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"}}catch(System.Exception e)");
             writer.WriteLineEx($"{{");
             writer.WriteLineEx($"      throw new System.Exception($\"Row:{{__i}} {{e.Message}}\");");
             writer.WriteLineEx($"}}");
-            writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map_);");
+            writer.WriteLineEx($"map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map__);");
             if(!string.IsNullOrEmpty(equalityType))
             {
-                writer.WriteLineEx($"Map_ = Map_.WithComparers({equalityType});");
+                writer.WriteLineEx($"map_ = map_.WithComparers({equalityType});");
             }
             writer.WriteLineEx( "}");
             writer.WriteLineEx();
@@ -598,8 +624,8 @@ namespace TableGenerate
 
             writer.WriteLineEx("list__.Add(values);");
             writer.WriteLineEx( "}");
-            writer.WriteLineEx("Array_ = list__.ToArray();");
-            writer.WriteLineEx("ArrayToMap(Array_);");
+            writer.WriteLineEx("array_ = list__.ToArray();");
+            writer.WriteLineEx("ArrayToMap(array_);");
             writer.WriteLineEx( "}catch(System.Exception e)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx("if( rows == null ) throw;");
@@ -639,7 +665,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"table.Columns.Add(nameof({column.var_name}), typeof({type}));");
                 }
             }
-            writer.WriteLineEx("foreach(var item in Array_ )");
+            writer.WriteLineEx("foreach(var item in array_ )");
             writer.WriteLineEx("{");
             writer.WriteLineEx("table.Rows.Add(");
             bool bFirst = true;
@@ -710,8 +736,8 @@ namespace TableGenerate
             writer.WriteLineEx($"if(dts?.Tables[nameof({sheetName})] is null) throw new System.Exception(\"dts.Tables['{sheetName}'] is null\");");
             writer.WriteLineEx($"var tables__ = dts.Tables[nameof({sheetName})];");
             writer.WriteLineEx($"if(tables__ is null) throw new System.Exception(\"dts.Tables['{sheetName}'] is null\");");
-            writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{keyType},{sheetName}>.Empty;");
-            writer.WriteLineEx($"Array_ = new {sheetName}[tables__.Rows.Count];");
+            writer.WriteLineEx($"map_ = System.Collections.Immutable.ImmutableDictionary<{keyType},{sheetName}>.Empty;");
+            writer.WriteLineEx($"array_ = new {sheetName}[tables__.Rows.Count];");
             writer.WriteLineEx($"var row__ = 0;");
             writer.WriteLineEx($"foreach (System.Data.DataRow row in tables__.Rows)");
             writer.WriteLineEx("{");
@@ -759,8 +785,8 @@ namespace TableGenerate
                 bFirst = false;
             }
             writer.WriteLineEx(");");
-            writer.WriteLineEx($"Map_ = Map_.Add(table__.{keyColumn.var_name}, table__);");
-            writer.WriteLineEx($"Array_[row__++] = table__;");
+            writer.WriteLineEx($"map_ = map_.Add(table__.{keyColumn.var_name}, table__);");
+            writer.WriteLineEx($"array_[row__++] = table__;");
             writer.WriteLineEx("}");
             writer.WriteLineEx("return true;");
             writer.WriteLineEx("}");
@@ -769,8 +795,8 @@ namespace TableGenerate
         {
             writer.WriteLineEx("public static void WriteStream(System.IO.BinaryWriter __writer)");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"__writer.Write(Array_.Length);");
-            writer.WriteLineEx($"foreach (var __table in Array_)");
+            writer.WriteLineEx($"__writer.Write(array_.Length);");
+            writer.WriteLineEx($"foreach (var __table in array_)");
             writer.WriteLineEx( "{");
             foreach (var column in columns.Where( t => t.array_index <= 0))
             {
@@ -869,7 +895,7 @@ namespace TableGenerate
             ));
             writer.WriteLineEx($"array__[__i] = __table;");
             writer.WriteLineEx("}");
-            writer.WriteLineEx($"Array_ = array__;");
+            writer.WriteLineEx($"array_ = array__;");
             writer.WriteLineEx($"ArrayToMap(array__);");
             writer.WriteLineEx("}");
         }
