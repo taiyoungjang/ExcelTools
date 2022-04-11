@@ -260,39 +260,40 @@ namespace TableGenerate
             return columns;
         }
 
-        public static string GetConvertFunction(this Column column, string arg, eGenType gen_type)
+        public static string GetConvertFunction(this Column column, string arg, eGenType genType)
         {
             string returnTypeName = string.Empty;
             if(column.IsEnumType())
             {
-                returnTypeName = $"({column.GetPrimitiveType(gen_type)}) System.Enum.Parse(typeof({column.GetPrimitiveType(gen_type)}),{arg})";
+                returnTypeName = $"({column.GetPrimitiveType(genType)}) System.Enum.Parse(typeof({column.GetPrimitiveType(genType)}),{arg})";
             }
             else if(column.IsStructType())
             {
-                returnTypeName = $"{column.primitive_type.GetConvertFunction(arg, gen_type)}";
+                returnTypeName = $"{column.primitive_type.GetConvertFunction(arg, genType)}";
             }
             else
             {
-                returnTypeName = GetConvertFunction(column.base_type, arg, gen_type);
+                returnTypeName = GetConvertFunction(column.base_type, arg, genType);
             }
             return returnTypeName;
         }
-        public static string GetConvertFunction(this eBaseType base_type, string arg, eGenType gen_type)
+
+        private static string GetConvertFunction(this eBaseType baseType, string arg, eGenType genType)
         {
-            string returnTypeName = string.Empty;
-            switch (base_type)
+            string returnTypeName = baseType switch
             {
-                case eBaseType.Int64: returnTypeName = $"System.Convert.ToInt64(System.Math.Round(double.Parse({arg})))"; break;
-                case eBaseType.Int32: returnTypeName = $"System.Convert.ToInt32(System.Math.Round(double.Parse({arg})))"; break;
-                case eBaseType.Int16: returnTypeName = $"System.Convert.ToInt16(System.Math.Round(double.Parse({arg})))"; break;
-                case eBaseType.String: returnTypeName = $"{arg}"; break;
-                case eBaseType.Float: returnTypeName = $"System.Convert.ToSingle({arg})"; break;
-                case eBaseType.Double: returnTypeName = $"System.Convert.ToDouble({arg})"; break;
-                case eBaseType.Int8: returnTypeName = $"System.Convert.ToByte({arg})"; break;
-                case eBaseType.Boolean: returnTypeName = $"({arg}.Trim()==\"1\"||{arg}.Trim().ToUpper()==\"TRUE\")?true:false"; break;
-                case eBaseType.DateTime: returnTypeName = $"System.DateTime.Parse({arg})"; break;
-                case eBaseType.TimeSpan: returnTypeName = $"System.TimeSpan.Parse({arg})"; break;
-            }
+                eBaseType.Int64 => $"System.Convert.ToInt64(System.Math.Round(double.Parse({arg})))",
+                eBaseType.Int32 => $"System.Convert.ToInt32(System.Math.Round(double.Parse({arg})))",
+                eBaseType.Int16 => $"System.Convert.ToInt16(System.Math.Round(double.Parse({arg})))",
+                eBaseType.String => $"{arg}",
+                eBaseType.Float => $"System.Convert.ToSingle({arg})",
+                eBaseType.Double => $"System.Convert.ToDouble({arg})",
+                eBaseType.Int8 => $"System.Convert.ToByte({arg})",
+                eBaseType.Boolean => $"({arg}.Trim()==\"1\"||{arg}.Trim().ToUpper()==\"TRUE\")",
+                eBaseType.DateTime => $"System.DateTime.Parse({arg})",
+                eBaseType.TimeSpan => $"System.TimeSpan.Parse({arg})",
+                _ => string.Empty
+            };
             return returnTypeName;
         }
 
@@ -393,22 +394,23 @@ namespace TableGenerate
             }
             return returnTypeName;
         }
-        public static string GetReadStreamFunction(this eBaseType base_type)
+
+        private static string GetReadStreamFunction(this eBaseType baseType)
         {
-            string returnTypeName = string.Empty;
-            switch (base_type)
+            string returnTypeName = baseType switch
             {
-                case eBaseType.Int64: returnTypeName = $"__reader.ReadInt64()"; break;
-                case eBaseType.Int32: returnTypeName = $"__reader.ReadInt32()"; break;
-                case eBaseType.Int16: returnTypeName = $"__reader.ReadInt16()"; break;
-                case eBaseType.String: returnTypeName = $"TBL.Encoder.ReadString(ref __reader)"; break;
-                case eBaseType.Float: returnTypeName = $"__reader.ReadSingle()"; break;
-                case eBaseType.Double: returnTypeName = $"__reader.ReadDouble()"; break;
-                case eBaseType.Int8: returnTypeName = $"__reader.ReadByte()"; break;
-                case eBaseType.Boolean: returnTypeName = $"__reader.ReadBoolean()"; break;
-                case eBaseType.DateTime: returnTypeName = $"System.DateTime.FromBinary(__reader.ReadInt64())"; break;
-                case eBaseType.TimeSpan: returnTypeName = $"System.TimeSpan.FromTicks(__reader.ReadInt64())"; break;
-            }
+                eBaseType.Int64 => $"__reader.ReadInt64()",
+                eBaseType.Int32 => $"__reader.ReadInt32()",
+                eBaseType.Int16 => $"__reader.ReadInt16()",
+                eBaseType.String => $"Encoder.ReadString(ref __reader)",
+                eBaseType.Float => $"__reader.ReadSingle()",
+                eBaseType.Double => $"__reader.ReadDouble()",
+                eBaseType.Int8 => $"__reader.ReadByte()",
+                eBaseType.Boolean => $"__reader.ReadBoolean()",
+                eBaseType.DateTime => $"System.DateTime.FromBinary(__reader.ReadInt64())",
+                eBaseType.TimeSpan => $"System.TimeSpan.FromTicks(__reader.ReadInt64())",
+                _ => string.Empty
+            };
             return returnTypeName;
         }
 
@@ -661,26 +663,27 @@ namespace TableGenerate
             }
             return returnTypeName;
         }
-        public static string GetEqualityTypeValue(this Column column, eGenType gen_type)
+        public static string GetEqualityTypeValue(this Column column, eGenType genType)
         {
             string returnTypeName = string.Empty;
-            if (gen_type == eGenType.cs)
+            if (genType == eGenType.cs)
             {
-                switch (column.base_type)
+                returnTypeName = column.base_type switch
                 {
-                    case eBaseType.Int64: returnTypeName = "default(global::TBL.LongEqualityComparer)"; break;
-                    case eBaseType.Int32: returnTypeName = "default(global::TBL.IntEqualityComparer)"; break;
-                    case eBaseType.Int16: returnTypeName = "default(global::TBL.ShortEqualityComparer)"; break;
-                    case eBaseType.String: returnTypeName = "default(global::TBL.StringEqualityComparer)"; break;
-                    case eBaseType.Float: returnTypeName = ""; break;
-                    case eBaseType.Double: returnTypeName = ""; break;
-                    case eBaseType.Int8: returnTypeName = ""; break;
-                    case eBaseType.Boolean: returnTypeName = ""; break;
-                    case eBaseType.DateTime: returnTypeName = ""; break;
-                    case eBaseType.TimeSpan: returnTypeName = ""; break;
-                    case eBaseType.Enum: returnTypeName = $""; break;
-                    case eBaseType.Struct: returnTypeName = $""; break;
-                }
+                    eBaseType.Int64 => "default(LongEqualityComparer)",
+                    eBaseType.Int32 => "default(IntEqualityComparer)",
+                    eBaseType.Int16 => "default(ShortEqualityComparer)",
+                    eBaseType.String => "default(StringEqualityComparer)",
+                    eBaseType.Float => "",
+                    eBaseType.Double => "",
+                    eBaseType.Int8 => "",
+                    eBaseType.Boolean => "",
+                    eBaseType.DateTime => "",
+                    eBaseType.TimeSpan => "",
+                    eBaseType.Enum => $"",
+                    eBaseType.Struct => $"",
+                    _ => returnTypeName
+                };
             }
             return returnTypeName;
         }

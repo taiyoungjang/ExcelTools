@@ -84,7 +84,7 @@ namespace TableGenerate
                     // Init class
                     writer.WriteLineEx($"namespace {NameSpace}.{filename};");
                     writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
-                    writer.WriteLineEx( "public class Loader : global::TBL.ILoader");
+                    writer.WriteLineEx( "public class Loader : ILoader");
                     writer.WriteLineEx( "{");
 
                     writer.WriteLineEx($"#if !{_unityDefine}");
@@ -317,9 +317,9 @@ namespace TableGenerate
 
         private void SheetProcess(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key);
-            var type = key_column.GenerateType(_gen_type);
-            var equality_type = key_column.GetEqualityTypeValue(_gen_type);
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
+            var type = keyColumn.GenerateType(_gen_type);
+            var equalityType = keyColumn.GetEqualityTypeValue(_gen_type);
             writer.WriteLineEx();
             if (_async == "unity3d")
             {
@@ -327,11 +327,11 @@ namespace TableGenerate
                 writer.WriteLineEx($"[System.Serializable]");
                 writer.WriteLineEx($"#endif");
             }
-            string primitiveName = key_column.var_name;
+            string primitiveName = keyColumn.var_name;
             writer.WriteLineEx($"public partial record {sheetName}");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"public static {sheetName}[] Array_ = null;");
-            writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_ = null;");
+            writer.WriteLineEx($"public static {sheetName}[] Array_;");
+            writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_;");
             writer.WriteLineEx();
             writer.WriteLineEx($"public static void ArrayToMap({sheetName}[] array__)");
             writer.WriteLineEx( "{");
@@ -352,9 +352,9 @@ namespace TableGenerate
             writer.WriteLineEx($"      throw new System.Exception($\"Row:{{__i}} {{e.Message}}\");");
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map_);");
-            if(!string.IsNullOrEmpty(equality_type))
+            if(!string.IsNullOrEmpty(equalityType))
             {
-                writer.WriteLineEx($"Map_ = Map_.WithComparers({equality_type});");
+                writer.WriteLineEx($"Map_ = Map_.WithComparers({equalityType});");
             }
             writer.WriteLineEx( "}");
             writer.WriteLineEx();
@@ -616,7 +616,7 @@ namespace TableGenerate
 
             writer.WriteLineEx("public static void GetDataTable(System.Data.DataSet dts)");
             writer.WriteLineEx("{");
-            writer.WriteLineEx($"var table = dts.Tables.Add(\"{sheetName}\");");
+            writer.WriteLineEx($"var table = dts.Tables.Add(nameof({sheetName}));");
             foreach (var column in columns.Where(compare => compare.array_index <= 0))
             {
                 string type = column.GenerateBaseType(_gen_type);
@@ -636,7 +636,7 @@ namespace TableGenerate
                 }
                 else
                 {
-                    writer.WriteLineEx($"table.Columns.Add(\"{column.var_name}\", typeof({type}));");
+                    writer.WriteLineEx($"table.Columns.Add(nameof({column.var_name}), typeof({type}));");
                 }
             }
             writer.WriteLineEx("foreach(var item in Array_ )");
@@ -709,12 +709,13 @@ namespace TableGenerate
             writer.WriteLineEx("{");
             writer.WriteLineEx($"if(dts?.Tables[nameof({sheetName})] is null) throw new System.Exception(\"dts.Tables['{sheetName}'] is null\");");
             writer.WriteLineEx($"var tables__ = dts.Tables[nameof({sheetName})];");
+            writer.WriteLineEx($"if(tables__ is null) throw new System.Exception(\"dts.Tables['{sheetName}'] is null\");");
             writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{keyType},{sheetName}>.Empty;");
             writer.WriteLineEx($"Array_ = new {sheetName}[tables__.Rows.Count];");
             writer.WriteLineEx($"var row__ = 0;");
             writer.WriteLineEx($"foreach (System.Data.DataRow row in tables__.Rows)");
             writer.WriteLineEx("{");
-            writer.WriteLineEx($"var table = new {sheetName}");
+            writer.WriteLineEx($"var table__ = new {sheetName}");
             writer.WriteLineEx("(");
             bool bFirst = true;
             foreach (var column in columns.Where(compare => compare.array_index <= 0))
@@ -733,7 +734,7 @@ namespace TableGenerate
                     int arrayCount = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
                     for (int i = 0; i <= arrayCount; i++)
                     {
-                        string arg = $"row[\"{column.var_name}{i}\"].ToString()";
+                        string arg = $"(row[\"{column.var_name}{i}\"].ToString() ?? string.Empty)";
                         string convertFunction = column.GetConvertFunction(arg, _gen_type);
                         if (i == 0)
                         {
@@ -751,15 +752,15 @@ namespace TableGenerate
                 }
                 else
                 {
-                    string arg = $"row[nameof({sheetName}.{column.var_name})].ToString()";
+                    string arg = $"(row[nameof({column.var_name})].ToString() ?? string.Empty)";
                     string convertFunction = column.GetConvertFunction(arg, _gen_type);
                     writer.WriteLineEx($"{append}{convertFunction}");
                 }
                 bFirst = false;
             }
             writer.WriteLineEx(");");
-            writer.WriteLineEx($"{sheetName}.Map_ = {sheetName}.Map_.Add(table.{keyColumn.var_name}, table);");
-            writer.WriteLineEx($"{sheetName}.Array_[row__++] = table;");
+            writer.WriteLineEx($"Map_ = Map_.Add(table__.{keyColumn.var_name}, table__);");
+            writer.WriteLineEx($"Array_[row__++] = table__;");
             writer.WriteLineEx("}");
             writer.WriteLineEx("return true;");
             writer.WriteLineEx("}");
@@ -782,7 +783,7 @@ namespace TableGenerate
 
                 if (column.array_index >= 0)
                 {
-                    writer.WriteLineEx($"TBL.Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
+                    writer.WriteLineEx($"Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
                     writer.Write($"for(var j__=0;j__<__table.{column.var_name}.Length;++j__)");
                     writer.Write("{");
                     if (column.IsDateTime())
@@ -791,12 +792,12 @@ namespace TableGenerate
                         writer.Write($"__writer.Write(__table.{column.var_name}[j__].Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
                     {
-                        string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
-                        writer.Write($"__writer.Write(({primitive_type})__table.{column.var_name}[j__]);");
+                        string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
+                        writer.Write($"__writer.Write(({primitiveType})__table.{column.var_name}[j__]);");
                     }
                     else if(column.IsString())
                     {
-                        writer.Write($"TBL.Encoder.Write(__writer,__table.{column.var_name}[j__]);");
+                        writer.Write($"Encoder.Write(__writer,__table.{column.var_name}[j__]);");
                     }
                     else
                     {
@@ -813,12 +814,12 @@ namespace TableGenerate
                         writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
                     {
-                        string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
-                        writer.WriteLineEx($"__writer.Write(({primitive_type})__table.{column.var_name});");
+                        string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
+                        writer.WriteLineEx($"__writer.Write(({primitiveType})__table.{column.var_name});");
                     }
                     else if (column.IsString())
                     {
-                        writer.Write($"TBL.Encoder.Write(__writer,__table.{column.var_name});");
+                        writer.Write($"Encoder.Write(__writer,__table.{column.var_name});");
                     }
                     else
                     {
