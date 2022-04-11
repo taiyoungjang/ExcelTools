@@ -251,7 +251,7 @@ namespace TableGenerate
                     writer.WriteLineEx("using var md5 = System.Security.Cryptography.MD5.Create();");
                     writer.WriteLineEx("var dataBytes = md5.ComputeHash(bytes);");
                     writer.WriteLineEx("if(!System.Linq.Enumerable.SequenceEqual(hashBytes, dataBytes))");
-                    writer.WriteLineEx("    {throw new System.Exception(\"{filename} verify failure...\");}");
+                    writer.WriteLineEx($"  {{throw new System.Exception(\"{filename} verify failure...\");}}");
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("using var __ms = new System.IO.MemoryStream(bytes);");
