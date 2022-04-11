@@ -810,24 +810,24 @@ namespace TableGenerate
                 if (column.array_index >= 0)
                 {
                     writer.WriteLineEx($"Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
-                    writer.Write($"for(var j__=0;j__<__table.{column.var_name}.Length;++j__)");
+                    writer.Write($"foreach(var t__ in __table.{column.var_name})");
                     writer.Write("{");
                     if (column.IsDateTime())
-                        writer.Write($"__writer.Write(__table.{column.var_name}[j__].ToBinary());");
+                        writer.Write($"__writer.Write(t__.ToBinary());");
                     else if (column.IsTimeSpan())
-                        writer.Write($"__writer.Write(__table.{column.var_name}[j__].Ticks);");
+                        writer.Write($"__writer.Write(t__.Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
                     {
                         string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
-                        writer.Write($"__writer.Write(({primitiveType})__table.{column.var_name}[j__]);");
+                        writer.Write($"__writer.Write(({primitiveType})t__);");
                     }
                     else if(column.IsString())
                     {
-                        writer.Write($"Encoder.Write(__writer,__table.{column.var_name}[j__]);");
+                        writer.Write($"Encoder.Write(__writer,t__);");
                     }
                     else
                     {
-                        writer.Write($"__writer.Write(__table.{column.var_name}[j__]);");
+                        writer.Write($"__writer.Write(t__);");
                     }
                     writer.Write("}");
                     writer.WriteLineEx("");
