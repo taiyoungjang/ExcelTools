@@ -358,7 +358,45 @@ namespace TableGenerate
             writer.WriteLineEx($"return map_;");
             writer.WriteLineEx("}");
             writer.WriteLineEx("}");
-            writer.WriteLineEx();
+            writer.WriteLineEx("public object[] DataRow_ => new object[]{");
+            {
+                bool bFirst = true;
+                foreach (var column in columns.Where(compare => compare.array_index <= 0))
+                {
+                    if (column.is_generated == false)
+                    {
+                        continue;
+                    }
+
+                    string delim = string.Empty;
+
+
+                    if (column.array_index >= 0)
+                    {
+                        int arrayCount = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
+                        for (int i = 0; i <= arrayCount; i++)
+                        {
+                            if( i > 0 || bFirst == false)
+                            {
+                                delim = ",";
+                            }
+                            else
+                            {
+                                delim = string.Empty;
+                            }
+                            writer.WriteLineEx($"{delim}{column.var_name}[{i}]");
+                            bFirst = false;
+                        }
+                    }
+                    else
+                    {
+                        delim = bFirst == false ? "," : string.Empty;
+                        writer.WriteLineEx($"{delim}{column.var_name}");
+                        bFirst = false;
+                    }
+                }
+            }
+            writer.WriteLineEx("};");
             writer.WriteLineEx($"public static void ArrayToMap({sheetName}[] array__)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"var map__ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length);");
@@ -665,47 +703,9 @@ namespace TableGenerate
                     writer.WriteLineEx($"table.Columns.Add(nameof({column.var_name}), typeof({type}));");
                 }
             }
-            writer.WriteLineEx("foreach(var item in array_ )");
+            writer.WriteLineEx("foreach(var item__ in array_ )");
             writer.WriteLineEx("{");
-            writer.WriteLineEx("table.Rows.Add(");
-            bool bFirst = true;
-            foreach (var column in columns.Where(compare => compare.array_index <= 0))
-            {
-                string type = column.GenerateType(_gen_type);
-
-                if (column.is_generated == false)
-                {
-                    continue;
-                }
-
-                string delim = string.Empty;
-
-
-                if (column.array_index >= 0)
-                {
-                    int arrayCount = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
-                    for (int i = 0; i <= arrayCount; i++)
-                    {
-                        if( i > 0 || bFirst == false)
-                        {
-                            delim = ",";
-                        }
-                        else
-                        {
-                            delim = string.Empty;
-                        }
-                        writer.WriteLineEx($"{delim}item.{column.var_name}[{i}]");
-                        bFirst = false;
-                    }
-                }
-                else
-                {
-                    delim = bFirst == false ? "," : string.Empty;
-                    writer.WriteLineEx($"{delim}item.{column.var_name}");
-                    bFirst = false;
-                }
-            }
-            writer.WriteLineEx(");");
+            writer.WriteLineEx("table.Rows.Add(item__.DataRow_);");
             writer.WriteLineEx("}");
             writer.WriteLineEx("}");
         }
