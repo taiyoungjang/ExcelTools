@@ -21,7 +21,7 @@ namespace TableGenerateCmd
         protected string _iniFile;
         protected IniFile _historyIni;
         protected bool _isWriteLog;
-        protected int _cmdMask;
+        protected long _cmdMask;
         protected string _async;
         List<XlsFileName> _xlsList;
         List<JobItem> _JobList;
@@ -32,7 +32,7 @@ namespace TableGenerateCmd
         protected List<string> _except = new List<string>();
         protected string _srcDir;
 
-        public TableGenerateCmd(int cmd, string iniFile, string srcDir, string lang, string version, string async)
+        public TableGenerateCmd(long cmd, string iniFile, string srcDir, string lang, string version, string async)
         {
             this._cmdMask = cmd;
             this._iniFile = iniFile;
@@ -64,6 +64,7 @@ namespace TableGenerateCmd
             }
 
             _JobList.Add(new JobImportTable(0, ProgramCmd.TABLE_DIR, "TableGenerate", "TableInput", _srcDir));        // JobList의 Index 0은 항상 Import Table 정보를 저장함.
+            if ((_cmdMask & ProgramCmd.EXPORT_RUST) > 0) _JobList.Add(new JobExportData(new ExportToRust(unityDefine, useInterface), ProgramCmd.EXPORT_RUST, ProgramCmd.CS_DIR, "Directory", "RUST", "RUST_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_PROTO) > 0) _JobList.Add(new JobExportData(new ExportToProto(unityDefine, useInterface), ProgramCmd.EXPORT_PROTO, ProgramCmd.CS_DIR, "Directory", "PROTO", "PROTO_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(unityDefine, useInterface), ProgramCmd.EXPORT_CS, ProgramCmd.CS_DIR, "Directory", "CS", "C#_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CSMGR) > 0) _JobList.Add(new JobExportData(new ExportToCSMgr(unityDefine), ProgramCmd.EXPORT_CSMGR, ProgramCmd.CS_DIR, "Directory", "CSMGR", "C#_FILES"));
@@ -274,7 +275,7 @@ namespace TableGenerateCmd
             return library.Name == (assemblyName.Name)
                 || library.Dependencies.Any(d => d.Name.StartsWith(assemblyName.Name));
         }
-        protected JobItem GetJobItem(int JobType)
+        protected JobItem GetJobItem(long JobType)
         {
             for (int i = 0; i < _JobList.Count; i++)
                 if (_JobList[i].GetJobType() == JobType)
@@ -517,7 +518,7 @@ namespace TableGenerateCmd
 
     public abstract class JobItem
     {
-        protected int JobType;
+        protected long JobType;
         protected string DefaultDir, DestDir, version, lang, langTbl, langSrc, extName;
         protected string INISection, INIItem, FileItem;
         protected int current, max;
@@ -525,7 +526,7 @@ namespace TableGenerateCmd
         protected List<string> files;
         protected System.Reflection.Assembly _Assembly = null;
         protected System.Reflection.Assembly mscorlibAssembly = null;
-        public JobItem(int JobType, string Default, string INISection, string INIItem)
+        public JobItem(long JobType, string Default, string INISection, string INIItem)
         {
             this.JobType = JobType;
             this.DefaultDir = Default;
@@ -534,7 +535,7 @@ namespace TableGenerateCmd
             files = new List<string>();
         }
 
-        public JobItem(ExportBase expBase, int JobType, string Default, string INISection, string INIItem, string FileItem)
+        public JobItem(ExportBase expBase, long JobType, string Default, string INISection, string INIItem, string FileItem)
         {
             this.expBase = expBase;
             this.JobType = JobType;
@@ -604,7 +605,7 @@ namespace TableGenerateCmd
 
         public ExportBase GetExportBase() => expBase;
         public List<string> GetFileList() => files;
-        public int GetJobType() => JobType;
+        public long GetJobType() => JobType;
         public string GetSection() => INISection;
         public string GetItem() => INIItem;
         public string GetFileItem() => FileItem;
@@ -659,7 +660,7 @@ namespace TableGenerateCmd
 
     public class JobExportData : JobItem
     {
-        public JobExportData(ExportBase expBase, int JobType, string Default, string INISection, string INIItem, string FileItem)
+        public JobExportData(ExportBase expBase, long JobType, string Default, string INISection, string INIItem, string FileItem)
             : base(expBase, JobType, Default, INISection, INIItem, FileItem)
         {
         }

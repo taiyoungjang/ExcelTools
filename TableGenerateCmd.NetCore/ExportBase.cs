@@ -34,6 +34,7 @@ namespace TableGenerate
         sqllite,
         tf,
         proto,
+        rust,
     };
 
     public class Column
@@ -705,6 +706,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "bigint"; break;
                                 case eGenType.mysql: returnTypeName = "bigint"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
+                                case eGenType.rust: returnTypeName = "Vec<i64>"; break;
                             }
                         }
                         break;
@@ -718,6 +720,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "int"; break;
                                 case eGenType.mysql: returnTypeName = "int"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
+                                case eGenType.rust: returnTypeName = "Vec<i32>"; break;
                             }
                         }
                         break;
@@ -731,6 +734,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "smallint"; break;
                                 case eGenType.mysql: returnTypeName = "smallint"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
+                                case eGenType.rust: returnTypeName = "Vec<i16>"; break;
                             }
                         }
                         break;
@@ -744,6 +748,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
                                 case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                                 case eGenType.sqllite: returnTypeName = "text"; break;
+                                case eGenType.rust: returnTypeName = "Vec<String>"; break;
                             }
                         }
                         break;
@@ -757,6 +762,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "float"; break;
                                 case eGenType.mysql: returnTypeName = "float"; break;
                                 case eGenType.sqllite: returnTypeName = "real"; break;
+                                case eGenType.rust: returnTypeName = "Vec<f32>"; break;
                             }
                         }
                         break;
@@ -771,6 +777,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "double"; break;
                                 case eGenType.mysql: returnTypeName = "double"; break;
                                 case eGenType.sqllite: returnTypeName = "real"; break;
+                                case eGenType.rust: returnTypeName = "Vec<f64>"; break;
                             }
                         }
                         break;
@@ -784,6 +791,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "tinyint"; break;
                                 case eGenType.mysql: returnTypeName = "tinyint"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
+                                case eGenType.rust: returnTypeName = "Vec<i8>"; break;
                             }
                         }
                         break;
@@ -797,6 +805,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "bit"; break;
                                 case eGenType.mysql: returnTypeName = "bool"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
+                                case eGenType.rust: returnTypeName = "Vec<bool>"; break;
                             }
                         }
                         break;
@@ -810,6 +819,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "datetime"; break;
                                 case eGenType.mysql: returnTypeName = "datetime"; break;
                                 case eGenType.sqllite: returnTypeName = "text"; break;
+                                case eGenType.rust: returnTypeName = "Vec<chrono::DateTime>"; break;
                             }
                         }
                         break;
@@ -823,6 +833,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                                 case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                                 case eGenType.sqllite: returnTypeName = "text"; break;
+                                case eGenType.rust: returnTypeName = "Vec<timespan::DateTimeSpan>"; break;
                             }
                         }
                         break;
@@ -837,6 +848,7 @@ namespace TableGenerate
                                 case eGenType.mssql: returnTypeName = "int"; break;
                                 case eGenType.mysql: returnTypeName = "int"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
+                                case eGenType.rust: returnTypeName = "Vec<i32>"; break;
                             }
                         }
                         break;
@@ -856,6 +868,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "bigint"; break;
                             case eGenType.mysql: returnTypeName = "bigint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i64"; break;
                         }
                     }
                     break;
@@ -869,6 +882,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i32"; break;
                         }
                     }
                     break;
@@ -882,6 +896,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "smallint"; break;
                             case eGenType.mysql: returnTypeName = "smallint"; break;
                             case eGenType.sqllite: returnTypeName = "smallint"; break;
+                            case eGenType.rust: returnTypeName = "i16"; break;
                         }
                     }
                     break;
@@ -895,6 +910,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "String"; break;
                         }
                     }
                     break;
@@ -907,6 +923,7 @@ namespace TableGenerate
                             case eGenType.proto: returnTypeName = "float"; break;
                             case eGenType.mssql: returnTypeName = "float"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
+                            case eGenType.rust: returnTypeName = "f32"; break;
                         }
                     }
                     break;
@@ -921,6 +938,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "double"; break;
                             case eGenType.mysql: returnTypeName = "double"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
+                            case eGenType.rust: returnTypeName = "f64"; break;
                         }
                     }
                     break;
@@ -934,6 +952,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "tinyint"; break;
                             case eGenType.mysql: returnTypeName = "tinyint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i8"; break;
                         }
                     }
                     break;
@@ -947,6 +966,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "bit"; break;
                             case eGenType.mysql: returnTypeName = "bool"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "bool"; break;
                         }
                     }
                     break;
@@ -960,6 +980,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "chrono::DateTime"; break;
                         }
                     }
                     break;
@@ -973,6 +994,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "timespan::DateTimeSpan"; break;
                         }
                     }
                     break;
@@ -987,6 +1009,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i32"; break;
                         }
                     }
                     break;
@@ -1008,6 +1031,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "bigint"; break;
                             case eGenType.mysql: returnTypeName = "bigint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i64"; break;
                         }
                     }
                     break;
@@ -1020,6 +1044,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i32"; break;
                         }
                     }
                     break;
@@ -1032,6 +1057,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "smallint"; break;
                             case eGenType.mysql: returnTypeName = "smallint"; break;
                             case eGenType.sqllite: returnTypeName = "smallint"; break;
+                            case eGenType.rust: returnTypeName = "i16"; break;
                         }
                     }
                     break;
@@ -1044,6 +1070,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "String"; break;
                         }
                     }
                     break;
@@ -1055,6 +1082,7 @@ namespace TableGenerate
                             case eGenType.cs: returnTypeName = "float"; break;
                             case eGenType.mssql: returnTypeName = "float"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
+                            case eGenType.rust: returnTypeName = "f32"; break;
                         }
                     }
                     break;
@@ -1068,6 +1096,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "double"; break;
                             case eGenType.mysql: returnTypeName = "double"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
+                            case eGenType.rust: returnTypeName = "f64"; break;
                         }
                     }
                     break;
@@ -1080,6 +1109,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "tinyint"; break;
                             case eGenType.mysql: returnTypeName = "tinyint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i8"; break;
                         }
                     }
                     break;
@@ -1093,6 +1123,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "bit"; break;
                             case eGenType.mysql: returnTypeName = "bool"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "bool"; break;
                         }
                     }
                     break;
@@ -1105,6 +1136,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "datetime"; break;
                             case eGenType.mysql: returnTypeName = "datetime"; break;
                             case eGenType.sqllite: returnTypeName = "date"; break;
+                            case eGenType.rust: returnTypeName = "chrono::DateTime"; break;
                         }
                     }
                     break;
@@ -1117,6 +1149,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "timespan::DateTimeSpan"; break;
                         }
                     }
                     break;
@@ -1132,6 +1165,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "???"; break;
                             case eGenType.mysql: returnTypeName = "???"; break;
                             case eGenType.sqllite: returnTypeName = "???"; break;
+                            case eGenType.rust: returnTypeName = "i32"; break;
                         }
                     }
                     break;
@@ -1153,6 +1187,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "bigint"; break;
                             case eGenType.mysql: returnTypeName = "bigint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i64"; break;
                         }
                     }
                     break;
@@ -1165,6 +1200,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i32"; break;
                         }
                     }
                     break;
@@ -1177,6 +1213,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "smallint"; break;
                             case eGenType.mysql: returnTypeName = "smallint"; break;
                             case eGenType.sqllite: returnTypeName = "smallint"; break;
+                            case eGenType.rust: returnTypeName = "i16"; break;
                         }
                     }
                     break;
@@ -1189,6 +1226,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "String"; break;
                         }
                     }
                     break;
@@ -1200,6 +1238,7 @@ namespace TableGenerate
                             case eGenType.cs: returnTypeName = "float"; break;
                             case eGenType.mssql: returnTypeName = "float"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
+                            case eGenType.rust: returnTypeName = "f32"; break;
                         }
                     }
                     break;
@@ -1213,6 +1252,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "double"; break;
                             case eGenType.mysql: returnTypeName = "double"; break;
                             case eGenType.sqllite: returnTypeName = "real"; break;
+                            case eGenType.rust: returnTypeName = "f64"; break;
                         }
                     }
                     break;
@@ -1225,6 +1265,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "tinyint"; break;
                             case eGenType.mysql: returnTypeName = "tinyint"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "i8"; break;
                         }
                     }
                     break;
@@ -1238,6 +1279,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "bit"; break;
                             case eGenType.mysql: returnTypeName = "bool"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
+                            case eGenType.rust: returnTypeName = "bool"; break;
                         }
                     }
                     break;
@@ -1250,6 +1292,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "datetime"; break;
                             case eGenType.mysql: returnTypeName = "datetime"; break;
                             case eGenType.sqllite: returnTypeName = "date"; break;
+                            case eGenType.rust: returnTypeName = "chrono::DateTime"; break;
                         }
                     }
                     break;
@@ -1262,6 +1305,7 @@ namespace TableGenerate
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
                             case eGenType.mysql: returnTypeName = "varchar(300)"; break;
                             case eGenType.sqllite: returnTypeName = "text"; break;
+                            case eGenType.rust: returnTypeName = "timespan::DateTimeSpan"; break;
                         }
                     }
                     break;
