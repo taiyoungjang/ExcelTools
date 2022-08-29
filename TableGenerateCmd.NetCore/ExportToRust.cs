@@ -36,13 +36,13 @@ namespace TableGenerate
             {
                 string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".rs");
 
-                using MemoryStream stream = new MemoryStream();
+                using var stream = new MemoryStream();
                 {
                     using var writer = new IndentedTextWriter(new StreamWriter(stream,  System.Text.Encoding.UTF8), " ");
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
 
-                        writer.WriteLineEx("//#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
+                        writer.WriteLineEx("use std::collections::HashMap;");
 
                         string[] sheets = imp.GetSheetList();
 
@@ -59,6 +59,17 @@ namespace TableGenerate
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                             SheetProcess(writer, filename, trimSheetName, columns);
                         }
+                        writer.WriteLineEx($"#[allow(dead_code)]");
+                        writer.WriteLineEx($"#[allow(non_snake_case)]");
+                        writer.WriteLineEx($"pub fn readStream(reader: &mut binary_reader::BinaryReader) {{");
+                        foreach (string sheetName in sheets)
+                        {
+                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
+                            var rows = imp.GetSheetShortCut(sheetName, language);
+                            var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
+                            writer.WriteLineEx($"let (_{sheetName}_map, _{sheetName}_vec) = {sheetName}::readStream(reader);");
+                        }
+                        writer.WriteLineEx($"}}");
 
                         foreach (string sheetName in sheets)
                         {
@@ -87,16 +98,11 @@ namespace TableGenerate
         }
         private void SheetProcess(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            if(_useInterface)
-            {
-                InterfacePropertySheetProcess(sheetName, writer, columns);
-            }
-            
             //writer.WriteLineEx($"/// <summary>");
             //writer.WriteLineEx($"/// {sheetName}"); 
             //writer.WriteLineEx($"/// </summary>");
             //InnerSheetDescProcess(writer,columns);
-            writer.WriteLineEx($"//#[Clone, PartialEq]");
+            writer.WriteLineEx($"#[derive(Clone)]");
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
             writer.WriteLineEx($"pub struct {sheetName}");
@@ -104,41 +110,6 @@ namespace TableGenerate
             InnerSheetProcess(writer, columns);
             //SheetConstructorProcess(writer, sheetName, columns);
             writer.WriteLineEx("}");
-        }
-        private void InterfacePropertySheetProcess(string sheetName, IndentedTextWriter _writer, List<Column> columns)
-        {
-            _writer.WriteLineEx($"#if !{_unityDefine}");
-            _writer.WriteLineEx($"public interface I{sheetName}");
-            _writer.WriteLineEx("{");
-            foreach (var column in columns)
-            {
-                string name = column.var_name;
-                string type = column.GenerateType(_gen_type);
-                if (column.is_generated == false)
-                {
-                    continue;
-                }
-                if (column.array_index > 0)
-                {
-                    continue;
-                }
-                if (column.is_key)
-                {
-                    _writer.WriteLineEx($"/// <summary>");
-                    _writer.WriteLineEx($"/// Key Column");
-                    _writer.WriteLineEx($"/// </summary>");
-                }
-                //if (_async == "unity3d")
-                //{
-                //    _writer.WriteLineEx($"public abstract {type} {name} {{get;}}");
-                //}
-                //else
-                {
-                    _writer.WriteLineEx($"  {type} {name} {{get;}}");
-                }
-            }
-            _writer.WriteLineEx("}");
-            _writer.WriteLineEx("#endif");
         }
         private void InnerSheetDescProcess(IndentedTextWriter writer, List<Column> columns)
         {
@@ -174,7 +145,6 @@ namespace TableGenerate
         
         private void InnerSheetProcess(IndentedTextWriter writer, List<Column> columns)
         {
-            bool isFirst = true;
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -205,16 +175,18 @@ namespace TableGenerate
                     }
                     writer.WriteLineEx($"pub {name}: {type},");
                 }
-                isFirst = false;
             }
         }
         
         private void InnerSheetReadStreamProcess(string sheetName, IndentedTextWriter writer, List<Column> columns)
         {
+            var firstColumn = columns.FirstOrDefault(t => t.is_key);
+            var firstColumnType = firstColumn.GenerateType(_gen_type);
+            var firstColumnName = firstColumn.var_name;
             writer.WriteLineEx($"#[allow(dead_code)]");
-            writer.WriteLineEx($"pub fn readStream(reader: &mut binary_reader::BinaryReader) -> Vec<{sheetName}> {{");
-            writer.WriteLineEx($"std::iter::repeat(reader.read_i32().unwrap()).map(|_|");
-            writer.WriteLineEx($"{sheetName} {{");
+            writer.WriteLineEx($"pub fn readStream(reader: &mut binary_reader::BinaryReader) -> (Vec<{sheetName}>,HashMap<{firstColumnType},{sheetName}>) {{");
+            writer.WriteLineEx($"let map:HashMap<{firstColumnType},{sheetName}> = std::iter::repeat(reader.read_i32().unwrap()).map(|_| {{");
+            writer.WriteLineEx($"let v = {sheetName} {{");
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -243,6 +215,7 @@ namespace TableGenerate
                     eBaseType.Boolean => "reader.read_bool().unwrap()",
                     eBaseType.Int8 => "reader.read_i8().unwrap()",
                     eBaseType.Int16 => "reader.read_i16().unwrap()",
+                    eBaseType.Enum => "reader.read_i32().unwrap()",
                     eBaseType.Int32 => "reader.read_i32().unwrap()",
                     eBaseType.Int64 => "reader.read_i64().unwrap()",
                     eBaseType.Float => "reader.read_f32().unwrap()",
@@ -259,7 +232,8 @@ namespace TableGenerate
                     writer.WriteLineEx($"{name}: {readStream},");
                 }
             }
-            writer.WriteLineEx($"}}).collect()");
+            writer.WriteLineEx($"}}; (v.{firstColumnName},v) }}).collect();");
+            writer.WriteLineEx($"(map.values().cloned().collect(),map)");
             writer.WriteLineEx($"}}");
         }
         private void SheetConstructorProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)

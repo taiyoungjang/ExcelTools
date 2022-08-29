@@ -30,7 +30,7 @@ $CurrentFolder = (get-item ([Environment]::CurrentDirectory) ).Name
 $CurrentDirectory = (get-item ([Environment]::CurrentDirectory) ).FullName
 # ********************************
 #$PlatformType = "Mixed Platforms"
-$LangVers = [array] "English", "Korean"
+$LangVers = [array] "English"#, "Korean"
 $nl = [Environment]::NewLine
 $hostname=[Environment]::MachineName
 if($CPU_Count -eq 0)

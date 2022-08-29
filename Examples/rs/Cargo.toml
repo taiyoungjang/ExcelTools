@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 binary-reader = "0.4.5"
+bzip2 = "0.4.3"
+md5 = "0.7.0"
