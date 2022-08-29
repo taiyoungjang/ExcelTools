@@ -63,7 +63,7 @@ namespace TableGenerate
                         }
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
-                        writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) {{");
+                        writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> StaticData {{");
                         writer.WriteLineEx($"let _streamLength = reader.length;");
                         writer.WriteLineEx($"let _hashLength = reader.read_i8().unwrap() as usize;");
                         writer.WriteLineEx($"let _hashBytes = reader.read(_hashLength);");
@@ -81,8 +81,14 @@ namespace TableGenerate
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
                             var rows = imp.GetSheetShortCut(sheetName, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                            writer.WriteLineEx($"let (_{sheetName}_map, _{sheetName}_vec) = {sheetName}::readStream(&mut decompressReader);");
+                            writer.WriteLineEx($"let ({sheetName}_vec, {sheetName}_map) = {sheetName}::readStream(&mut decompressReader);");
                         }
+                        writer.WriteLineEx($"StaticData{{");
+                        foreach (string sheetName in sheets)
+                        {
+                            writer.WriteLineEx($"{sheetName}_vec, {sheetName}_map,");
+                        }
+                        writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"}}");
 
                         foreach (string sheetName in sheets)
@@ -96,6 +102,22 @@ namespace TableGenerate
                             //SheetConstructorProcess(writer, sheetName, columns);
                             writer.WriteLineEx("}");
                         }
+                        
+                        writer.WriteLineEx($"#[allow(dead_code)]");
+                        writer.WriteLineEx($"#[allow(non_snake_case)]");
+                        writer.WriteLineEx($"pub struct StaticData {{");
+                        foreach (string sheetName in sheets)
+                        {
+                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
+                            var rows = imp.GetSheetShortCut(sheetName, language);
+                            var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
+                            var firstColumn = columns.FirstOrDefault(t => t.is_key);
+                            var firstColumnType = firstColumn.GenerateType(_gen_type);
+                            var firstColumnName = firstColumn.var_name;
+                            writer.WriteLineEx($"pub {sheetName}_vec: Vec<{sheetName}>,");
+                            writer.WriteLineEx($"pub {sheetName}_map: HashMap<{firstColumnType},{sheetName}>,");
+                        }
+                        writer.WriteLineEx($"}}");
                         //writer.WriteLineEx("}");
                         //writer.WriteLineEx("}");
                         writer.Flush();

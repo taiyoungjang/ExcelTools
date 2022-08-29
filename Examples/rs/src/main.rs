@@ -9,5 +9,6 @@ fn main() {
     let mut file = File::open(r"..\Bytes\English\ItemTable.bytes").unwrap();
     let mut reader = BinaryReader::from_file(&mut file);
     reader.set_endian(Endian::Little);
-    let _ = ItemTable::readStream(&mut reader);
+    let _static_data = ItemTable::readStream(&mut reader);
+    println!("{:?}", _static_data.ItemEffect_vec);
 }

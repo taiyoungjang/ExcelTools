@@ -124,7 +124,7 @@ use binary_reader::{BinaryReader, Endian};
   }
   #[allow(dead_code)]
   #[allow(non_snake_case)]
-  pub fn readStream(reader: &mut BinaryReader) {
+  pub fn readStream(reader: &mut BinaryReader) -> StaticData {
     let _streamLength = reader.length;
     let _hashLength = reader.read_i8().unwrap() as usize;
     let _hashBytes = reader.read(_hashLength);
@@ -137,11 +137,18 @@ use binary_reader::{BinaryReader, Endian};
     decompressor.read_to_end(&mut _decompressed).unwrap();
     let mut decompressReader = binary_reader::BinaryReader::from_vec(&mut _decompressed);
     decompressReader.set_endian(Endian::Little);
-    let (_Item_map, _Item_vec) = Item::readStream(&mut decompressReader);
-    let (_ItemEffect_map, _ItemEffect_vec) = ItemEffect::readStream(&mut decompressReader);
-    let (_ItemEnchant_map, _ItemEnchant_vec) = ItemEnchant::readStream(&mut decompressReader);
-    let (_ItemManufacture_map, _ItemManufacture_vec) = ItemManufacture::readStream(&mut decompressReader);
-    let (_RandomBoxGroup_map, _RandomBoxGroup_vec) = RandomBoxGroup::readStream(&mut decompressReader);
+    let (Item_vec, Item_map) = Item::readStream(&mut decompressReader);
+    let (ItemEffect_vec, ItemEffect_map) = ItemEffect::readStream(&mut decompressReader);
+    let (ItemEnchant_vec, ItemEnchant_map) = ItemEnchant::readStream(&mut decompressReader);
+    let (ItemManufacture_vec, ItemManufacture_map) = ItemManufacture::readStream(&mut decompressReader);
+    let (RandomBoxGroup_vec, RandomBoxGroup_map) = RandomBoxGroup::readStream(&mut decompressReader);
+    StaticData{
+      Item_vec, Item_map,
+      ItemEffect_vec, ItemEffect_map,
+      ItemEnchant_vec, ItemEnchant_map,
+      ItemManufacture_vec, ItemManufacture_map,
+      RandomBoxGroup_vec, RandomBoxGroup_map,
+    }
   }
   impl Item
   {
@@ -304,4 +311,18 @@ use binary_reader::{BinaryReader, Endian};
       }
       (vec,map)
     }
+  }
+  #[allow(dead_code)]
+  #[allow(non_snake_case)]
+  pub struct StaticData {
+    pub Item_vec: Vec<Item>,
+    pub Item_map: HashMap<i32,Item>,
+    pub ItemEffect_vec: Vec<ItemEffect>,
+    pub ItemEffect_map: HashMap<i32,ItemEffect>,
+    pub ItemEnchant_vec: Vec<ItemEnchant>,
+    pub ItemEnchant_map: HashMap<i32,ItemEnchant>,
+    pub ItemManufacture_vec: Vec<ItemManufacture>,
+    pub ItemManufacture_map: HashMap<i32,ItemManufacture>,
+    pub RandomBoxGroup_vec: Vec<RandomBoxGroup>,
+    pub RandomBoxGroup_map: HashMap<i32,RandomBoxGroup>,
   }
