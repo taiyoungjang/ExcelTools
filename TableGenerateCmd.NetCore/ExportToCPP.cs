@@ -29,14 +29,14 @@ namespace TableGenerate
                 string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".cpp");
                 string filename = System.IO.Path.GetFileName(createFileName);
                 string @namespace = $"{ ExportToCSMgr.NameSpace }::{filename.Replace(".cpp", string.Empty)}";
-                using MemoryStream stream = new MemoryStream();
-                var _writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
+                using MemoryStream stream = new ();
+                var writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
                 {
 
-                    _writer.WriteLineEx($"// generate {filename}");
-                    _writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
-                    _writer.WriteLineEx($"#include \"{filename.Replace(".cpp", ".h")}\"");
-                    _writer.WriteLineEx($"using namespace {@namespace};");
+                    writer.WriteLineEx($"// generate {filename}");
+                    writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
+                    writer.WriteLineEx($"#include \"{filename.Replace(".cpp", ".h")}\"");
+                    writer.WriteLineEx($"using namespace {@namespace};");
 
                     string[] sheets = imp.GetSheetList();
 
@@ -51,9 +51,9 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        SheetProcess(_writer, trimSheetName, columns);
+                        SheetProcess(writer, trimSheetName, columns);
                     }
-                    _writer.Flush();
+                    writer.Flush();
                 }
                 ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
             }
@@ -65,38 +65,60 @@ namespace TableGenerate
             return true;
         }
 
-        private void SheetProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)
+        private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
-            SheetConstructorProcess(_writer, sheetName, columns);
-            SheetFindFunction(_writer, sheetName, columns);
+            SheetConstructorProcess(writer, sheetName, columns);
+            SheetFindFunction(writer, sheetName, columns);
         }
 
-        private void SheetConstructorProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)
+        private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, IReadOnlyCollection<Column> columns)
         {
-            _writer.WriteLineEx($"const {sheetName}::Array {sheetName}::array;");
-            _writer.WriteLineEx($"const {sheetName}::Map {sheetName}::map;");
-            _writer.WriteLineEx(string.Format("{0} ({1})\n:{2}",
+            sheetName = 'F' + sheetName;
+            writer.WriteLineEx($"const {sheetName}::Array {sheetName}::array;");
+            writer.WriteLineEx($"const {sheetName}::Map {sheetName}::map;");
+            writer.WriteLineEx($"{sheetName}::{sheetName}(void)");
+            /*
+            bool isFirst =true;
+            foreach (var column in columns.Where(t => t.is_generated == true && t.array_index <= 0))
+            {
+                if (!isFirst)
+                {
+                    writer.Write(',');
+                }
+                string genDefaultValue = column.GenerateDefaultValue(_gen_type);
+                writer.WriteLineEx($"{column.var_name}({genDefaultValue})");
+                isFirst = true;
+            }
+            */
+            writer.WriteLineEx("{");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx($"{sheetName}& {sheetName}::operator=(const {sheetName}& rhs)");
+            writer.WriteLineEx("{");
+            foreach(var column in columns.Where(t => t.is_generated == true && t.array_index <= 0))
+            {
+                string genType = column.GenerateType(_gen_type);
+                writer.WriteLineEx($"const_cast<{genType}&>({column.var_name})=rhs.{column.var_name};");
+            }
+            writer.WriteLineEx("return *this;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx(string.Format("{0} ({1})\n:{2}",
                 $"{sheetName}::{sheetName}",
                 string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}__").ToArray()),
                 string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}({t.var_name}__)").ToArray()))
             );
-            _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"}}");
+            writer.WriteLineEx($"{{");
+            writer.WriteLineEx($"}}");
         }
-        private void SheetFindFunction(IndentedTextWriter _writer, string sheetName, List<Column> columns)
+        private void SheetFindFunction(IndentedTextWriter writer, string sheetName, IEnumerable<Column> columns)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key == true);
-            string keyType = key_column.GenerateType(_gen_type);
+            sheetName = 'F' + sheetName;
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
+            string keyType = keyColumn.GenerateType(_gen_type);
 
-            _writer.WriteLineEx($"{sheetName}Ptr {sheetName}::Find(const {keyType}& {key_column.var_name})");
-            _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"auto it = {sheetName}::map.find({key_column.var_name});");
-            _writer.WriteLineEx($"if (it != {sheetName}::map.end())");
-            _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"return it->second;");
-            _writer.WriteLineEx($"}}");
-            _writer.WriteLineEx($"return {sheetName}Ptr(nullptr);");
-            _writer.WriteLineEx($"}}");
+            writer.WriteLineEx($"/*{sheetName} {sheetName}::Find(const {keyType}& {keyColumn.var_name})");
+            writer.WriteLineEx($"{{");
+            writer.WriteLineEx($"return {sheetName}Ptr(map.Find({keyColumn.var_name}));");
+            writer.WriteLineEx($"}}*/");
         }
     }
 }

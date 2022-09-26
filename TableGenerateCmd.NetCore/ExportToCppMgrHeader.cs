@@ -16,35 +16,30 @@ namespace TableGenerate
         {
             string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableManager.h");
 
-            using( var _stream = new MemoryStream(32767))
+            using MemoryStream stream = new(32767);
             {
-                var _writer = new StreamWriter(_stream, new System.Text.ASCIIEncoding());
+                StreamWriter writer = new (stream, new System.Text.ASCIIEncoding());
                 {
                     string filename = System.IO.Path.GetFileName(createFileName);
 
-                    string defineName = filename.Replace(".h", "_H");
-                    defineName = defineName.ToUpper();
-                    _writer.WriteLineEx($"// generate {filename}");
-                    _writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
+                    writer.WriteLineEx($"// generated {filename}");
+                    writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
 
-                    _writer.WriteLineEx($"#ifndef {defineName}");
-                    _writer.WriteLineEx($"#define {defineName}");
+                    writer.WriteLineEx($"#pragma once");
 
-                    _writer.WriteLineEx(string.Empty);
+                    writer.WriteLineEx(string.Empty);
 
                     string[] sheets = imp.GetSheetList();
 
                     filename = filename.Replace("TableManager.h", string.Empty);
 
-                    _writer.WriteLineEx($"#include \"{filename}.h\"");
-                    _writer.WriteLineEx($"#include <TableManager.h>");
+                    writer.WriteLineEx($"#include \"{filename}.h\"");
+                    writer.WriteLineEx($"#include \"TableManager.h\"");
                     max = sheets.GetLength(0);
                     current = 0;
 
-                    _writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}");
-                    _writer.WriteLineEx($"{{");
-                    _writer.WriteLineEx($"namespace {filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
-                    _writer.WriteLineEx($"{{");
+                    writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
+                    writer.WriteLineEx($"{{");
 
                     //foreach (string sheetName in sheets)
                     //{
@@ -54,17 +49,15 @@ namespace TableGenerate
                     //    var columns = ExportBaseUtil.GetColumnInfo(trimSheetName, rows, except);
                     //    SheetProcess(filename, trimSheetName, columns);
                     //}
-                    _writer.WriteLineEx($"class TableManager");
-                    _writer.WriteLineEx($"{{");
-                    _writer.WriteLineEx("public:");
-                    _writer.WriteLineEx($"static bool LoadTable(std::ifstream& stream);");
-                    _writer.WriteLineEx($"}};");
-                    _writer.WriteLineEx($"}};");
-                    _writer.WriteLineEx($"}};");
-                    _writer.WriteLineEx($"#endif //{defineName}");
-                    _writer.Flush();
+                    writer.WriteLineEx($"class TableManager");
+                    writer.WriteLineEx($"{{");
+                    writer.WriteLineEx("public:");
+                    writer.WriteLineEx($"bool LoadTable(BufferReader& stream);");
+                    writer.WriteLineEx($"}};");
+                    writer.WriteLineEx($"}}");
+                    writer.Flush();
                 }
-                ExportBaseUtil.CheckReplaceFile(_stream, $"{outputPath}/{createFileName}");
+                ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
             }
             return true;
         }
@@ -80,10 +73,10 @@ namespace TableGenerate
 
         private void InnerSheetProcess(string sheetName, List<Column> columns, StreamWriter _writer)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key == true);
-            string keyType = key_column.GenerateType(_gen_type); 
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
+            string keyType = keyColumn.GenerateType(_gen_type); 
             _writer.WriteLineEx("public:");
-            _writer.WriteLineEx("bool LoadTable(std::istream& stream) override;");
+            _writer.WriteLineEx("bool LoadTable(BufferReader& stream) override;");
         }
     }
 }

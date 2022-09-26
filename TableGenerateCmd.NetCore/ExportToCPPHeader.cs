@@ -29,44 +29,36 @@ namespace TableGenerate
             {
                 string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".h");
 
-                using (MemoryStream stream = new MemoryStream())
+                using var stream = new MemoryStream();
                 {
-                    var _writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
+                    var writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
-
-                        _writer.WriteLineEx($"// generate {filename}");
-                        _writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
-                        _writer.WriteLineEx($"#ifndef {filename.Replace(".","_").ToUpper()}");
-                        _writer.WriteLineEx($"#define {filename.Replace(".", "_").ToUpper()}");
-                        _writer.WriteLineEx($"#include <memory>");
-                        _writer.WriteLineEx($"#include <string>");
-                        _writer.WriteLineEx($"#include <vector>");
-                        _writer.WriteLineEx($"#include <map>");
-
                         string[] sheets = imp.GetSheetList();
-
                         filename = filename.Replace(".h", string.Empty);
+
+                        writer.WriteLineEx($"// generate {filename}");
+                        
+                        writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
+                        writer.WriteLineEx($"#pragma once");
+                        writer.WriteLineEx($"#include \"CoreMinimal.h\"");
+                        writer.WriteLineEx($"//#include \"{filename}.generated.h\"");
 
                         max = sheets.GetLength(0);
                         current = 0;
 
-                        _writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx($"namespace {filename}");
-                        _writer.WriteLineEx("{");
+                        writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename}");
+                        writer.WriteLineEx("{");
                         foreach (string sheetName in sheets)
                         {
                             current++;
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
                             var rows = imp.GetSheetShortCut(sheetName, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                            SheetProcess(_writer, filename, trimSheetName, columns);
+                            SheetProcess(writer, trimSheetName, columns);
                         }
-                        _writer.WriteLineEx("};");
-                        _writer.WriteLineEx("};");
-                        _writer.WriteLineEx($"#endif //{filename.Replace(".", "_").ToUpper()}");
-                        _writer.Flush();
+                        writer.WriteLineEx("}");
+                        writer.Flush();
                     }
                     ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
                 }
@@ -79,29 +71,29 @@ namespace TableGenerate
             return true;
         }
 
-        private void SheetProcess(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
-            _writer.WriteLineEx($"class {sheetName};");
-            _writer.WriteLineEx($"typedef std::shared_ptr<{sheetName}> {sheetName}Ptr;");
-            _writer.WriteLineEx($"class {sheetName}");
-            _writer.WriteLineEx("{");
-            var key_column = columns.FirstOrDefault(compare => compare.is_key == true);
-            string keyType = key_column.GenerateType(_gen_type);
+            sheetName = 'F' + sheetName;
+            writer.WriteLineEx($"//USTRUCT(BlueprintType)");
+            writer.WriteLineEx($"struct {sheetName}");
+            writer.WriteLineEx("{");
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
+            string keyType = keyColumn.GenerateType(_gen_type);
 
-            _writer.WriteLineEx("public:");
-            _writer.WriteLine($"static {sheetName}Ptr Find( const {keyType}& {key_column.var_name});");
-            _writer.WriteLine($"typedef std::vector<{sheetName}Ptr> Array;");
-            _writer.WriteLine($"typedef std::map<{keyType},{sheetName}Ptr> Map;");
-            _writer.WriteLine("static const Array array;");
-            _writer.WriteLine("static const Map map;");
-            _writer.WriteLine("");
+            writer.WriteLine($"//static {sheetName} Find( const {keyType}& {keyColumn.var_name});");
+            writer.WriteLine($"typedef TArray<{sheetName}> Array;");
+            writer.WriteLine($"typedef TMap<{keyType},{sheetName}> Map;");
+            writer.WriteLine("static const Array array;");
+            writer.WriteLine("static const Map map;");
+            writer.WriteLineEx($"//GENERATED_BODY()");
+            writer.WriteLine("");
 
-            InnerSheetProcess(_writer, columns);
-            SheetConstructorProcess(_writer, sheetName, columns);
-            _writer.WriteLineEx("};");
+            InnerSheetProcess(writer, columns);
+            SheetConstructorProcess(writer, sheetName, columns);
+            writer.WriteLineEx("};");
         }
 
-        private void InnerSheetProcess(IndentedTextWriter _writer, List<Column> columns)
+        private void InnerSheetProcess(IndentedTextWriter writer, List<Column> columns)
         {
             foreach (var column in columns)
             {
@@ -115,12 +107,14 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                _writer.WriteLineEx($"const {type} {name};");
+                writer.WriteLineEx($"    const {type} {name} {{}};{(column.desc.Any()?$"  ///< {column.desc}":string.Empty)}");
             }
         }
-        private void SheetConstructorProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)
+        private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
-            _writer.WriteLineEx(string.Format("{0} ({1});",
+            writer.WriteLineEx($"{sheetName}(void);");
+            writer.WriteLineEx($"{sheetName}& operator=(const {sheetName}& rhs);");
+            writer.WriteLineEx(string.Format("{0} ({1});",
                 sheetName,
                 string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}__").ToArray()))
             );
