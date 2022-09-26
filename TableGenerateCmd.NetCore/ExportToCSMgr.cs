@@ -33,7 +33,7 @@ namespace TableGenerate
 
             using(var stream = new MemoryStream())
             {
-                var _writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), " ");
+                var writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), " ");
                 {
                     string filename = System.IO.Path.GetFileName(createFileName);
                     string[] sheets = imp.GetSheetList();
@@ -41,106 +41,105 @@ namespace TableGenerate
                     filename = filename.Replace(".cs", string.Empty);
                     max = sheets.GetLength(0);
 
-                    _writer.WriteLineEx($"// generate {filename}");
-                    _writer.WriteLineEx( "// DO NOT TOUCH SOURCE....");
-                    _writer.WriteLineEx( "#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
+                    writer.WriteLineEx( "#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018");
 
                     if (_async == "unity3d")
                     {
-                        _writer.WriteLineEx("#if UNITY_EDITOR");
-                        _writer.WriteLineEx($"public class {filename}Manager : UnityEngine.MonoBehaviour");
-                        _writer.WriteLineEx("{");
+                        writer.WriteLineEx("#if UNITY_EDITOR");
+                        writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
+                        writer.WriteLineEx($"public class {filename}Manager : UnityEngine.MonoBehaviour");
+                        writer.WriteLineEx("{");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            _writer.WriteLineEx($"public {NameSpace}.{filename}.{trimSheetName}[] {trimSheetName} = null;");
+                            writer.WriteLineEx($"public {NameSpace}.{filename}.{trimSheetName}[] {trimSheetName} = null;");
                         }
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
 
-                        _writer.WriteLineEx($"[UnityEditor.CustomEditor(typeof({filename}Manager))]");
-                        _writer.WriteLineEx($"public class {filename}Editor : UnityEditor.Editor");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx($"public override void OnInspectorGUI()");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx($"{filename}Manager myScript = ({filename}Manager) target;");
-                        _writer.WriteLineEx("if(UnityEngine.GUILayout.Button(\"Load\"))");
-                        _writer.WriteLineEx("{");
+                        writer.WriteLineEx($"[UnityEditor.CustomEditor(typeof({filename}Manager))]");
+                        writer.WriteLineEx($"public class {filename}Editor : UnityEditor.Editor");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx($"public override void OnInspectorGUI()");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx($"{filename}Manager myScript = ({filename}Manager) target;");
+                        writer.WriteLineEx("if(UnityEngine.GUILayout.Button(\"Load\"))");
+                        writer.WriteLineEx("{");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            _writer.WriteLineEx($"myScript.{trimSheetName} = {NameSpace}.{filename}.{trimSheetName}.Array_;");
+                            writer.WriteLineEx($"myScript.{trimSheetName} = {NameSpace}.{filename}.{trimSheetName}.Array_;");
                         }
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
                         //_writer.WriteLineEx("if(UnityEngine.GUILayout.Button(\"Save\"))");
                         //_writer.WriteLineEx("{");
                         //_writer.WriteLineEx("}");
-                        _writer.WriteLineEx("DrawDefaultInspector();");
-                        _writer.WriteLineEx("}");
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx("DrawDefaultInspector();");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
 
-                        _writer.WriteLineEx("#endif");
-                        _writer.WriteLineEx();
+                        writer.WriteLineEx("#endif");
+                        writer.WriteLineEx();
                     }
 
                     // Init class
-                    _writer.WriteLineEx($"namespace {NameSpace}.{filename}");
-                    _writer.WriteLineEx( "{");
-                    _writer.WriteLineEx( "public class Loader : global::TBL.ILoader");
-                    _writer.WriteLineEx( "{");
+                    writer.WriteLineEx($"namespace {NameSpace}.{filename};");
+                    writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
+                    writer.WriteLineEx( "public class Loader : ILoader");
+                    writer.WriteLineEx( "{");
 
-                    _writer.WriteLineEx($"#if !{_unityDefine}");
-                    _writer.WriteLineEx("public System.Data.DataSet DataSet");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("get");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx($"System.Data.DataSet dts = new System.Data.DataSet(\"{filename}\");");
+                    writer.WriteLineEx($"#if !{_unityDefine}");
+                    writer.WriteLineEx("public System.Data.DataSet DataSet");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("get");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx($"var dts = new System.Data.DataSet(nameof({filename}));");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.GetDataTable(dts);");
+                        writer.WriteLineEx($"{trimSheetName}.GetDataTable(dts);");
                     }
-                    _writer.WriteLineEx("return dts;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("set");
-                    _writer.WriteLineEx("{");
+                    writer.WriteLineEx("return dts;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("set");
+                    writer.WriteLineEx("{");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.SetDataSet(value);");
+                        writer.WriteLineEx($"{trimSheetName}.SetDataSet(value);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                     // ExcelLoad function
-                    _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-                    _writer.WriteLineEx("public void ExcelLoad(string path, string language)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("language = language.Trim();");
-                    _writer.WriteLineEx("string directoryName = System.IO.Path.GetDirectoryName(path);");
-                    _writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
-                    _writer.WriteLineEx("imp.Open(path);");
-                    _writer.WriteLineEx("switch (excelName)");
-                    _writer.WriteLineEx("{");
+                    writer.WriteLineEx("#if !NO_EXCEL_LOADER");
+                    writer.WriteLineEx("public void ExcelLoad(string path, string language)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("language = language.Trim();");
+                    writer.WriteLineEx("string directoryName = System.IO.Path.GetDirectoryName(path);");
+                    writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
+                    writer.WriteLineEx("imp.Open(path);");
+                    writer.WriteLineEx("switch (excelName)");
+                    writer.WriteLineEx("{");
                     var sheetNames = sheets.Select(sheetName => sheetName.Trim().Replace(" ", "_"));
                     foreach (string sheetName in sheetNames)
                     {
-                        _writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad(imp,directoryName,language);");
-                        _writer.WriteLineEx("break;");
+                        writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad(imp,directoryName,language);");
+                        writer.WriteLineEx("break;");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("imp.Dispose();");
-                    _writer.WriteLineEx("};");
-                    _writer.WriteLineEx($"System.Threading.Tasks.Parallel.ForEach(new string[]{{{(string.Join(',', sheetNames.Select(t => $@"""{t}""")))}}},excelAction);");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("imp.Dispose();");
+                    writer.WriteLineEx("};");
+                    writer.WriteLineEx($"System.Threading.Tasks.Parallel.ForEach(new string[]{{{(string.Join(',', sheetNames.Select(t => $@"""{t}""")))}}},excelAction);");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("#endif");
-                    _writer.WriteLineEx("#endif");
+                    writer.WriteLineEx("#endif");
+                    writer.WriteLineEx("#endif");
 
                     // GetStaticObject function
-                    _writer.WriteLineEx("/*");
-                    _writer.WriteLineEx("public void GetMapAndArray(System.Collections.Immutable.ImmutableDictionary<string,object> container)");
-                    _writer.WriteLineEx("{");
+                    writer.WriteLineEx("/*");
+                    writer.WriteLineEx("public void GetMapAndArray(System.Collections.Immutable.ImmutableDictionary<string,object> container)");
+                    writer.WriteLineEx("{");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
@@ -148,83 +147,83 @@ namespace TableGenerate
                         var key_column = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except).FirstOrDefault( t => t.is_key);
                         var type = key_column.GenerateType(_gen_type);
                         var equality_type = key_column.GetEqualityTypeValue(_gen_type);
-                        _writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Map_\");");
-                        _writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.Array_\");");
-                        _writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Map_\", new System.Collections.Immutable.ImmutableDictionary<{type},{trimSheetName}>({trimSheetName}.Map_{(string.IsNullOrEmpty(equality_type)?string.Empty:$",{equality_type}")}));");
-                        _writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.Array_\",{trimSheetName}.Array_);");
+                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.map_\");");
+                        writer.WriteLineEx($"container.Remove( \"{filename}.{trimSheetName}.array_\");");
+                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.map_\", new System.Collections.Immutable.ImmutableDictionary<{type},{trimSheetName}>({trimSheetName}.map_{(string.IsNullOrEmpty(equality_type)?string.Empty:$",{equality_type}")}));");
+                        writer.WriteLineEx($"container.Add( \"{filename}.{trimSheetName}.array_\",{trimSheetName}.array_);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("*/");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("*/");
 
-                    _writer.WriteLineEx("public void CheckReplaceFile( string tempFileName, string fileName ) ");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.IO.File.Copy(tempFileName, fileName, true);");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("public void CheckReplaceFile( string tempFileName, string fileName ) ");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.IO.File.Copy(tempFileName, fileName, true);");
+                    writer.WriteLineEx("}");
 
                     // WriteFile function
-                    _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-                    _writer.WriteLineEx("public void WriteFile(string path)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("int uncompressedLength = 0;");
-                    _writer.WriteLineEx("System.IO.MemoryStream uncompressedMemoryStream = null;");
-                    _writer.WriteLineEx("uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);");
+                    writer.WriteLineEx("#if !NO_EXCEL_LOADER");
+                    writer.WriteLineEx("public void WriteFile(string path)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("int uncompressedLength = 0;");
+                    writer.WriteLineEx("System.IO.MemoryStream uncompressedMemoryStream = null;");
+                    writer.WriteLineEx("uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.WriteStream(uncompressedMemoryStreamWriter);");
+                        writer.WriteLineEx($"{trimSheetName}.WriteStream(uncompressedMemoryStreamWriter);");
                     }
-                    _writer.WriteLineEx("uncompressedLength = (int) uncompressedMemoryStream.Position;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("System.IO.FileStream stream = null;");
-                    _writer.WriteLineEx("try");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFile" +
+                    writer.WriteLineEx("uncompressedLength = (int) uncompressedMemoryStream.Position;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("System.IO.FileStream stream = null;");
+                    writer.WriteLineEx("try");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFile" +
                         "Name();");
-                    _writer.WriteLineEx("uncompressedMemoryStream.Position=0;");
-                    _writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);");
-                    _writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("var __compressed = __zip.ToArray();");
-                    _writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
-                    _writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
-                    _writer.WriteLineEx("stream.Write(hashBytes, 0, hashBytes.Length);");
-                    _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
-                    _writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );");
-                    _writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("uncompressedMemoryStream.Position=0;");
+                    writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);");
+                    writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("var __compressed = __zip.ToArray();");
+                    writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
+                    writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
+                    writer.WriteLineEx("stream.Write(hashBytes, 0, hashBytes.Length);");
+                    writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
+                    writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );");
+                    writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("stream.Flush();");
-                    _writer.WriteLineEx("stream.Close();");
-                    _writer.WriteLineEx("stream = null;");
-                    _writer.WriteLineEx($"CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\");");
-                    _writer.WriteLineEx("}catch(System.Exception e)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.Console.WriteLine(e.ToString());");
-                    _writer.WriteLineEx("throw;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("finally");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("stream.Flush();");
+                    writer.WriteLineEx("stream.Close();");
+                    writer.WriteLineEx("stream = null;");
+                    writer.WriteLineEx($"CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\");");
+                    writer.WriteLineEx("}catch(System.Exception e)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.Console.WriteLine(e.ToString());");
+                    writer.WriteLineEx("throw;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("finally");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("#endif //NO_EXCEL_LOADER");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("#endif //NO_EXCEL_LOADER");
 
 
-                    _writer.WriteLineEx($"    public string GetFileName() {{ return \"{filename}\"; }}");
+                    writer.WriteLineEx($"public string GetFileName() => \"{filename}\";");
                     // ReadStream function
-                    _writer.WriteLineEx( "public void ReadStream(System.IO.Stream stream)");
-                    _writer.WriteLineEx( "{");
-                    _writer.WriteLineEx( "stream.Position = 0;");
+                    writer.WriteLineEx( "public void ReadStream(System.IO.Stream stream)");
+                    writer.WriteLineEx( "{");
+                    writer.WriteLineEx( "stream.Position = 0;");
                     //if(sheets.Any())
                     //{
                     //    _writer.WriteLineEx("if(" + string.Join( "\r\n      || ", sheets.Select(sheetName => $"communicator.findObjectFactory({ExportToIceCSMgr.NameSpace}.{filename}.{sheetName.Trim().Replace(" ", "_")}.ice_staticId()) == null")) + ")");
@@ -238,64 +237,62 @@ namespace TableGenerate
                     //    }
                     //    _writer.WriteLineEx("}");
                     //}
-                    _writer.WriteLineEx("int streamLength = (int)stream.Length;");
-                    _writer.WriteLineEx("int hashLength = stream.ReadByte();");
-                    _writer.WriteLineEx("byte[] uncompressedSize = new byte[4];");
-                    _writer.WriteLineEx("byte[] compressedSize = new byte[4];");
-                    _writer.WriteLineEx("byte[] hashBytes = new byte[hashLength];");
-                    _writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
-                    _writer.WriteLineEx("byte[] bytes = new byte[streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1];");
-                    _writer.WriteLineEx("stream.Read( uncompressedSize, 0, uncompressedSize.Length);");
-                    _writer.WriteLineEx("stream.Read( compressedSize, 0, compressedSize.Length);");
-                    _writer.WriteLineEx("stream.Read( bytes, 0, streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1);");
-                    _writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("byte[] dataBytes = md5.ComputeHash(bytes);");
-                    _writer.WriteLineEx("if(!System.Linq.Enumerable.SequenceEqual(hashBytes, dataBytes))");
-                    _writer.WriteLineEx($"throw new System.Exception(\"{filename} verify failure...\");");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("using (System.IO.MemoryStream __ms = new System.IO.MemoryStream(bytes))");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("using (var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms))");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("int uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
-                    _writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
-                    _writer.WriteLineEx("decompressStream.Read(bytes, 0, uncompressedSize__);");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("var streamLength = (int)stream.Length;");
+                    writer.WriteLineEx("var hashLength = stream.ReadByte();");
+                    writer.WriteLineEx("var uncompressedSize = new byte[4];");
+                    writer.WriteLineEx("var compressedSize = new byte[4];");
+                    writer.WriteLineEx("var hashBytes = new byte[hashLength];");
+                    writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
+                    writer.WriteLineEx("var bytes = new byte[streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1];");
+                    writer.WriteLineEx("stream.Read( uncompressedSize, 0, uncompressedSize.Length);");
+                    writer.WriteLineEx("stream.Read( compressedSize, 0, compressedSize.Length);");
+                    writer.WriteLineEx("stream.Read( bytes, 0, streamLength-hashLength-compressedSize.Length-uncompressedSize.Length-1);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using var md5 = System.Security.Cryptography.MD5.Create();");
+                    writer.WriteLineEx("var dataBytes = md5.ComputeHash(bytes);");
+                    writer.WriteLineEx("if(!System.Linq.Enumerable.SequenceEqual(hashBytes, dataBytes))");
+                    writer.WriteLineEx($"  {{throw new System.Exception(\"{filename} verify failure...\");}}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using var __ms = new System.IO.MemoryStream(bytes);");
+                    writer.WriteLineEx("using var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms);");
+                    writer.WriteLineEx("var uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
+                    writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
+                    writer.WriteLineEx("decompressStream.Read(bytes, 0, uncompressedSize__);");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("System.IO.MemoryStream __ms = null;");
-                    _writer.WriteLineEx("try");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("__ms = new System.IO.MemoryStream(bytes);");
-                    _writer.WriteLineEx("using (System.IO.BinaryReader reader = new System.IO.BinaryReader(__ms))");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("__ms = null;");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("System.IO.MemoryStream __ms = null;");
+                    writer.WriteLineEx("try");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("__ms = new System.IO.MemoryStream(bytes);");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("using var reader = new System.IO.BinaryReader(__ms);");
+                    writer.WriteLineEx("__ms = null;");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                        _writer.WriteLineEx($"{trimSheetName}.ReadStream(reader);");
+                        writer.WriteLineEx($"{trimSheetName}.ReadStream(reader);");
                     }
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("finally");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("if(__ms != null) __ms.Dispose();");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("finally");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("__ms?.Dispose();");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                     // Get Hash FUnction
-                    _writer.WriteLineEx("public byte[] GetHash(System.IO.Stream stream)");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("stream.Position = 0;");
-                    _writer.WriteLineEx("int hashLength = stream.ReadByte();");
-                    _writer.WriteLineEx("byte[] hashBytes = new byte[hashLength];");
-                    _writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
-                    _writer.WriteLineEx("return hashBytes;");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("public byte[] GetHash(System.IO.Stream stream)");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("stream.Position = 0;");
+                    writer.WriteLineEx("var hashLength = stream.ReadByte();");
+                    writer.WriteLineEx("var hashBytes = new byte[hashLength];");
+                    writer.WriteLineEx("stream.Read( hashBytes, 0, hashLength);");
+                    writer.WriteLineEx("return hashBytes;");
+                    writer.WriteLineEx("}");
 
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
 
                     current = 0;
                     foreach (string sheetName in sheets)
@@ -305,11 +302,11 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        SheetProcess(_writer, filename, trimSheetName, columns);
+                        SheetProcess(writer, filename, trimSheetName, columns);
                     }
 
-                    _writer.WriteLineEx("}");
-                    _writer.Flush();
+                    //_writer.WriteLineEx("}");
+                    writer.Flush();
                 }
                 string tempCreateFileName = createFileName.Replace(".cs", "Manager.cs");
                 ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{tempCreateFileName}");
@@ -318,60 +315,123 @@ namespace TableGenerate
             return true;
         }
 
-        private void SheetProcess(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void SheetProcess(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key);
-            var type = key_column.GenerateType(_gen_type);
-            var equality_type = key_column.GetEqualityTypeValue(_gen_type);
-            _writer.WriteLineEx();
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
+            var type = keyColumn.GenerateType(_gen_type);
+            var equalityType = keyColumn.GetEqualityTypeValue(_gen_type);
+            writer.WriteLineEx();
             if (_async == "unity3d")
             {
-                _writer.WriteLineEx($"#if !ENCRYPT");
-                _writer.WriteLineEx($"[System.Serializable]");
-                _writer.WriteLineEx($"#endif");
+                writer.WriteLineEx($"#if !ENCRYPT");
+                writer.WriteLineEx($"[System.Serializable]");
+                writer.WriteLineEx($"#endif");
             }
-            string primitiveName = key_column.var_name;
-            _writer.WriteLineEx($"public partial class {sheetName}");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"public static {sheetName}[] Array_ = null;");
-            _writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_ = null;");
-            _writer.WriteLineEx();
-            _writer.WriteLineEx($"public static void ArrayToMap({sheetName}[] array__)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"var map_ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length);");
+            string primitiveName = keyColumn.var_name;
+            writer.WriteLineEx($"public partial record {sheetName}");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"private static {sheetName}[] array_;");
+            writer.WriteLineEx($"public static {sheetName}[] Array_");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"get");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"if (array_ != null) return array_;");
+            writer.WriteLineEx($"if (string.IsNullOrEmpty(Base_.Path) || string.IsNullOrEmpty(Base_.Language)) throw new System.Exception(\"TBL.Base_.Path or TBL.Base_.Language is empty\");");
+            writer.WriteLineEx($"Loader loader = new();");
+            writer.WriteLineEx($"      var path = $\"{{Base_.Path}}/ScriptTable/{{Base_.Language}}/{{loader.GetFileName()}}.bytes\";");
+            writer.WriteLineEx($"using var stream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);");
+            writer.WriteLineEx($"loader.ReadStream(stream);");
+            writer.WriteLineEx($"return array_;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx($"private static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> map_;");
+            writer.WriteLineEx($"public static System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}> Map_");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"get");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"if (map_ != null) return map_;");
+            writer.WriteLineEx($"if (string.IsNullOrEmpty(Base_.Path) || string.IsNullOrEmpty(Base_.Language)) throw new System.Exception(\"TBL.Base_.Path or TBL.Base_.Language is empty\");");
+            writer.WriteLineEx($"Loader loader = new();");
+            writer.WriteLineEx($"      var path = $\"{{Base_.Path}}/ScriptTable/{{Base_.Language}}/{{loader.GetFileName()}}.bytes\";");
+            writer.WriteLineEx($"using var stream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);");
+            writer.WriteLineEx($"loader.ReadStream(stream);");
+            writer.WriteLineEx($"return map_;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("public object[] DataRow_ => new object[]{");
+            {
+                bool bFirst = true;
+                foreach (var column in columns.Where(compare => compare.array_index <= 0))
+                {
+                    if (column.is_generated == false)
+                    {
+                        continue;
+                    }
+
+                    string delim = string.Empty;
+
+
+                    if (column.array_index >= 0)
+                    {
+                        int arrayCount = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
+                        for (int i = 0; i <= arrayCount; i++)
+                        {
+                            if( i > 0 || bFirst == false)
+                            {
+                                delim = ",";
+                            }
+                            else
+                            {
+                                delim = string.Empty;
+                            }
+                            writer.WriteLineEx($"{delim}{column.var_name}[{i}]");
+                            bFirst = false;
+                        }
+                    }
+                    else
+                    {
+                        delim = bFirst == false ? "," : string.Empty;
+                        writer.WriteLineEx($"{delim}{column.var_name}");
+                        bFirst = false;
+                    }
+                }
+            }
+            writer.WriteLineEx("};");
+            writer.WriteLineEx($"public static void ArrayToMap({sheetName}[] array__)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"var map__ = new System.Collections.Generic.Dictionary<{type},{sheetName}> (array__.Length);");
             //_writer.WriteLineEx($"array.Sort(delegate({sheetName} a,{sheetName} b)");
             //_writer.WriteLineEx( "{");
             //_writer.WriteLineEx($"return a.{primitiveName}.CompareTo(b.{primitiveName});");
             //_writer.WriteLineEx("});");
-            _writer.WriteLineEx($"{sheetName} __table;");
-            _writer.WriteLineEx("int __i=0;");
-            _writer.WriteLineEx($"try{{");
-            _writer.WriteLineEx("for(__i=0;__i<array__.Length;__i++)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"__table = array__[__i];");
-            _writer.WriteLineEx($"map_.Add(__table.{primitiveName}, __table);");
-            _writer.WriteLineEx( "}");
-            _writer.WriteLineEx($"}}catch(System.Exception e)");
-            _writer.WriteLineEx($"{{");
-            _writer.WriteLineEx($"      throw new System.Exception($\"Row:{{__i}} {{e.Message}}\");");
-            _writer.WriteLineEx($"}}");
-            _writer.WriteLineEx($"Map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map_);");
-            if(!string.IsNullOrEmpty(equality_type))
+            writer.WriteLineEx("var __i=0;");
+            writer.WriteLineEx($"try{{");
+            writer.WriteLineEx("for(__i=0;__i<array__.Length;__i++)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"var __table = array__[__i];");
+            writer.WriteLineEx($"map__.Add(__table.{primitiveName}, __table);");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx($"}}catch(System.Exception e)");
+            writer.WriteLineEx($"{{");
+            writer.WriteLineEx($"      throw new System.Exception($\"Row:{{__i}} {{e.Message}}\");");
+            writer.WriteLineEx($"}}");
+            writer.WriteLineEx($"map_ = System.Collections.Immutable.ImmutableDictionary<{type},{sheetName}>.Empty.AddRange(map__);");
+            if(!string.IsNullOrEmpty(equalityType))
             {
-                _writer.WriteLineEx($"Map_ = Map_.WithComparers({equality_type});");
+                writer.WriteLineEx($"map_ = map_.WithComparers({equalityType});");
             }
-            _writer.WriteLineEx( "}");
-            _writer.WriteLineEx();
-            WriteStreamFunction(_writer, filename, sheetName,columns);
-            _writer.WriteLineEx($"#if !{_unityDefine}");
-            SetDataTableFunction(_writer, filename, sheetName, columns);
-            _writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-            ExcelLoadFunction(_writer, filename, sheetName, columns);
-            _writer.WriteLineEx("#endif");
-            GetDataTableFunction(_writer, filename, sheetName, columns);
-            _writer.WriteLineEx("#endif");
-            ReadStreamFunction(_writer, filename, sheetName, columns);
-            ArrayCountFunction(_writer, filename, sheetName, columns);
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx();
+            WriteStreamFunction(writer, filename, sheetName,columns);
+            writer.WriteLineEx($"#if !{_unityDefine}");
+            SetDataTableFunction(writer, filename, sheetName, columns);
+            writer.WriteLineEx("#if !NO_EXCEL_LOADER");
+            ExcelLoadFunction(writer, filename, sheetName, columns);
+            writer.WriteLineEx("#endif");
+            GetDataTableFunction(writer, filename, sheetName, columns);
+            writer.WriteLineEx("#endif");
+            ReadStreamFunction(writer, filename, sheetName, columns);
+            ArrayCountFunction(writer, filename, sheetName, columns);
             //SheetConstructorProcess(_writer, sheetName, columns);
             if (_async == "unity3d")
             {
@@ -388,7 +448,7 @@ namespace TableGenerate
                 //WhereIsInStringFunction(filename, sheetName, columns);
                 //WhereNotInStringFunction(filename, sheetName, columns);
             }
-            _writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
         }
         private void SheetConstructorProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)
         {
@@ -437,15 +497,15 @@ namespace TableGenerate
                     ));
             }
         }
-        private void ExcelLoadFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void ExcelLoadFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key == true);
-            var nation_column = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
+            var nationColumn = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
 
-            _writer.WriteLineEx( "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx( "var i=0; var j=0;");
-            _writer.WriteLineEx( "string[,] rows = null;");
+            writer.WriteLineEx( "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx( "var i=0; var j=0;");
+            writer.WriteLineEx( "TableGenerateCmd.StringWithDesc[,] rows = null;");
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -458,23 +518,23 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                _writer.WriteLineEx($"{type} {name};");
+                writer.WriteLineEx($"{type} {name};");
             }
-            _writer.WriteLineEx( "try");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"rows = imp.GetSheet(\"{sheetName}\", language);");
-            if (nation_column != null) _writer.WriteLineEx($"      bool useNation = rows[0,{nation_column.data_column_index}].Trim().ToLower() == \"nation\";");
-            _writer.WriteLineEx($"var list__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 3);");
-            _writer.WriteLineEx( "for (i = 3; i < rows.GetLength(0); i++)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"j=0;");
-            _writer.WriteLineEx("if( rows[i,0].Length == 0) break;");
-            if (nation_column != null) _writer.WriteLineEx($"if( useNation == true && (rows[i,{nation_column.data_column_index}].Trim().Length == 0 || rows[i,{nation_column.data_column_index}].Trim().ToLower() == \"all\") ) {{}}");
-            if (nation_column != null) _writer.WriteLineEx($"else if( useNation == true && rows[i,{nation_column.data_column_index}].Trim()/*.ToLower()*/ != language ) continue;");
+            writer.WriteLineEx( "try");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"rows = imp.GetSheet(\"{sheetName}\", language);");
+            if (nationColumn != null) writer.WriteLineEx($"      bool useNation = rows[0,{nationColumn.data_column_index}].Text.Trim().ToLower() == \"nation\";");
+            writer.WriteLineEx($"var list__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 3);");
+            writer.WriteLineEx( "for (i = 3; i < rows.GetLength(0); i++)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"j=0;");
+            writer.WriteLineEx("if(rows[i,0].Text.Length == 0) break;");
+            if (nationColumn != null) writer.WriteLineEx($"if( useNation == true && (rows[i,{nationColumn.data_column_index}].Text.Trim().Length == 0 || rows[i,{nationColumn.data_column_index}].Text.Trim().ToLower() == \"all\") ) {{}}");
+            if (nationColumn != null) writer.WriteLineEx($"else if( useNation == true && rows[i,{nationColumn.data_column_index}].Text.Trim()/*.ToLower()*/ != language ) continue;");
             foreach (var column in columns)
             {
                 string type = column.GenerateType(_gen_type);
-                string arg = $"rows[i,{column.data_column_index}]";
+                string arg = $"rows[i,{column.data_column_index}].Text";
                 string convert_function = column.GetConvertFunction(arg,_gen_type);
                 if (column.is_generated == false)
                 {
@@ -487,87 +547,87 @@ namespace TableGenerate
                         if (column.array_index == 0)
                         {
                             int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
-                            _writer.WriteLineEx($"var {column.var_name}_list__ = new System.Collections.Generic.List<{column.GenerateBaseType(_gen_type)}>();");
-                            _writer.WriteLineEx($"bool not_empty_{column.var_name}__ = false;");
+                            writer.WriteLineEx($"var {column.var_name}_list__ = new System.Collections.Generic.List<{column.GenerateBaseType(_gen_type)}>();");
+                            writer.WriteLineEx($"bool not_empty_{column.var_name}__ = false;");
                         }
 
-                        _writer.WriteLineEx($"j = {column.data_column_index};");
-                        _writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
-                        _writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"j = {column.data_column_index};");
+                        writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
+                        writer.WriteLineEx($"{{");
                         if (column.array_index > 0)
                         {
-                            _writer.WriteLineEx($"if(not_empty_{column.var_name}__)");
-                            _writer.WriteLineEx($"{{");
-                            _writer.WriteLineEx($"    throw new System.Exception(string.Format(\"i:{{0}} j:{{1}} before is empty text\",i,j));");
-                            _writer.WriteLineEx($"}}");
+                            writer.WriteLineEx($"if(not_empty_{column.var_name}__)");
+                            writer.WriteLineEx($"{{");
+                            writer.WriteLineEx($"    throw new System.Exception(string.Format(\"i:{{0}} j:{{1}} before is empty text\",i,j));");
+                            writer.WriteLineEx($"}}");
                         }
-                        _writer.WriteLineEx($"{column.var_name}_list__.Add({convert_function});");
-                        _writer.WriteLineEx($"}}");
-                        _writer.WriteLineEx($"else");
-                        _writer.WriteLineEx($"{{");
-                        _writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
-                        _writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"{column.var_name}_list__.Add({convert_function});");
+                        writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"else");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
+                        writer.WriteLineEx($"}}");
                         if (column.is_last_array)
                         {
-                            _writer.WriteLineEx($"{column.var_name} = {column.var_name}_list__.ToArray();");
+                            writer.WriteLineEx($"{column.var_name} = {column.var_name}_list__.ToArray();");
                         }
                     }
                     else
                     {
                         if (column.array_index == 0)
                         {
-                            int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
-                            _writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[{array_count}];");
+                            int arrayCount = columns.Count(compare => compare.var_name == column.var_name);
+                            writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[{arrayCount}];");
                         }
 
                         if (column.IsDateTime() == true)
                         {
-                            _writer.WriteLineEx($"j = {column.data_column_index};");
-                            _writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = new System.DateTime(1970,1,1);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
+                            writer.WriteLineEx($"j = {column.data_column_index};");
+                            writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = new System.DateTime(1970,1,1);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
                         }
                         else if (column.IsTimeSpan() == true)
                         {
-                            _writer.WriteLineEx($"j = {column.data_column_index};");
-                            _writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = System.TimeSpan.FromTicks(0);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
+                            writer.WriteLineEx($"j = {column.data_column_index};");
+                            writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = System.TimeSpan.FromTicks(0);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
                         }
                         else if (column.IsNumberType() == true)
                         {
-                            _writer.WriteLineEx($"j = {column.data_column_index};");
-                            _writer.WriteLineEx("{");
-                            _writer.WriteLineEx($"{column.GetPrimitiveType(_gen_type)} outvalue = {column.GetInitValue(_gen_type)}; if(!string.IsNullOrEmpty({arg})) ");
-                            _writer.WriteLineEx($"outvalue = {convert_function}; {column.var_name}[{column.array_index}] = outvalue;");
-                            _writer.WriteLineEx("}");
+                            writer.WriteLineEx($"j = {column.data_column_index};");
+                            writer.WriteLineEx("{");
+                            writer.WriteLineEx($"{column.GetPrimitiveType(_gen_type)} outValue = {column.GetInitValue(_gen_type)}; if(!string.IsNullOrEmpty({arg})) ");
+                            writer.WriteLineEx($"outValue = {convert_function}; {column.var_name}[{column.array_index}] = outValue;");
+                            writer.WriteLineEx("}");
                         }
                         else if (column.IsNumberType() == false)
                         {
-                            _writer.WriteLineEx($"j = {column.data_column_index};");
-                            _writer.WriteLineEx($"{column.var_name}[{column.array_index}] = {convert_function};");
+                            writer.WriteLineEx($"j = {column.data_column_index};");
+                            writer.WriteLineEx($"{column.var_name}[{column.array_index}] = {convert_function};");
                         }
                     }
                     continue;
                 }
                 if (column.IsDateTime() == true)
                 {
-                    _writer.WriteLineEx($"j = {column.data_column_index};");
-                    _writer.WriteLineEx($"if(string.IsNullOrEmpty({arg})){{{column.var_name} = new System.DateTime(1970,1,1);}} else{{{column.var_name} = {convert_function};}}");
+                    writer.WriteLineEx($"j = {column.data_column_index};");
+                    writer.WriteLineEx($"if(string.IsNullOrEmpty({arg})){{{column.var_name} = new System.DateTime(1970,1,1);}} else{{{column.var_name} = {convert_function};}}");
                 }
                 else if (column.IsTimeSpan() == true)
                 {
-                    _writer.WriteLineEx($"j = {column.data_column_index};");
-                    _writer.WriteLineEx($"if(string.IsNullOrEmpty({arg})){{{column.var_name} = System.TimeSpan.FromTicks(0);}} else{{{column.var_name} = {convert_function};}}");
+                    writer.WriteLineEx($"j = {column.data_column_index};");
+                    writer.WriteLineEx($"if(string.IsNullOrEmpty({arg})){{{column.var_name} = System.TimeSpan.FromTicks(0);}} else{{{column.var_name} = {convert_function};}}");
                 }
                 else if (column.IsNumberType() == true)
                 {
-                    _writer.WriteLineEx($"j = {column.data_column_index};");
-                    _writer.WriteLineEx($"if(string.IsNullOrEmpty({arg}))");
-                    _writer.WriteLineEx( "{");
-                    _writer.WriteLineEx($"{column.var_name} = {column.GetInitValue(_gen_type)};}}else {{{column.var_name} = {convert_function};");
-                    _writer.WriteLineEx( "}");
+                    writer.WriteLineEx($"j = {column.data_column_index};");
+                    writer.WriteLineEx($"if(string.IsNullOrEmpty({arg}))");
+                    writer.WriteLineEx( "{");
+                    writer.WriteLineEx($"{column.var_name} = {column.GetInitValue(_gen_type)};}}else {{{column.var_name} = {convert_function};");
+                    writer.WriteLineEx( "}");
                 }
                 else if (column.IsNumberType() == false)
                 {
-                    _writer.WriteLineEx($"j = {column.data_column_index};");
-                    _writer.WriteLineEx($"{column.var_name} = {convert_function};");
+                    writer.WriteLineEx($"j = {column.data_column_index};");
+                    writer.WriteLineEx($"{column.var_name} = {convert_function};");
                 }
             }
 
@@ -584,43 +644,43 @@ namespace TableGenerate
                 foreach (var item in query.Where(t => t.Count > 1))
                 {
                     var arrs = columns.Where(t => t.array_group_name == item.groupName && t.array_index == 0).ToArray();
-                    _writer.WriteLineEx($"if({string.Join(" || ", arrs.Skip(1).Select(t => $" {arrs[0].var_name}.Length != {t.var_name}.Length"))})");
-                    _writer.WriteLineEx($"{{");
-                    _writer.WriteLineEx($"    throw new System.Exception(string.Format(\"mismatch group:{{0}}\",\"{item.groupName}\"));");
-                    _writer.WriteLineEx($"}}");
+                    writer.WriteLineEx($"if({string.Join(" || ", arrs.Skip(1).Select(t => $" {arrs[0].var_name}.Length != {t.var_name}.Length"))})");
+                    writer.WriteLineEx($"{{");
+                    writer.WriteLineEx($"    throw new System.Exception(string.Format(\"mismatch group:{{0}}\",\"{item.groupName}\"));");
+                    writer.WriteLineEx($"}}");
                 }
             }
 
-            _writer.WriteLineEx(string.Format("{0} values = new {0}({1});", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}").ToArray())));
-            _writer.WriteLineEx("foreach (var preValues in list__)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"if (preValues.{key_column.var_name}.Equals({key_column.var_name}))");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"throw new System.Exception(\"row:\" + i + \" {sheetName}.{key_column.var_name}:\" + preValues.{key_column.var_name}.ToString() + \") Duplicated!!\");");
-            _writer.WriteLineEx("}");
-            _writer.WriteLineEx( "}");
+            writer.WriteLineEx(string.Format("{0} values = new {0}({1});", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}").ToArray())));
+            writer.WriteLineEx("foreach (var preValues in list__)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"if (preValues.{keyColumn.var_name}.Equals({keyColumn.var_name}))");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"throw new System.Exception(\"row:\" + i + \" {sheetName}.{keyColumn.var_name}:\" + preValues.{keyColumn.var_name}.ToString() + \") Duplicated!!\");");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx( "}");
 
-            _writer.WriteLineEx("list__.Add(values);");
-            _writer.WriteLineEx( "}");
-            _writer.WriteLineEx("Array_ = list__.ToArray();");
-            _writer.WriteLineEx("ArrayToMap(Array_);");
-            _writer.WriteLineEx( "}catch(System.Exception e)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx("if( rows == null ) throw;");
-            _writer.WriteLineEx("if (j >= rows.GetLength(1))");
-            _writer.WriteLineEx($"  throw new System.Exception(\"sheet({sheetName}) invalid column count:\" + j);");
-            _writer.WriteLineEx($"throw new System.Exception(\" convert failure : excel({filename}).sheet({sheetName}) key:\" + rows[i,0] + \" Name:\" + rows[0,j] + \" \" + rows[i,j] + \" \" + e.Message );");
-            _writer.WriteLineEx( "}");
-            _writer.WriteLineEx( "}");
+            writer.WriteLineEx("list__.Add(values);");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx("array_ = list__.ToArray();");
+            writer.WriteLineEx("ArrayToMap(array_);");
+            writer.WriteLineEx( "}catch(System.Exception e)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx("if( rows == null ) throw;");
+            writer.WriteLineEx("if (j >= rows.GetLength(1))");
+            writer.WriteLineEx($"  throw new System.Exception(\"sheet({sheetName}) invalid column count:\" + j);");
+            writer.WriteLineEx($"throw new System.Exception(\" convert failure : excel({filename}).sheet({sheetName}) key:\" + rows[i,0].Text + \" Name:\" + rows[0,j].Text + \" \" + rows[i,j].Text + \" \" + e.Message );");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx( "}");
         }
-        private void GetDataTableFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void GetDataTableFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key == true);
-            var nation_column = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
+            var nationColumn = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
 
-            _writer.WriteLineEx("public static void GetDataTable(System.Data.DataSet dts)");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"System.Data.DataTable table = dts.Tables.Add(\"{sheetName}\");");
+            writer.WriteLineEx("public static void GetDataTable(System.Data.DataSet dts)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"var table = dts.Tables.Add(nameof({sheetName}));");
             foreach (var column in columns.Where(compare => compare.array_index <= 0))
             {
                 string type = column.GenerateBaseType(_gen_type);
@@ -632,69 +692,24 @@ namespace TableGenerate
 
                 if (column.array_index >= 0)
                 {
-                    int array_count = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
-                    for (int i = 0; i <= array_count; i++)
+                    int arrayCount = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
+                    for (int i = 0; i <= arrayCount; i++)
                     {
-                        _writer.WriteLineEx($"table.Columns.Add(\"{column.var_name}{i}\", typeof({type}));");
+                        writer.WriteLineEx($"table.Columns.Add(\"{column.var_name}{i}\", typeof({type}));");
                     }
                 }
                 else
                 {
-                    _writer.WriteLineEx($"table.Columns.Add(\"{column.var_name}\", typeof({type}));");
+                    writer.WriteLineEx($"table.Columns.Add(nameof({column.var_name}), typeof({type}));");
                 }
             }
-            _writer.WriteLineEx("foreach(var item in Array_ )");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx("table.Rows.Add(");
-            bool bFirst = true;
-            foreach (var column in columns.Where(compare => compare.array_index <= 0))
-            {
-                string type = column.GenerateType(_gen_type);
-
-                if (column.is_generated == false)
-                {
-                    continue;
-                }
-
-                string delim = string.Empty;
-
-
-                if (column.array_index >= 0)
-                {
-                    int array_count = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
-                    for (int i = 0; i <= array_count; i++)
-                    {
-                        if( i > 0 || bFirst == false)
-                        {
-                            delim = ",";
-                        }
-                        else
-                        {
-                            delim = string.Empty;
-                        }
-                        _writer.WriteLineEx($"{delim}item.{column.var_name}[{i}]");
-                        bFirst = false;
-                    }
-                }
-                else
-                {
-                    if (bFirst == false)
-                    {
-                        delim = ",";
-                    }
-                    else
-                    {
-                        delim = string.Empty;
-                    }
-                    _writer.WriteLineEx($"{delim}item.{column.var_name}");
-                    bFirst = false;
-                }
-            }
-            _writer.WriteLineEx(");");
-            _writer.WriteLineEx("}");
-            _writer.WriteLineEx("}");
+            writer.WriteLineEx("foreach(var item__ in array_ )");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx("table.Rows.Add(item__.DataRow_);");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
         }
-        private void ArrayCountFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void ArrayCountFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
             foreach (var column in columns.Where(compare => compare.array_index <= 0))
             {
@@ -705,91 +720,84 @@ namespace TableGenerate
                     continue;
                 }
 
-                if (column.array_index >= 0)
-                {
-                    int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
-                    _writer.WriteLineEx($"     public static int {column.var_name}_Length {{ get {{ return {array_count}; }} }}");
-                }
+                if (column.array_index < 0) continue;
+                int arrayCount = columns.Count(compare => compare.var_name == column.var_name);
+                writer.WriteLineEx($"public static int {column.var_name}_Length => {arrayCount};");
             }
         }
-        private void SetDataTableFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void SetDataTableFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            var key_column = columns.FirstOrDefault(compare => compare.is_key == true);
-            var key_type = key_column.GenerateType(_gen_type);
-            var nation_column = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
+            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
+            var keyType = keyColumn.GenerateType(_gen_type);
+            var nationColumn = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
 
-            _writer.WriteLineEx("public static bool SetDataSet(System.Data.DataSet dts)");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"{sheetName}.Map_ = System.Collections.Immutable.ImmutableDictionary<{key_type},{sheetName}>.Empty;");
-            _writer.WriteLineEx($"{sheetName}.Array_ = new {sheetName}[dts.Tables[\"{sheetName}\"].Rows.Count];");
-            _writer.WriteLineEx($"int row__ = 0;");
-            _writer.WriteLineEx($"foreach (System.Data.DataRow row in dts.Tables[\"{sheetName}\"].Rows)");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"{sheetName} table = new {sheetName}");
-            _writer.WriteLineEx("(");
+            writer.WriteLineEx("public static bool SetDataSet(System.Data.DataSet dts)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"if(dts?.Tables[nameof({sheetName})] is null) throw new System.Exception(\"dts.Tables['{sheetName}'] is null\");");
+            writer.WriteLineEx($"var tables__ = dts.Tables[nameof({sheetName})];");
+            writer.WriteLineEx($"if(tables__ is null) throw new System.Exception(\"dts.Tables['{sheetName}'] is null\");");
+            writer.WriteLineEx($"map_ = System.Collections.Immutable.ImmutableDictionary<{keyType},{sheetName}>.Empty;");
+            writer.WriteLineEx($"array_ = new {sheetName}[tables__.Rows.Count];");
+            writer.WriteLineEx($"var row__ = 0;");
+            writer.WriteLineEx($"foreach (System.Data.DataRow row in tables__.Rows)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"var table__ = new {sheetName}");
+            writer.WriteLineEx("(");
             bool bFirst = true;
             foreach (var column in columns.Where(compare => compare.array_index <= 0))
             {
                 string type = column.base_type.GenerateBaseType(_gen_type);
-                string generate_type = column.GenerateType(_gen_type);
+                string generateType = column.GenerateType(_gen_type);
                 string append = string.Empty;
 
                 if (column.is_generated == false)
                 {
                     continue;
                 }
-                if (bFirst == false)
-                {
-                    append = ",";
-                }
-                else
-                {
-                    append ="";
-                }
+                append = bFirst == false ? "," : "";
                 if (column.array_index >= 0)
                 {
-                    int array_count = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
-                    for (int i = 0; i <= array_count; i++)
+                    int arrayCount = columns.Where(compare => compare.var_name == column.var_name).Max(compare => compare.array_index);
+                    for (int i = 0; i <= arrayCount; i++)
                     {
-                        string arg = $"row[\"{column.var_name}{i}\"].ToString()";
-                        string convert_function = column.GetConvertFunction(arg, _gen_type);
+                        string arg = $"(row[\"{column.var_name}{i}\"].ToString() ?? string.Empty)";
+                        string convertFunction = column.GetConvertFunction(arg, _gen_type);
                         if (i == 0)
                         {
-                            _writer.WriteLineEx($"{append}new {generate_type}");
+                            writer.WriteLineEx($"{append}new {generateType}");
                             append = ",";
-                            _writer.WriteLineEx("{");
-                            _writer.WriteLineEx($"{convert_function}");
+                            writer.WriteLineEx("{");
+                            writer.WriteLineEx($"{convertFunction}");
                         }
                         else
                         {
-                            _writer.WriteLineEx($",{convert_function}");
+                            writer.WriteLineEx($",{convertFunction}");
                         }
                     }
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                 }
                 else
                 {
-                    string arg = $"row[\"{column.var_name}\"].ToString()";
-                    string convert_function = column.GetConvertFunction(arg, _gen_type);
-                    _writer.WriteLineEx($"{append}{convert_function}");
+                    string arg = $"(row[nameof({column.var_name})].ToString() ?? string.Empty)";
+                    string convertFunction = column.GetConvertFunction(arg, _gen_type);
+                    writer.WriteLineEx($"{append}{convertFunction}");
                 }
                 bFirst = false;
             }
-            _writer.WriteLineEx(");");
-            _writer.WriteLineEx($"{sheetName}.Map_ = {sheetName}.Map_.Add(table.{key_column.var_name}, table);");
-            _writer.WriteLineEx($"{sheetName}.Array_[row__++] = table;");
-            _writer.WriteLineEx("}");
-            _writer.WriteLineEx("return true;");
-            _writer.WriteLineEx("}");
+            writer.WriteLineEx(");");
+            writer.WriteLineEx($"map_ = map_.Add(table__.{keyColumn.var_name}, table__);");
+            writer.WriteLineEx($"array_[row__++] = table__;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("return true;");
+            writer.WriteLineEx("}");
         }
-        private void WriteStreamFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void WriteStreamFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            _writer.WriteLineEx("public static void WriteStream(System.IO.BinaryWriter __writer)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"__writer.Write(Array_.Length);");
-            _writer.WriteLineEx($"for (var __i=0;__i<Array_.Length;__i++)");
-            _writer.WriteLineEx( "{");
-            _writer.WriteLineEx($"var __table = Array_[__i];");
+            writer.WriteLineEx("public static void WriteStream(System.IO.BinaryWriter __writer)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"__writer.Write(array_.Length);");
+            writer.WriteLineEx($"foreach (var __table in array_)");
+            writer.WriteLineEx( "{");
             foreach (var column in columns.Where( t => t.array_index <= 0))
             {
                 string type = column.GenerateType(_gen_type);
@@ -801,61 +809,61 @@ namespace TableGenerate
 
                 if (column.array_index >= 0)
                 {
-                    _writer.WriteLineEx($"TBL.Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
-                    _writer.Write($"for(var j__=0;j__<__table.{column.var_name}.Length;++j__)");
-                    _writer.Write("{");
+                    writer.WriteLineEx($"Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
+                    writer.Write($"foreach(var t__ in __table.{column.var_name})");
+                    writer.Write("{");
                     if (column.IsDateTime())
-                        _writer.Write($"__writer.Write(__table.{column.var_name}[j__].ToBinary());");
+                        writer.Write($"__writer.Write(t__.ToBinary());");
                     else if (column.IsTimeSpan())
-                        _writer.Write($"__writer.Write(__table.{column.var_name}[j__].Ticks);");
+                        writer.Write($"__writer.Write(t__.Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
                     {
-                        string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
-                        _writer.Write($"__writer.Write(({primitive_type})__table.{column.var_name}[j__]);");
+                        string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
+                        writer.Write($"__writer.Write(({primitiveType})t__);");
                     }
                     else if(column.IsString())
                     {
-                        _writer.Write($"TBL.Encoder.Write(__writer,__table.{column.var_name}[j__]);");
+                        writer.Write($"Encoder.Write(__writer,t__);");
                     }
                     else
                     {
-                        _writer.Write($"__writer.Write(__table.{column.var_name}[j__]);");
+                        writer.Write($"__writer.Write(t__);");
                     }
-                    _writer.Write("}");
-                    _writer.WriteLineEx("");
+                    writer.Write("}");
+                    writer.WriteLineEx("");
                 }
                 else
                 {
                     if (column.IsDateTime())
-                        _writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.ToBinary());");
+                        writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.ToBinary());");
                     else if (column.IsTimeSpan())
-                        _writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.Ticks);");
+                        writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
                     {
-                        string primitive_type = column.primitive_type.GenerateBaseType(_gen_type);
-                        _writer.WriteLineEx($"__writer.Write(({primitive_type})__table.{column.var_name});");
+                        string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
+                        writer.WriteLineEx($"__writer.Write(({primitiveType})__table.{column.var_name});");
                     }
                     else if (column.IsString())
                     {
-                        _writer.Write($"TBL.Encoder.Write(__writer,__table.{column.var_name});");
+                        writer.Write($"Encoder.Write(__writer,__table.{column.var_name});");
                     }
                     else
                     {
-                        _writer.WriteLineEx($"__writer.Write(__table.{column.var_name});");
+                        writer.WriteLineEx($"__writer.Write(__table.{column.var_name});");
                     }
                 }
             }
-            _writer.WriteLineEx( "}");
-            _writer.WriteLineEx( "}");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx( "}");
         }
-        private void ReadStreamFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void ReadStreamFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
-            _writer.WriteLineEx("public static void ReadStream(System.IO.BinaryReader __reader)");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx($"var count__ = __reader.ReadInt32();");
-            _writer.WriteLineEx($"var array__ = new {sheetName}[count__];");
-            _writer.WriteLineEx($"for (var __i=0;__i<array__.Length;__i++)");
-            _writer.WriteLineEx("{");
+            writer.WriteLineEx("public static void ReadStream(System.IO.BinaryReader __reader)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"var count__ = __reader.ReadInt32();");
+            writer.WriteLineEx($"var array__ = new {sheetName}[count__];");
+            writer.WriteLineEx($"for (var __i=0;__i<array__.Length;__i++)");
+            writer.WriteLineEx("{");
             foreach (var column in columns.Where( t => t.array_index <= 0))
             {
                 string type = column.GenerateType(_gen_type);
@@ -868,30 +876,30 @@ namespace TableGenerate
 
                 if (column.array_index >= 0)
                 {
-                    _writer.WriteLineEx($"{type} {column.var_name};");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);");
-                    _writer.WriteLineEx($"{column.var_name} = arrayCount__ > 0?new {column.GenerateBaseType(_gen_type)}[arrayCount__]:System.Array.Empty<{column.GenerateBaseType(_gen_type)}>();");
-                    _writer.WriteLineEx($"for(var __j=0;__j<arrayCount__;++__j){column.var_name}[__j] = {convert_funtion};");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx($"{type} {column.var_name};");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);");
+                    writer.WriteLineEx($"{column.var_name} = arrayCount__ > 0?new {column.GenerateBaseType(_gen_type)}[arrayCount__]:System.Array.Empty<{column.GenerateBaseType(_gen_type)}>();");
+                    writer.WriteLineEx($"for(var __j=0;__j<arrayCount__;++__j){column.var_name}[__j] = {convert_funtion};");
+                    writer.WriteLineEx("}");
                 }
                 else
                 {
-                    _writer.WriteLineEx($"var {column.var_name} = {convert_funtion};");
+                    writer.WriteLineEx($"var {column.var_name} = {convert_funtion};");
                 }
             }
-            _writer.WriteLineEx(
-                string.Format("{0} __table = new {0}({1});", 
+            writer.WriteLineEx(
+                string.Format("var __table = new {0}({1});", 
                 sheetName,
                 string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => t.var_name).ToArray())
             ));
-            _writer.WriteLineEx($"array__[__i] = __table;");
-            _writer.WriteLineEx("}");
-            _writer.WriteLineEx($"Array_ = array__;");
-            _writer.WriteLineEx($"ArrayToMap(array__);");
-            _writer.WriteLineEx("}");
+            writer.WriteLineEx($"array__[__i] = __table;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx($"array_ = array__;");
+            writer.WriteLineEx($"ArrayToMap(array__);");
+            writer.WriteLineEx("}");
         }
-        private void PropertyFunction(IndentedTextWriter _writer, string filename, string sheetName, List<Column> columns)
+        private void PropertyFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
         {
             //_writer.WriteLineEx($"#if {UNITY_DEFINE} && !DEBUG");
             foreach (var column in columns)
@@ -903,18 +911,18 @@ namespace TableGenerate
                 }
                 if (column.array_index == 0)
                 {
-                    _writer.WriteLineEx($"private {type} {column.var_name}__prop;");
-                    _writer.WriteLineEx($"public override {type} {column.var_name}");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx("get");
-                    _writer.WriteLineEx("{");
-                    _writer.WriteLineEx($"return {column.var_name}__prop;");
-                    _writer.WriteLineEx("}");
-                    _writer.WriteLineEx("}");
+                    writer.WriteLineEx($"private {type} {column.var_name}__prop;");
+                    writer.WriteLineEx($"public override {type} {column.var_name}");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx("get");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx($"return {column.var_name}__prop;");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                 }
                 else if(column.array_index == -1)
                 {
-                    _writer.WriteLineEx($"private {type} {column.var_name}__prop;");
+                    writer.WriteLineEx($"private {type} {column.var_name}__prop;");
                     if (
                         column.base_type != eBaseType.Int32 &&
                         column.base_type != eBaseType.Int16 &&
@@ -922,24 +930,24 @@ namespace TableGenerate
                         column.base_type != eBaseType.Int64 &&
                         column.base_type != eBaseType.String)
                     {
-                        _writer.WriteLineEx($"public override {type} {column.var_name}");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx("get");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx($"return {column.var_name}__prop;");
-                        _writer.WriteLineEx("}");
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx($"public override {type} {column.var_name}");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("get");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx($"return {column.var_name}__prop;");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
                     }
                     else
                     {
-                        _writer.WriteLineEx($"public override {type} {column.var_name}");
-                        _writer.WriteLineEx("{");
-                        _writer.WriteLineEx("get");
-                        _writer.WriteLineEx("{");
+                        writer.WriteLineEx($"public override {type} {column.var_name}");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("get");
+                        writer.WriteLineEx("{");
                         //_writer.WriteLineEx($"return Utility.Decrypt({column.var_name}__prop);");
-                        _writer.WriteLineEx($"return {column.var_name}__prop;");
-                        _writer.WriteLineEx("}");
-                        _writer.WriteLineEx("}");
+                        writer.WriteLineEx($"return {column.var_name}__prop;");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
                     }
                 }
             }

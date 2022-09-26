@@ -12,8 +12,8 @@ namespace fs = std::filesystem;
 int main()
 {
 	{
-        std::wstring executePath = fs::current_path().append("..\\Examples\\Bytes\\Korean\\ItemTable.bytes").c_str();
-		std::ifstream infile;
+        FString executePath = TEXT("../Examples/Bytes/Korean/ItemTable.bytes");
+		FMemoryReader infile;
 		infile.open(executePath.c_str(), std::ios_base::binary);
 		if (!infile.eof())
 		{

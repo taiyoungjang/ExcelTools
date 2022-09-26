@@ -50,6 +50,11 @@ namespace TBL
 {
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
+    public static class Base_
+    {
+        public static string Path { get; set; }
+        public static string Language { get; set; }
+    }
 	public interface ILoader
 	{
 		void ReadStream(System.IO.Stream stream);

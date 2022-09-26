@@ -3,3 +3,7 @@ bin
 obj
 .vs
 .idea
+Debug
+Release
+cargo.lock
+target

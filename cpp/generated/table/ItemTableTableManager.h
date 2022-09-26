@@ -1,19 +1,14 @@
-// generate ItemTableTableManager.h
+// generated ItemTableTableManager.h
 // DO NOT TOUCH SOURCE....
-#ifndef ITEMTABLETABLEMANAGER_H
-#define ITEMTABLETABLEMANAGER_H
+#pragma once
 
 #include "ItemTable.h"
-#include <TableManager.h>
-namespace TBL
+#include "TableManager.h"
+namespace TBL::ItemTable
 {
-  namespace ItemTable
+  class TableManager
   {
-    class TableManager
-    {
-      public:
-      static bool LoadTable(std::ifstream& stream);
-    };
+    public:
+    bool LoadTable(BufferReader& stream);
   };
-};
-#endif //ITEMTABLETABLEMANAGER_H
+}

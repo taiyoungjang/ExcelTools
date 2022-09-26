@@ -1,337 +1,201 @@
-// generate ItemTable.cs
-// DO NOT TOUCH SOURCE....
-#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018
-namespace TBL.ItemTable
-{
-  #if !UNITY_2018_2_OR_NEWER
-  public interface IItem
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-    int Item_ID {get;}
-    string Name {get;}
-    int Item_grade {get;}
-    int Require_lv {get;}
-    int Enchant_lv {get;}
-    int PhysicalAttack {get;}
-    int PhysicalDefense {get;}
-    int MagicalAttack {get;}
-    int MagicalDefense {get;}
-    float Critical {get;}
-    int HP {get;}
-    int KnockBackResist {get;}
-    eDictionaryType DictionaryType {get;}
-    int ItemType {get;}
-    short Gear_Score {get;}
-    short InventoryType {get;}
-    bool UsageType {get;}
-    short Socket_quantity {get;}
-    int Removal_cost {get;}
-    short Belonging {get;}
-    short Sub_stats_quantity {get;}
-    int Stack {get;}
-    int DesignScroll_ID {get;}
-    int BindingSkill_ID {get;}
-    int BindingAttack_ID {get;}
-    int Manufacture_gold {get;}
-    int Manufacture_cash {get;}
-    int SummonCompanion_ID {get;}
-    int Next_itemID {get;}
-    int Next_item_price {get;}
-    int[] Next_Item_material {get;}
-    int[] Next_Item_material_quantity {get;}
-    string Resource_Path {get;}
-    string WeaponName {get;}
-    short WeaponIndex {get;}
-    string[] PartName {get;}
-    short[] PartIndex {get;}
-    string Icon_path {get;}
-    int EXP {get;}
-    int Buy_cost {get;}
-    int Sell_reward {get;}
-    int Consignment_maxprice {get;}
-    int QuestBringer {get;}
-    int ItemEvent_ID {get;}
-    string Description {get;}
-    int Sub_Item {get;}
-    int WeaponType {get;}
-    int[] RandomBoxGroup_NO {get;}
-  }
-  #endif
-  public partial struct Item
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-      public readonly int Item_ID;
-      public readonly string Name;
-      public readonly int Item_grade;
-      public readonly int Require_lv;
-      public readonly int Enchant_lv;
-      public readonly int PhysicalAttack;
-      public readonly int PhysicalDefense;
-      public readonly int MagicalAttack;
-      public readonly int MagicalDefense;
-      public readonly float Critical;
-      public readonly int HP;
-      public readonly int KnockBackResist;
-      public readonly eDictionaryType DictionaryType;
-      public readonly int ItemType;
-      public readonly short Gear_Score;
-      public readonly short InventoryType;
-      public readonly bool UsageType;
-      public readonly short Socket_quantity;
-      public readonly int Removal_cost;
-      public readonly short Belonging;
-      public readonly short Sub_stats_quantity;
-      public readonly int Stack;
-      public readonly int DesignScroll_ID;
-      public readonly int BindingSkill_ID;
-      public readonly int BindingAttack_ID;
-      public readonly int Manufacture_gold;
-      public readonly int Manufacture_cash;
-      public readonly int SummonCompanion_ID;
-      public readonly int Next_itemID;
-      public readonly int Next_item_price;
-      public readonly int[] Next_Item_material;
-      public readonly int[] Next_Item_material_quantity;
-      public readonly string Resource_Path;
-      public readonly string WeaponName;
-      public readonly short WeaponIndex;
-      public readonly string[] PartName;
-      public readonly short[] PartIndex;
-      public readonly string Icon_path;
-      public readonly int EXP;
-      public readonly int Buy_cost;
-      public readonly int Sell_reward;
-      public readonly int Consignment_maxprice;
-      public readonly int QuestBringer;
-      public readonly int ItemEvent_ID;
-      public readonly string Description;
-      public readonly int Sub_Item;
-      public readonly int WeaponType;
-      public readonly int[] RandomBoxGroup_NO;
-    public Item (int Item_ID__,string Name__,int Item_grade__,int Require_lv__,int Enchant_lv__,int PhysicalAttack__,int PhysicalDefense__,int MagicalAttack__,int MagicalDefense__,float Critical__,int HP__,int KnockBackResist__,eDictionaryType DictionaryType__,int ItemType__,short Gear_Score__,short InventoryType__,bool UsageType__,short Socket_quantity__,int Removal_cost__,short Belonging__,short Sub_stats_quantity__,int Stack__,int DesignScroll_ID__,int BindingSkill_ID__,int BindingAttack_ID__,int Manufacture_gold__,int Manufacture_cash__,int SummonCompanion_ID__,int Next_itemID__,int Next_item_price__,int[] Next_Item_material__,int[] Next_Item_material_quantity__,string Resource_Path__,string WeaponName__,short WeaponIndex__,string[] PartName__,short[] PartIndex__,string Icon_path__,int EXP__,int Buy_cost__,int Sell_reward__,int Consignment_maxprice__,int QuestBringer__,int ItemEvent_ID__,string Description__,int Sub_Item__,int WeaponType__,int[] RandomBoxGroup_NO__)
-    {
-      this.Item_ID = Item_ID__;
-      this.Name = Name__;
-      this.Item_grade = Item_grade__;
-      this.Require_lv = Require_lv__;
-      this.Enchant_lv = Enchant_lv__;
-      this.PhysicalAttack = PhysicalAttack__;
-      this.PhysicalDefense = PhysicalDefense__;
-      this.MagicalAttack = MagicalAttack__;
-      this.MagicalDefense = MagicalDefense__;
-      this.Critical = Critical__;
-      this.HP = HP__;
-      this.KnockBackResist = KnockBackResist__;
-      this.DictionaryType = DictionaryType__;
-      this.ItemType = ItemType__;
-      this.Gear_Score = Gear_Score__;
-      this.InventoryType = InventoryType__;
-      this.UsageType = UsageType__;
-      this.Socket_quantity = Socket_quantity__;
-      this.Removal_cost = Removal_cost__;
-      this.Belonging = Belonging__;
-      this.Sub_stats_quantity = Sub_stats_quantity__;
-      this.Stack = Stack__;
-      this.DesignScroll_ID = DesignScroll_ID__;
-      this.BindingSkill_ID = BindingSkill_ID__;
-      this.BindingAttack_ID = BindingAttack_ID__;
-      this.Manufacture_gold = Manufacture_gold__;
-      this.Manufacture_cash = Manufacture_cash__;
-      this.SummonCompanion_ID = SummonCompanion_ID__;
-      this.Next_itemID = Next_itemID__;
-      this.Next_item_price = Next_item_price__;
-      this.Next_Item_material = Next_Item_material__;
-      this.Next_Item_material_quantity = Next_Item_material_quantity__;
-      this.Resource_Path = Resource_Path__;
-      this.WeaponName = WeaponName__;
-      this.WeaponIndex = WeaponIndex__;
-      this.PartName = PartName__;
-      this.PartIndex = PartIndex__;
-      this.Icon_path = Icon_path__;
-      this.EXP = EXP__;
-      this.Buy_cost = Buy_cost__;
-      this.Sell_reward = Sell_reward__;
-      this.Consignment_maxprice = Consignment_maxprice__;
-      this.QuestBringer = QuestBringer__;
-      this.ItemEvent_ID = ItemEvent_ID__;
-      this.Description = Description__;
-      this.Sub_Item = Sub_Item__;
-      this.WeaponType = WeaponType__;
-      this.RandomBoxGroup_NO = RandomBoxGroup_NO__;
-    }
-  }
-  #if !UNITY_2018_2_OR_NEWER
-  public interface IItemEffect
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-    int Index {get;}
-    int Item_ID {get;}
-    int Effect_type {get;}
-    float Effect_min {get;}
-    float Effect_max {get;}
-    int Time_type {get;}
-    float Time_rate {get;}
-    float Time {get;}
-    float Duration {get;}
-    string Description {get;}
-  }
-  #endif
-  public partial struct ItemEffect
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-      public readonly int Index;
-      public readonly int Item_ID;
-      public readonly int Effect_type;
-      public readonly float Effect_min;
-      public readonly float Effect_max;
-      public readonly int Time_type;
-      public readonly float Time_rate;
-      public readonly float Time;
-      public readonly float Duration;
-      public readonly string Description;
-    public ItemEffect (int Index__,int Item_ID__,int Effect_type__,float Effect_min__,float Effect_max__,int Time_type__,float Time_rate__,float Time__,float Duration__,string Description__)
-    {
-      this.Index = Index__;
-      this.Item_ID = Item_ID__;
-      this.Effect_type = Effect_type__;
-      this.Effect_min = Effect_min__;
-      this.Effect_max = Effect_max__;
-      this.Time_type = Time_type__;
-      this.Time_rate = Time_rate__;
-      this.Time = Time__;
-      this.Duration = Duration__;
-      this.Description = Description__;
-    }
-  }
-  #if !UNITY_2018_2_OR_NEWER
-  public interface IItemEnchant
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-    int Index {get;}
-    int Item_ID {get;}
-    int Enchant_lv {get;}
-    int Physical_attack {get;}
-    int Physical_defense {get;}
-    int Magic_attack {get;}
-    int Magic_defense {get;}
-    float Critical {get;}
-    int HP {get;}
-    int KnockBack_resist {get;}
-    int[] Material_IDS {get;}
-    int[] Material_quantitys {get;}
-    int Require_gold {get;}
-    int Require_cash {get;}
-  }
-  #endif
-  public partial struct ItemEnchant
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-      public readonly int Index;
-      public readonly int Item_ID;
-      public readonly int Enchant_lv;
-      public readonly int Physical_attack;
-      public readonly int Physical_defense;
-      public readonly int Magic_attack;
-      public readonly int Magic_defense;
-      public readonly float Critical;
-      public readonly int HP;
-      public readonly int KnockBack_resist;
-      public readonly int[] Material_IDS;
-      public readonly int[] Material_quantitys;
-      public readonly int Require_gold;
-      public readonly int Require_cash;
-    public ItemEnchant (int Index__,int Item_ID__,int Enchant_lv__,int Physical_attack__,int Physical_defense__,int Magic_attack__,int Magic_defense__,float Critical__,int HP__,int KnockBack_resist__,int[] Material_IDS__,int[] Material_quantitys__,int Require_gold__,int Require_cash__)
-    {
-      this.Index = Index__;
-      this.Item_ID = Item_ID__;
-      this.Enchant_lv = Enchant_lv__;
-      this.Physical_attack = Physical_attack__;
-      this.Physical_defense = Physical_defense__;
-      this.Magic_attack = Magic_attack__;
-      this.Magic_defense = Magic_defense__;
-      this.Critical = Critical__;
-      this.HP = HP__;
-      this.KnockBack_resist = KnockBack_resist__;
-      this.Material_IDS = Material_IDS__;
-      this.Material_quantitys = Material_quantitys__;
-      this.Require_gold = Require_gold__;
-      this.Require_cash = Require_cash__;
-    }
-  }
-  #if !UNITY_2018_2_OR_NEWER
-  public interface IItemManufacture
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-    int Index {get;}
-    int Subject_item_ID {get;}
-    int Material_item_ID {get;}
-    int Material_quantity {get;}
-  }
-  #endif
-  public partial struct ItemManufacture
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-      public readonly int Index;
-      public readonly int Subject_item_ID;
-      public readonly int Material_item_ID;
-      public readonly int Material_quantity;
-    public ItemManufacture (int Index__,int Subject_item_ID__,int Material_item_ID__,int Material_quantity__)
-    {
-      this.Index = Index__;
-      this.Subject_item_ID = Subject_item_ID__;
-      this.Material_item_ID = Material_item_ID__;
-      this.Material_quantity = Material_quantity__;
-    }
-  }
-  #if !UNITY_2018_2_OR_NEWER
-  public interface IRandomBoxGroup
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-    int ID {get;}
-    int RandomItemGroup_NO {get;}
-    int ClassType {get;}
-    int Item_ID {get;}
-    int RatioAmount {get;}
-    int Item_Quantity {get;}
-  }
-  #endif
-  public partial struct RandomBoxGroup
-  {
-    /// <summary>
-    /// Key Column
-    /// </summary>
-      public readonly int ID;
-      public readonly int RandomItemGroup_NO;
-      public readonly int ClassType;
-      public readonly int Item_ID;
-      public readonly int RatioAmount;
-      public readonly int Item_Quantity;
-    public RandomBoxGroup (int ID__,int RandomItemGroup_NO__,int ClassType__,int Item_ID__,int RatioAmount__,int Item_Quantity__)
-    {
-      this.ID = ID__;
-      this.RandomItemGroup_NO = RandomItemGroup_NO__;
-      this.ClassType = ClassType__;
-      this.Item_ID = Item_ID__;
-      this.RatioAmount = RatioAmount__;
-      this.Item_Quantity = Item_Quantity__;
-    }
-  }
-};
+﻿#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018
+namespace TBL.ItemTable;
+/// <summary>
+/// Item
+/// </summary>
+/// <param name="Item_ID"></param> 
+/// <param name="Name"></param> 
+/// <param name="Item_grade"></param> 
+/// <param name="Require_lv"></param> 
+/// <param name="Enchant_lv"></param> 
+/// <param name="PhysicalAttack"></param> 
+/// <param name="PhysicalDefense"></param> 
+/// <param name="MagicalAttack"></param> 
+/// <param name="MagicalDefense"></param> 
+/// <param name="Critical"></param> 
+/// <param name="HP"></param> 
+/// <param name="KnockBackResist"></param> 
+/// <param name="DictionaryType"></param> 
+/// <param name="ItemType"></param> 
+/// <param name="Gear_Score"></param> 
+/// <param name="InventoryType"></param> 
+/// <param name="UsageType"></param> 
+/// <param name="Socket_quantity"></param> 
+/// <param name="Removal_cost"></param> 
+/// <param name="Belonging"></param> 
+/// <param name="Sub_stats_quantity"></param> 
+/// <param name="Stack"></param> 
+/// <param name="DesignScroll_ID"></param> 
+/// <param name="BindingSkill_ID"></param> 
+/// <param name="BindingAttack_ID"></param> 
+/// <param name="Manufacture_gold"></param> 
+/// <param name="Manufacture_cash"></param> 
+/// <param name="SummonCompanion_ID"></param> 
+/// <param name="Next_itemID"></param> 
+/// <param name="Next_item_price"></param> 
+/// <param name="Next_Item_material"></param> 
+/// <param name="Next_Item_material_quantity">젬의 경우 전체 필요한 수량을 여기에 적는다상위 젬을 만들기 위해 하위 젬이 4개 필요한 경우 4라고 기재</param> 
+/// <param name="Resource_Path"></param> 
+/// <param name="WeaponName"></param> 
+/// <param name="WeaponIndex"></param> 
+/// <param name="PartName"></param> 
+/// <param name="PartIndex"></param> 
+/// <param name="Icon_path"></param> 
+/// <param name="EXP"></param> 
+/// <param name="Buy_cost"></param> 
+/// <param name="Sell_reward"></param> 
+/// <param name="Consignment_maxprice"></param> 
+/// <param name="QuestBringer"></param> 
+/// <param name="ItemEvent_ID"></param> 
+/// <param name="Description"></param> 
+/// <param name="Sub_Item">NETEASE-SH:방패등 서브아이템 아이디</param> 
+/// <param name="WeaponType">wlfh qkr:0: 맨손1: 왼손무기2: 오른손 무기</param> 
+/// <param name="RandomBoxGroup_NO"></param> 
+[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+public partial record Item
+(
+  int Item_ID
+, string Name
+, int Item_grade
+, int Require_lv
+, int Enchant_lv
+, int PhysicalAttack
+, int PhysicalDefense
+, int MagicalAttack
+, int MagicalDefense
+, float Critical
+, int HP
+, int KnockBackResist
+, eDictionaryType DictionaryType
+, int ItemType
+, short Gear_Score
+, short InventoryType
+, bool UsageType
+, short Socket_quantity
+, int Removal_cost
+, short Belonging
+, short Sub_stats_quantity
+, int Stack
+, int DesignScroll_ID
+, int BindingSkill_ID
+, int BindingAttack_ID
+, int Manufacture_gold
+, int Manufacture_cash
+, int SummonCompanion_ID
+, int Next_itemID
+, int Next_item_price
+, int[] Next_Item_material
+, int[] Next_Item_material_quantity
+, string Resource_Path
+, string WeaponName
+, short WeaponIndex
+, string[] PartName
+, short[] PartIndex
+, string Icon_path
+, int EXP
+, int Buy_cost
+, int Sell_reward
+, int Consignment_maxprice
+, int QuestBringer
+, int ItemEvent_ID
+, string Description
+, int Sub_Item
+, int WeaponType
+, int[] RandomBoxGroup_NO
+);
+/// <summary>
+/// ItemEffect
+/// </summary>
+/// <param name="Index"></param> 
+/// <param name="Item_ID"></param> 
+/// <param name="Effect_type"></param> 
+/// <param name="Effect_min"></param> 
+/// <param name="Effect_max"></param> 
+/// <param name="Time_type"></param> 
+/// <param name="Time_rate"></param> 
+/// <param name="Time"></param> 
+/// <param name="Duration"></param> 
+/// <param name="Description"></param> 
+[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+public partial record ItemEffect
+(
+  int Index
+, int Item_ID
+, int Effect_type
+, float Effect_min
+, float Effect_max
+, int Time_type
+, float Time_rate
+, float Time
+, float Duration
+, string Description
+);
+/// <summary>
+/// ItemEnchant
+/// </summary>
+/// <param name="Index"></param> 
+/// <param name="Item_ID"></param> 
+/// <param name="Enchant_lv"></param> 
+/// <param name="Physical_attack"></param> 
+/// <param name="Physical_defense"></param> 
+/// <param name="Magic_attack"></param> 
+/// <param name="Magic_defense"></param> 
+/// <param name="Critical"></param> 
+/// <param name="HP"></param> 
+/// <param name="KnockBack_resist"></param> 
+/// <param name="Material_IDS"></param> 
+/// <param name="Material_quantitys"></param> 
+/// <param name="Require_gold"></param> 
+/// <param name="Require_cash"></param> 
+[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+public partial record ItemEnchant
+(
+  int Index
+, int Item_ID
+, int Enchant_lv
+, int Physical_attack
+, int Physical_defense
+, int Magic_attack
+, int Magic_defense
+, float Critical
+, int HP
+, int KnockBack_resist
+, int[] Material_IDS
+, int[] Material_quantitys
+, int Require_gold
+, int Require_cash
+);
+/// <summary>
+/// ItemManufacture
+/// </summary>
+/// <param name="Index"></param> 
+/// <param name="Subject_item_ID"></param> 
+/// <param name="Material_item_ID"></param> 
+/// <param name="Material_quantity"></param> 
+[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+public partial record ItemManufacture
+(
+  int Index
+, int Subject_item_ID
+, int Material_item_ID
+, int Material_quantity
+);
+/// <summary>
+/// RandomBoxGroup
+/// </summary>
+/// <param name="ID"></param> 
+/// <param name="RandomItemGroup_NO"></param> 
+/// <param name="ClassType"></param> 
+/// <param name="Item_ID"></param> 
+/// <param name="RatioAmount"></param> 
+/// <param name="Item_Quantity"></param> 
+[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+public partial record RandomBoxGroup
+(
+  int ID
+, int RandomItemGroup_NO
+, int ClassType
+, int Item_ID
+, int RatioAmount
+, int Item_Quantity
+);

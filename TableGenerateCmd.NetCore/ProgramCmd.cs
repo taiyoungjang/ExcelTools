@@ -11,18 +11,19 @@ namespace TableGenerateCmd
 {
     public static class ProgramCmd
     {
-        public static int EXPORT_CS         = 1;     // 0000000001
-        public static int EXPORT_CPPHEADER  = 2;     // 0000000010
-        public static int EXPORT_CPP        = 4;     // 0000000010
-        public static int EXPORT_CPPMGR     = 8;     // 0000000100
-        public static int EXPORT_HPPMGR     = 16;    // 0000001000
-        public static int EXPORT_CSMGR      = 32;    // 0000010000
-        public static int EXPORT_TABLE      = 64;    // 0000100000
-        public static int EXPORT_PROTO      = 128;   // 0001000000
-        public static int EXPORT_SQLITE     = 256;   // 0010000000
-        public static int EXPORT_MSSQL      = 512;   // 0100000000
-        public static int EXPORT_MYSQL      = 1024;  // 0111111111
-        public static int EXPORT_ALL        = 2048;  // 1111111111
+        public static long EXPORT_CS         = 1 << 1;     // 0000000001
+        public static long EXPORT_CPPHEADER  = 1 << 2;     // 0000000010
+        public static long EXPORT_CPP        = 1 << 3;     // 0000000010
+        public static long EXPORT_CPPMGR     = 1 << 4;     // 0000000100
+        public static long EXPORT_HPPMGR     = 1 << 5;    // 0000001000
+        public static long EXPORT_CSMGR      = 1 << 6;    // 0000010000
+        public static long EXPORT_TABLE      = 1 << 7;    // 0000100000
+        public static long EXPORT_PROTO      = 1 << 8;   // 0001000000
+        public static long EXPORT_SQLITE     = 1 << 9;   // 0010000000
+        public static long EXPORT_MSSQL      = 1 << 10;   // 0100000000
+        public static long EXPORT_MYSQL      = 1 << 11;  // 0111111111
+        public static long EXPORT_RUST       = 1 << 12;  // 1111111111
+        public static long EXPORT_ALL        = EXPORT_CS | EXPORT_CPPHEADER | EXPORT_CPP | EXPORT_CPPMGR | EXPORT_HPPMGR | EXPORT_CSMGR | EXPORT_TABLE | EXPORT_PROTO | EXPORT_RUST;  
 
         public static string EXT_TYPE = ".xls";
         public static string TABLE_DIR = $"Data{System.IO.Path.DirectorySeparatorChar}Table";
@@ -32,7 +33,7 @@ namespace TableGenerateCmd
         public static string DLL_DIR = $"engine{System.IO.Path.DirectorySeparatorChar}table";
         public static string DB_DIR = $"Server{System.IO.Path.DirectorySeparatorChar}engine{System.IO.Path.DirectorySeparatorChar}table{System.IO.Path.DirectorySeparatorChar}DB";
 
-        public static int cmd = 0;
+        public static long cmd = 0;
         public static int exit_code = 0;
         public static string inifilename = string.Empty, source = string.Empty, version = string.Empty, lang = string.Empty, single_file = string.Empty, ext_path = string.Empty, async = string.Empty;
         public static int parallel = 1;
@@ -193,7 +194,7 @@ namespace TableGenerateCmd
                 argstr += a + " ";
             }
 
-            int tmp, i=0;
+            long tmp, i=0;
 
             try {               // out of index Exception을 잡기 위해서...
                 while (i < args.Length)
@@ -252,29 +253,20 @@ namespace TableGenerateCmd
 
         public static String ExtractAppName() => System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
 
-        public static int CmdToMask(string val)
-        {
-            string cmd = val.ToLower();
-            if (cmd == "c++" || cmd == "cpp")
-                return EXPORT_CPP | EXPORT_CPPHEADER | EXPORT_HPPMGR | EXPORT_CPPMGR;
-            else if (cmd == "c#" || cmd == "cs")
-                return EXPORT_CS | EXPORT_CSMGR;
-//            else if (cmd == "c#" || cmd == "cs")
-//                return EXPORT_CS | EXPORT_CSMGR;
-            else if (cmd == "table" || cmd == "tbl" || cmd == "bytes")
-                return EXPORT_TABLE;
-            else if (cmd == "proto")
-                return EXPORT_PROTO;
-            else if (cmd == "sqlite" || cmd == "sqllite")
-                return EXPORT_SQLITE;
-            else if (cmd == "mssql")
-                return EXPORT_MSSQL;
-            else if (cmd == "mysql")
-                return EXPORT_MYSQL;
-            else if (cmd == "ALL")
-                return EXPORT_ALL;
-            return -1;
-        }
+        public static long CmdToMask(string val)
+            => val.ToLower() switch
+            {
+                "c++" or "cpp" => EXPORT_CPP | EXPORT_CPPHEADER | EXPORT_HPPMGR | EXPORT_CPPMGR,
+                "c#" or "cs" => EXPORT_CS | EXPORT_CSMGR,
+                "table" or "tbl" or "bytes" => EXPORT_TABLE,
+                "proto" or "bytes" => EXPORT_PROTO,
+                "rust" or "rs" => EXPORT_RUST,
+                "sqlite" or "sqllite" => EXPORT_SQLITE,
+                "mssql" => EXPORT_MSSQL,
+                "mysql" => EXPORT_MYSQL,
+                "all" => EXPORT_ALL,
+                _ => -1
+            };
 
 
         public static string save_as_value_powershell =

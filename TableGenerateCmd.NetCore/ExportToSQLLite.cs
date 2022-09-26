@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Linq;
+using TableGenerateCmd;
 
 namespace TableGenerate
 {
@@ -103,7 +104,7 @@ namespace TableGenerate
             _writer.WriteLine(");");
         }
 
-        private void ExportDataProcess(string filename, string sheetName, List<Column> columns, string[,] rows, StreamWriter _writer)
+        private void ExportDataProcess(string filename, string sheetName, List<Column> columns, StringWithDesc[,] rows, StreamWriter _writer)
         {
             _writer.WriteLine($"/** start insert {sheetName} */");
             InnerExportDataProcess(columns, rows, filename, sheetName, _writer);
@@ -149,11 +150,11 @@ namespace TableGenerate
             _writer.WriteLine(string.Empty);
         }
 
-        private void InnerExportDataProcess(List<Column> columns, string[,] rows, string filename, string sheetName, StreamWriter _writer)
+        private void InnerExportDataProcess(List<Column> columns, StringWithDesc[,] rows, string filename, string sheetName, StreamWriter _writer)
         {
             for (int i = 3; i < rows.GetLength(0); i++)
             {
-                if (rows[i, 0].ToUpper() == "EOF" || rows[i, 0].Length == 0)
+                if (rows[i, 0].Text.ToUpper() == "EOF" || rows[i, 0].Text.Length == 0)
                     break;
 
                 _writer.Write($"  INSERT INTO {sheetName}");
@@ -187,7 +188,7 @@ namespace TableGenerate
                     if( column == null )
                         continue;
 
-                    string data = rows[i, j].Replace("\'", "\'\'");
+                    string data = rows[i, j].Text.Replace("\'", "\'\'");
 
                     if (column.is_generated == false)
                         continue;

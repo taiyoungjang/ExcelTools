@@ -1,0 +1,11 @@
+[package]
+name = "rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+binary-reader = "0.4.5"
+bzip2 = "0.4.3"
+md5 = "0.7.0"

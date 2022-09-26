@@ -150,6 +150,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BufferReader.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="generated\table\ItemTable.h" />
     <ClInclude Include="generated\table\ItemTableTableManager.h" />
