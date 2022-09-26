@@ -82,12 +82,14 @@ namespace TableGenerate
                     }
 
                     // Init class
-                    writer.WriteLineEx($"namespace {NameSpace}.{filename};");
+                    writer.WriteLineEx($"namespace {NameSpace}.{filename}");
+                    writer.WriteLineEx("{");
                     writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
                     writer.WriteLineEx( "public class Loader : ILoader");
                     writer.WriteLineEx( "{");
-
+                    
                     writer.WriteLineEx($"#if !{_unityDefine}");
+                    /*
                     writer.WriteLineEx("public System.Data.DataSet DataSet");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("get");
@@ -109,6 +111,7 @@ namespace TableGenerate
                     }
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("}");
+                    */
                     // ExcelLoad function
                     writer.WriteLineEx("#if !NO_EXCEL_LOADER");
                     writer.WriteLineEx("public void ExcelLoad(string path, string language)");
@@ -305,7 +308,7 @@ namespace TableGenerate
                         SheetProcess(writer, filename, trimSheetName, columns);
                     }
 
-                    //_writer.WriteLineEx("}");
+                    writer.WriteLineEx("}");
                     writer.Flush();
                 }
                 string tempCreateFileName = createFileName.Replace(".cs", "Manager.cs");
@@ -328,7 +331,7 @@ namespace TableGenerate
                 writer.WriteLineEx($"#endif");
             }
             string primitiveName = keyColumn.var_name;
-            writer.WriteLineEx($"public partial record {sheetName}");
+            writer.WriteLineEx($"public partial class {sheetName}");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"private static {sheetName}[] array_;");
             writer.WriteLineEx($"public static {sheetName}[] Array_");
@@ -424,11 +427,11 @@ namespace TableGenerate
             writer.WriteLineEx();
             WriteStreamFunction(writer, filename, sheetName,columns);
             writer.WriteLineEx($"#if !{_unityDefine}");
-            SetDataTableFunction(writer, filename, sheetName, columns);
+            //SetDataTableFunction(writer, filename, sheetName, columns);
             writer.WriteLineEx("#if !NO_EXCEL_LOADER");
             ExcelLoadFunction(writer, filename, sheetName, columns);
             writer.WriteLineEx("#endif");
-            GetDataTableFunction(writer, filename, sheetName, columns);
+            //GetDataTableFunction(writer, filename, sheetName, columns);
             writer.WriteLineEx("#endif");
             ReadStreamFunction(writer, filename, sheetName, columns);
             ArrayCountFunction(writer, filename, sheetName, columns);
@@ -651,7 +654,7 @@ namespace TableGenerate
                 }
             }
 
-            writer.WriteLineEx(string.Format("{0} values = new {0}({1});", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}").ToArray())));
+            writer.WriteLineEx(string.Format("{0} values = new {0}{{ {1} }};", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}={t.var_name}").ToArray())));
             writer.WriteLineEx("foreach (var preValues in list__)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"if (preValues.{keyColumn.var_name}.Equals({keyColumn.var_name}))");
@@ -889,9 +892,9 @@ namespace TableGenerate
                 }
             }
             writer.WriteLineEx(
-                string.Format("var __table = new {0}({1});", 
+                string.Format("var __table = new {0}(){{ {1} }};", 
                 sheetName,
-                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => t.var_name).ToArray())
+                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}={t.var_name}").ToArray())
             ));
             writer.WriteLineEx($"array__[__i] = __table;");
             writer.WriteLineEx("}");

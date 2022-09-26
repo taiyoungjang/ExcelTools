@@ -50,8 +50,8 @@ namespace TableGenerate
                         max = sheets.GetLength(0);
                         current = 0;
 
-                        writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}.{filename};");
-
+                        writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}.{filename}");
+                        writer.WriteLineEx("{");
                         foreach (string sheetName in sheets)
                         {
                             current++;
@@ -60,6 +60,7 @@ namespace TableGenerate
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                             SheetProcess(writer, filename, trimSheetName, columns);
                         }
+                        writer.WriteLineEx("}");
                         writer.Flush();
                     }
                     ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
@@ -84,11 +85,11 @@ namespace TableGenerate
             writer.WriteLineEx($"/// </summary>");
             InnerSheetDescProcess(writer,columns);
             writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
-            writer.WriteLineEx($"public partial record {sheetName}");
-            writer.WriteLineEx("(");
+            writer.WriteLineEx($"public partial class {sheetName}");
+            writer.WriteLineEx("{");
             InnerSheetProcess(writer, columns);
             //SheetConstructorProcess(writer, sheetName, columns);
-            writer.WriteLineEx(");");
+            writer.WriteLineEx("}");
         }
         private void InterfacePropertySheetProcess(string sheetName, IndentedTextWriter _writer, List<Column> columns)
         {
@@ -145,20 +146,10 @@ namespace TableGenerate
                     // writer.WriteLineEx($"/// Key Column");
                     // writer.WriteLineEx($"/// </summary>");
                 }
-                
-                //if (_async == "unity3d")
-                //{
-                //    _writer.WriteLineEx($"public abstract {type} {name} {{get;}}");
-                //}
-                //else
-                {
-                    writer.WriteLineNoTabs($"/// <param name=\"{name}\">{column.desc}</param> ");
-                }
             }
         }
         private void InnerSheetProcess(IndentedTextWriter writer, List<Column> columns)
         {
-            bool isFirst = true;
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -181,37 +172,14 @@ namespace TableGenerate
                 //{
                 //    _writer.WriteLineEx($"public abstract {type} {name} {{get;}}");
                 //}
-                //else
+                if(column.desc.Any())
                 {
-                    writer.WriteLineEx($"{(isFirst?' ':',')} {type} {name}");
+                    writer.WriteLineEx($"/// <param name=\"{name}\">{column.desc}</param> ");
                 }
-                isFirst = false;
-            }
-        }
-        private void SheetConstructorProcess(IndentedTextWriter _writer, string sheetName, List<Column> columns)
-        {
-            //if (_async != "unity3d")
-            {
-                _writer.WriteLineEx(string.Format("public {0} ({1})",
-                    sheetName,
-                    string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.GenerateType(_gen_type)} {t.var_name}__").ToArray()))
-                );
-                _writer.WriteLineEx($"{{");
-                foreach (var column in columns)
                 {
-                    string name = column.var_name;
-                    string type = column.GenerateType(_gen_type);
-                    if (column.is_generated == false)
-                    {
-                        continue;
-                    }
-                    if (column.array_index > 0)
-                    {
-                        continue;
-                    }
-                    _writer.WriteLineEx($"this.{name} = {name}__;");
+                    writer.WriteLineEx($"  public {type} {name} {{get; private set;}}");
                 }
-                _writer.WriteLineEx($"}}");
+                //isFirst = false;
             }
         }
     }

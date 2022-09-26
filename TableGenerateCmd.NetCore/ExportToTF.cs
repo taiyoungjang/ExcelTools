@@ -299,6 +299,7 @@ public static class Encoder
             str.AppendLine("      }");
             str.AppendLine("      return 0;");
             str.AppendLine("    }");
+            /*
             str.AppendLine("    public System.Data.DataSet ExtractFromBytes(string inputPath)");
             str.AppendLine("    {");
             str.AppendLine("      System.Data.DataSet dts = null;");
@@ -333,6 +334,7 @@ public static class Encoder
             str.AppendLine("      //}");
             str.AppendLine("      return 0;");
             str.AppendLine("    }");
+            */
             str.AppendLine("}");
             str.AppendLine("}");
             compileFiles.Add(str.ToString());

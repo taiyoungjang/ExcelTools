@@ -18,9 +18,9 @@
         byte[] GetHash(System.IO.Stream stream);
         //void GetMapAndArray(System.Collections.Generic.Dictionary<string, object> container);
 
-#if !UNITY_5_3_OR_NEWER
-        System.Data.DataSet DataSet { get; set; }
-#endif
+// #if !UNITY_5_3_OR_NEWER
+//         System.Data.DataSet DataSet { get; set; }
+// #endif
     }
     public static class Encoder
     {
