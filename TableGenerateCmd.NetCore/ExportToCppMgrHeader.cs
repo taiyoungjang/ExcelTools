@@ -18,7 +18,7 @@ namespace TableGenerate
 
             using MemoryStream stream = new(32767);
             {
-                StreamWriter writer = new (stream, new System.Text.ASCIIEncoding());
+                StreamWriter writer = new (stream, Encoding.UTF8);
                 {
                     string filename = System.IO.Path.GetFileName(createFileName);
 

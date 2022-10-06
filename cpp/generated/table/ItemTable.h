@@ -1,4 +1,4 @@
-// generate ItemTable
+﻿// generate ItemTable
 // DO NOT TOUCH SOURCE....
 #pragma once
 #include "CoreMinimal.h"
@@ -46,7 +46,7 @@ namespace TBL::ItemTable
         const int32 Next_itemID {};
         const int32 Next_item_price {};
         const TArray<int32> Next_Item_material {};
-        const TArray<int32> Next_Item_material_quantity {};  ///< ?? ?? ?? ??? ??? ??? ????? ?? ??? ?? ?? ?? 4? ??? ?? 4?? ??
+        const TArray<int32> Next_Item_material_quantity {};  ///< 젬의 경우 전체 필요한 수량을 여기에 적는다상위 젬을 만들기 위해 하위 젬이 4개 필요한 경우 4라고 기재
         const FString Resource_Path {};
         const FString WeaponName {};
         const int16 WeaponIndex {};
@@ -60,8 +60,8 @@ namespace TBL::ItemTable
         const int32 QuestBringer {};
         const int32 ItemEvent_ID {};
         const FString Description {};
-        const int32 Sub_Item {};  ///< NETEASE-SH:??? ????? ???
-        const int32 WeaponType {};  ///< wlfh qkr:0: ??1: ????2: ??? ??
+        const int32 Sub_Item {};  ///< NETEASE-SH:방패등 서브아이템 아이디
+        const int32 WeaponType {};  ///< wlfh qkr:0: 맨손1: 왼손무기2: 오른손 무기
         const TArray<int32> RandomBoxGroup_NO {};
         FItem(void);
         FItem& operator=(const FItem& rhs);

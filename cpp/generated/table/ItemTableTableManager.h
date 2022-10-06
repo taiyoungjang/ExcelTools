@@ -1,4 +1,4 @@
-// generated ItemTableTableManager.h
+﻿// generated ItemTableTableManager.h
 // DO NOT TOUCH SOURCE....
 #pragma once
 

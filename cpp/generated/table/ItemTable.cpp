@@ -1,4 +1,4 @@
-// generate ItemTable.cpp
+﻿// generate ItemTable.cpp
 // DO NOT TOUCH SOURCE....
 #include "ItemTable.h"
 using namespace TBL::ItemTable;

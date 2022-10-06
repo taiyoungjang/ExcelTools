@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using StreamWrite.Extension;
 
 namespace TableGenerate
@@ -16,7 +17,7 @@ namespace TableGenerate
 
             using MemoryStream stream = new();
             {
-                StreamWriter writer = new (stream, new System.Text.ASCIIEncoding());
+                StreamWriter writer = new (stream, Encoding.UTF8);
                 {
 
                     string filename = System.IO.Path.GetFileName(createFileName);

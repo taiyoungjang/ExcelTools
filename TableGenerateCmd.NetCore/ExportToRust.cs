@@ -38,7 +38,7 @@ namespace TableGenerate
 
                 using var stream = new MemoryStream();
                 {
-                    using var writer = new IndentedTextWriter(new StreamWriter(stream,  System.Text.Encoding.UTF8), " ");
+                    using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
 

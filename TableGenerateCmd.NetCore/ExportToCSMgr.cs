@@ -33,7 +33,7 @@ namespace TableGenerate
 
             using(var stream = new MemoryStream())
             {
-                var writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), " ");
+                var writer = new IndentedTextWriter(new StreamWriter(stream, Encoding.UTF8), " ");
                 {
                     string filename = System.IO.Path.GetFileName(createFileName);
                     string[] sheets = imp.GetSheetList();

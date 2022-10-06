@@ -1,201 +1,124 @@
 ﻿#pragma warning disable IDE0007, IDE0011, IDE0025, IDE1006, IDE0018
-namespace TBL.ItemTable;
-/// <summary>
-/// Item
-/// </summary>
-/// <param name="Item_ID"></param> 
-/// <param name="Name"></param> 
-/// <param name="Item_grade"></param> 
-/// <param name="Require_lv"></param> 
-/// <param name="Enchant_lv"></param> 
-/// <param name="PhysicalAttack"></param> 
-/// <param name="PhysicalDefense"></param> 
-/// <param name="MagicalAttack"></param> 
-/// <param name="MagicalDefense"></param> 
-/// <param name="Critical"></param> 
-/// <param name="HP"></param> 
-/// <param name="KnockBackResist"></param> 
-/// <param name="DictionaryType"></param> 
-/// <param name="ItemType"></param> 
-/// <param name="Gear_Score"></param> 
-/// <param name="InventoryType"></param> 
-/// <param name="UsageType"></param> 
-/// <param name="Socket_quantity"></param> 
-/// <param name="Removal_cost"></param> 
-/// <param name="Belonging"></param> 
-/// <param name="Sub_stats_quantity"></param> 
-/// <param name="Stack"></param> 
-/// <param name="DesignScroll_ID"></param> 
-/// <param name="BindingSkill_ID"></param> 
-/// <param name="BindingAttack_ID"></param> 
-/// <param name="Manufacture_gold"></param> 
-/// <param name="Manufacture_cash"></param> 
-/// <param name="SummonCompanion_ID"></param> 
-/// <param name="Next_itemID"></param> 
-/// <param name="Next_item_price"></param> 
-/// <param name="Next_Item_material"></param> 
-/// <param name="Next_Item_material_quantity">젬의 경우 전체 필요한 수량을 여기에 적는다상위 젬을 만들기 위해 하위 젬이 4개 필요한 경우 4라고 기재</param> 
-/// <param name="Resource_Path"></param> 
-/// <param name="WeaponName"></param> 
-/// <param name="WeaponIndex"></param> 
-/// <param name="PartName"></param> 
-/// <param name="PartIndex"></param> 
-/// <param name="Icon_path"></param> 
-/// <param name="EXP"></param> 
-/// <param name="Buy_cost"></param> 
-/// <param name="Sell_reward"></param> 
-/// <param name="Consignment_maxprice"></param> 
-/// <param name="QuestBringer"></param> 
-/// <param name="ItemEvent_ID"></param> 
-/// <param name="Description"></param> 
-/// <param name="Sub_Item">NETEASE-SH:방패등 서브아이템 아이디</param> 
-/// <param name="WeaponType">wlfh qkr:0: 맨손1: 왼손무기2: 오른손 무기</param> 
-/// <param name="RandomBoxGroup_NO"></param> 
-[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
-public partial record Item
-(
-  int Item_ID
-, string Name
-, int Item_grade
-, int Require_lv
-, int Enchant_lv
-, int PhysicalAttack
-, int PhysicalDefense
-, int MagicalAttack
-, int MagicalDefense
-, float Critical
-, int HP
-, int KnockBackResist
-, eDictionaryType DictionaryType
-, int ItemType
-, short Gear_Score
-, short InventoryType
-, bool UsageType
-, short Socket_quantity
-, int Removal_cost
-, short Belonging
-, short Sub_stats_quantity
-, int Stack
-, int DesignScroll_ID
-, int BindingSkill_ID
-, int BindingAttack_ID
-, int Manufacture_gold
-, int Manufacture_cash
-, int SummonCompanion_ID
-, int Next_itemID
-, int Next_item_price
-, int[] Next_Item_material
-, int[] Next_Item_material_quantity
-, string Resource_Path
-, string WeaponName
-, short WeaponIndex
-, string[] PartName
-, short[] PartIndex
-, string Icon_path
-, int EXP
-, int Buy_cost
-, int Sell_reward
-, int Consignment_maxprice
-, int QuestBringer
-, int ItemEvent_ID
-, string Description
-, int Sub_Item
-, int WeaponType
-, int[] RandomBoxGroup_NO
-);
-/// <summary>
-/// ItemEffect
-/// </summary>
-/// <param name="Index"></param> 
-/// <param name="Item_ID"></param> 
-/// <param name="Effect_type"></param> 
-/// <param name="Effect_min"></param> 
-/// <param name="Effect_max"></param> 
-/// <param name="Time_type"></param> 
-/// <param name="Time_rate"></param> 
-/// <param name="Time"></param> 
-/// <param name="Duration"></param> 
-/// <param name="Description"></param> 
-[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
-public partial record ItemEffect
-(
-  int Index
-, int Item_ID
-, int Effect_type
-, float Effect_min
-, float Effect_max
-, int Time_type
-, float Time_rate
-, float Time
-, float Duration
-, string Description
-);
-/// <summary>
-/// ItemEnchant
-/// </summary>
-/// <param name="Index"></param> 
-/// <param name="Item_ID"></param> 
-/// <param name="Enchant_lv"></param> 
-/// <param name="Physical_attack"></param> 
-/// <param name="Physical_defense"></param> 
-/// <param name="Magic_attack"></param> 
-/// <param name="Magic_defense"></param> 
-/// <param name="Critical"></param> 
-/// <param name="HP"></param> 
-/// <param name="KnockBack_resist"></param> 
-/// <param name="Material_IDS"></param> 
-/// <param name="Material_quantitys"></param> 
-/// <param name="Require_gold"></param> 
-/// <param name="Require_cash"></param> 
-[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
-public partial record ItemEnchant
-(
-  int Index
-, int Item_ID
-, int Enchant_lv
-, int Physical_attack
-, int Physical_defense
-, int Magic_attack
-, int Magic_defense
-, float Critical
-, int HP
-, int KnockBack_resist
-, int[] Material_IDS
-, int[] Material_quantitys
-, int Require_gold
-, int Require_cash
-);
-/// <summary>
-/// ItemManufacture
-/// </summary>
-/// <param name="Index"></param> 
-/// <param name="Subject_item_ID"></param> 
-/// <param name="Material_item_ID"></param> 
-/// <param name="Material_quantity"></param> 
-[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
-public partial record ItemManufacture
-(
-  int Index
-, int Subject_item_ID
-, int Material_item_ID
-, int Material_quantity
-);
-/// <summary>
-/// RandomBoxGroup
-/// </summary>
-/// <param name="ID"></param> 
-/// <param name="RandomItemGroup_NO"></param> 
-/// <param name="ClassType"></param> 
-/// <param name="Item_ID"></param> 
-/// <param name="RatioAmount"></param> 
-/// <param name="Item_Quantity"></param> 
-[System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
-public partial record RandomBoxGroup
-(
-  int ID
-, int RandomItemGroup_NO
-, int ClassType
-, int Item_ID
-, int RatioAmount
-, int Item_Quantity
-);
+namespace TBL.ItemTable
+{
+  /// <summary>
+  /// Item
+  /// </summary>
+  [System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+  public partial class Item
+  {
+    public int Item_ID {get; private set;}
+    public string Name {get; private set;}
+    public int Item_grade {get; private set;}
+    public int Require_lv {get; private set;}
+    public int Enchant_lv {get; private set;}
+    public int PhysicalAttack {get; private set;}
+    public int PhysicalDefense {get; private set;}
+    public int MagicalAttack {get; private set;}
+    public int MagicalDefense {get; private set;}
+    public float Critical {get; private set;}
+    public int HP {get; private set;}
+    public int KnockBackResist {get; private set;}
+    public eDictionaryType DictionaryType {get; private set;}
+    public int ItemType {get; private set;}
+    public short Gear_Score {get; private set;}
+    public short InventoryType {get; private set;}
+    public bool UsageType {get; private set;}
+    public short Socket_quantity {get; private set;}
+    public int Removal_cost {get; private set;}
+    public short Belonging {get; private set;}
+    public short Sub_stats_quantity {get; private set;}
+    public int Stack {get; private set;}
+    public int DesignScroll_ID {get; private set;}
+    public int BindingSkill_ID {get; private set;}
+    public int BindingAttack_ID {get; private set;}
+    public int Manufacture_gold {get; private set;}
+    public int Manufacture_cash {get; private set;}
+    public int SummonCompanion_ID {get; private set;}
+    public int Next_itemID {get; private set;}
+    public int Next_item_price {get; private set;}
+    public int[] Next_Item_material {get; private set;}
+    /// <param name="Next_Item_material_quantity">젬의 경우 전체 필요한 수량을 여기에 적는다상위 젬을 만들기 위해 하위 젬이 4개 필요한 경우 4라고 기재</param> 
+    public int[] Next_Item_material_quantity {get; private set;}
+    public string Resource_Path {get; private set;}
+    public string WeaponName {get; private set;}
+    public short WeaponIndex {get; private set;}
+    public string[] PartName {get; private set;}
+    public short[] PartIndex {get; private set;}
+    public string Icon_path {get; private set;}
+    public int EXP {get; private set;}
+    public int Buy_cost {get; private set;}
+    public int Sell_reward {get; private set;}
+    public int Consignment_maxprice {get; private set;}
+    public int QuestBringer {get; private set;}
+    public int ItemEvent_ID {get; private set;}
+    public string Description {get; private set;}
+    /// <param name="Sub_Item">NETEASE-SH:방패등 서브아이템 아이디</param> 
+    public int Sub_Item {get; private set;}
+    /// <param name="WeaponType">wlfh qkr:0: 맨손1: 왼손무기2: 오른손 무기</param> 
+    public int WeaponType {get; private set;}
+    public int[] RandomBoxGroup_NO {get; private set;}
+  }
+  /// <summary>
+  /// ItemEffect
+  /// </summary>
+  [System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+  public partial class ItemEffect
+  {
+    public int Index {get; private set;}
+    public int Item_ID {get; private set;}
+    public int Effect_type {get; private set;}
+    public float Effect_min {get; private set;}
+    public float Effect_max {get; private set;}
+    public int Time_type {get; private set;}
+    public float Time_rate {get; private set;}
+    public float Time {get; private set;}
+    public float Duration {get; private set;}
+    public string Description {get; private set;}
+  }
+  /// <summary>
+  /// ItemEnchant
+  /// </summary>
+  [System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+  public partial class ItemEnchant
+  {
+    public int Index {get; private set;}
+    public int Item_ID {get; private set;}
+    public int Enchant_lv {get; private set;}
+    public int Physical_attack {get; private set;}
+    public int Physical_defense {get; private set;}
+    public int Magic_attack {get; private set;}
+    public int Magic_defense {get; private set;}
+    public float Critical {get; private set;}
+    public int HP {get; private set;}
+    public int KnockBack_resist {get; private set;}
+    public int[] Material_IDS {get; private set;}
+    public int[] Material_quantitys {get; private set;}
+    public int Require_gold {get; private set;}
+    public int Require_cash {get; private set;}
+  }
+  /// <summary>
+  /// ItemManufacture
+  /// </summary>
+  [System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+  public partial class ItemManufacture
+  {
+    public int Index {get; private set;}
+    public int Subject_item_ID {get; private set;}
+    public int Material_item_ID {get; private set;}
+    public int Material_quantity {get; private set;}
+  }
+  /// <summary>
+  /// RandomBoxGroup
+  /// </summary>
+  [System.CodeDom.Compiler.GeneratedCode("TableGenerateCmd","1.0.0")]
+  public partial class RandomBoxGroup
+  {
+    public int ID {get; private set;}
+    public int RandomItemGroup_NO {get; private set;}
+    public int ClassType {get; private set;}
+    public int Item_ID {get; private set;}
+    public int RatioAmount {get; private set;}
+    public int Item_Quantity {get; private set;}
+  }
+}

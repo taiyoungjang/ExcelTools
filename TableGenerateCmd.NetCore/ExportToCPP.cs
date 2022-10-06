@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using StreamWrite.Extension;
 using System.CodeDom.Compiler;
+using System.Text;
 
 namespace TableGenerate
 {
@@ -30,7 +31,7 @@ namespace TableGenerate
                 string filename = System.IO.Path.GetFileName(createFileName);
                 string @namespace = $"{ ExportToCSMgr.NameSpace }::{filename.Replace(".cpp", string.Empty)}";
                 using MemoryStream stream = new ();
-                var writer = new IndentedTextWriter(new StreamWriter(stream, new System.Text.ASCIIEncoding()), "  ");
+                var writer = new IndentedTextWriter(new StreamWriter(stream, Encoding.UTF8), "  ");
                 {
 
                     writer.WriteLineEx($"// generate {filename}");

@@ -1,4 +1,4 @@
-#include "ItemTableTableManager.h"
+﻿#include "ItemTableTableManager.h"
 namespace TBL::ItemTable
 {
   class ItemTableManager : public TBL::TableManager
