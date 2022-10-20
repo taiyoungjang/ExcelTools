@@ -133,12 +133,12 @@ namespace TableGenerate
             */
         }
 
-        public static void CheckReplaceFile( MemoryStream tempFile, string fileName, bool using_perforce)
+        public static void CheckReplaceFile( MemoryStream tempFile, string fileName, bool usingPerforce)
         {
             fileName = System.IO.Path.GetFullPath(fileName);
             if (FileEquals(tempFile, fileName) == false)
             {
-                if (using_perforce)
+                if (usingPerforce)
                 {
                     string command = "add";
                     if (System.IO.File.Exists(fileName))

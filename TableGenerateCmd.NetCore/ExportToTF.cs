@@ -116,7 +116,7 @@ namespace TableGenerate
             str.AppendLine($"         if( excel_name.Contains(\"~$\"))continue;");
             str.AppendLine($"         loader__.ExcelLoad(file,\"{language}\");");
             str.AppendLine($"       }}");
-            str.AppendLine($"       loader__.WriteFile(outputPath);");
+            str.AppendLine($"       loader__.WriteFile(outputPath,{ProgramCmd.using_perforce.ToString().ToLower()});");
             str.AppendLine("      }");
             str.AppendLine("      catch(System.Exception ex)");
             str.AppendLine("      {");

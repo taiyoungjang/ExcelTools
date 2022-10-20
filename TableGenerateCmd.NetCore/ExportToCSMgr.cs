@@ -161,39 +161,41 @@ namespace TableGenerate
 
                     // WriteFile function
                     writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-                    writer.WriteLineEx("public void WriteFile(string path)");
+                    writer.WriteLineEx("public void WriteFile(string path, bool usingPerforce)");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("int uncompressedLength = 0;");
-                    writer.WriteLineEx("System.IO.MemoryStream uncompressedMemoryStream = null;");
-                    writer.WriteLineEx("uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);");
+                    writer.WriteLineEx("int compressedLength = 0;");
+                    writer.WriteLineEx("System.IO.MemoryStream ms = null;");
+                    writer.WriteLineEx("ms = new System.IO.MemoryStream(128 * 1024);");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);");
+                    writer.WriteLineEx("var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(ms);");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         writer.WriteLineEx($"{trimSheetName}.WriteStream(uncompressedMemoryStreamWriter);");
                     }
-                    writer.WriteLineEx("uncompressedLength = (int) uncompressedMemoryStream.Position;");
+                    writer.WriteLineEx("uncompressedLength = (int) ms.Position;");
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("System.IO.FileStream stream = null;");
                     writer.WriteLineEx("try");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("string tempFileName = System.IO.Path.GetTempFile" +
                         "Name();");
-                    writer.WriteLineEx("uncompressedMemoryStream.Position=0;");
+                    writer.WriteLineEx("ms.Position=0;");
                     writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);");
+                    writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(ms, __zip,false,1);");
                     writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("var __compressed = __zip.ToArray();");
+                    writer.WriteLineEx("compressedLength = __compressed.Length;");
                     writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
                     writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
                     writer.WriteLineEx("stream.Write(hashBytes, 0, hashBytes.Length);");
                     writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
-                    writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );");
+                    writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(compressedLength), 0, 4 );");
                     writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("}");
@@ -202,10 +204,12 @@ namespace TableGenerate
 
                     writer.WriteLineEx("stream.Flush();");
                     writer.WriteLineEx("stream.Close();");
+                    writer.WriteLineEx("stream = null;");
                     writer.WriteLineEx("using var file  = new System.IO.FileStream(tempFileName, System.IO.FileMode.Open);");
-                    writer.WriteLineEx("using var ms = new System.IO.MemoryStream();");
+                    writer.WriteLineEx("ms.Position=0;");
+                    writer.WriteLineEx("ms.SetLength(file.Length);");
                     writer.WriteLineEx("file.CopyTo(ms);");
-                    writer.WriteLineEx($"TBL.FileExtensions.CheckReplaceFile(ms, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\", {(ProgramCmd.using_perforce?"true":"false")});");
+                    writer.WriteLineEx($"TBL.FileExtensions.CheckReplaceFile(ms, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\", usingPerforce);");
                     writer.WriteLineEx("}catch(System.Exception e)");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("System.Console.WriteLine(e.ToString());");
@@ -213,7 +217,7 @@ namespace TableGenerate
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("finally");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("uncompressedMemoryStream?.Dispose();");
+                    writer.WriteLineEx("ms?.Dispose();");
                     writer.WriteLineEx("}");
 
                     writer.WriteLineEx("}");

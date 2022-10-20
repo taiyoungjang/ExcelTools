@@ -46,20 +46,21 @@
         }
         public static void Write7BitEncodedInt(this System.IO.BinaryWriter writer__, int value)
         {
-            // Write out an int 7 bits at a time.  The high bit of the byte,
-            // when on, tells reader to continue reading more bytes.
-            uint v = (uint)value;   // support negative numbers
+#if ENCODED
+            uint v = (uint) value;   // support negative numbers
             while (v >= 0x80)
             {
-                writer__.Write((byte)(v | 0x80));
+                writer__.Write((byte) (v | 0x80));
                 v >>= 7;
             }
-            writer__.Write((byte)v);
+            writer__.Write((byte) v);
+#else
+            writer__.Write(value);
+#endif
         }
         public static int Read7BitEncodedInt(ref System.IO.BinaryReader reader__)
         {
-            // Read out an Int32 7 bits at a time.  The high bit
-            // of the byte when on means to continue reading more bytes.
+#if ENCODED
             var count = 0;
             var shift = 0;
             byte b;
@@ -78,6 +79,9 @@
                 shift += 7;
             } while ((b & 0x80) != 0);
             return count;
+#else
+            return reader__.ReadInt32();
+#endif
         }
     }
     public struct StringEqualityComparer : IEqualityComparer<string>
@@ -247,7 +251,26 @@
             }
             */
         }
-
+        public static void CheckReplaceFile(string tempFileName, string fileName, bool usingPerforce)
+        {
+            tempFileName = System.IO.Path.GetFullPath(tempFileName);
+            fileName = System.IO.Path.GetFullPath(fileName);
+            if (FileEquals(tempFileName, fileName) == false)
+            {
+                if (usingPerforce)
+                {
+                    string command = "add";
+                    if (System.IO.File.Exists(fileName))
+                    {
+                        var attributes = System.IO.File.GetAttributes(fileName);
+                        var isReadOnly = (attributes & FileAttributes.ReadOnly) != 0;
+                        command = "edit";
+                    }
+                    System.Diagnostics.Process.Start("p4", $"{command} {fileName}");
+                }
+                File.Copy(tempFileName, fileName, true);
+            }
+        }
         public static void CheckReplaceFile( MemoryStream tempFile, string fileName, bool usingPerforce)
         {
             fileName = System.IO.Path.GetFullPath(fileName);
