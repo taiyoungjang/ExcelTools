@@ -88,10 +88,6 @@ namespace TBL.ItemTable
       container.Add( "ItemTable.RandomBoxGroup.array_",RandomBoxGroup.array_);
     }
     */
-    public void CheckReplaceFile( string tempFileName, string fileName ) 
-    {
-      System.IO.File.Copy(tempFileName, fileName, true);
-    }
     #if !NO_EXCEL_LOADER
     public void WriteFile(string path)
     {
@@ -132,7 +128,7 @@ namespace TBL.ItemTable
         stream.Flush();
         stream.Close();
         stream = null;
-        CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + "/") + "/ItemTable.bytes");
+        TBL.FileExtensions.CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + "/") + "/ItemTable.bytes", false);
       }catch(System.Exception e)
       {
         System.Console.WriteLine(e.ToString());

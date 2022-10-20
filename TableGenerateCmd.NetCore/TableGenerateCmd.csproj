@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <None Remove="Binaries\**\*" />
+    <EmbeddedResource Include="ILoader.cs" />
   </ItemGroup>
 
 </Project>

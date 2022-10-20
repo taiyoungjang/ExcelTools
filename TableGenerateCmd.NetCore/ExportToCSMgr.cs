@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using StreamWrite.Extension;
 using System.CodeDom.Compiler;
+using TableGenerateCmd;
 
 namespace TableGenerate
 {
@@ -158,11 +159,6 @@ namespace TableGenerate
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("*/");
 
-                    writer.WriteLineEx("public void CheckReplaceFile( string tempFileName, string fileName ) ");
-                    writer.WriteLineEx("{");
-                    writer.WriteLineEx("System.IO.File.Copy(tempFileName, fileName, true);");
-                    writer.WriteLineEx("}");
-
                     // WriteFile function
                     writer.WriteLineEx("#if !NO_EXCEL_LOADER");
                     writer.WriteLineEx("public void WriteFile(string path)");
@@ -206,8 +202,10 @@ namespace TableGenerate
 
                     writer.WriteLineEx("stream.Flush();");
                     writer.WriteLineEx("stream.Close();");
-                    writer.WriteLineEx("stream = null;");
-                    writer.WriteLineEx($"CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\");");
+                    writer.WriteLineEx("using var file  = new System.IO.FileStream(tempFileName, System.IO.FileMode.Open);");
+                    writer.WriteLineEx("using var ms = new System.IO.MemoryStream();");
+                    writer.WriteLineEx("file.CopyTo(ms);");
+                    writer.WriteLineEx($"TBL.FileExtensions.CheckReplaceFile(ms, System.IO.Path.GetDirectoryName( path + \"/\") + \"/{filename}.bytes\", {(ProgramCmd.using_perforce?"true":"false")});");
                     writer.WriteLineEx("}catch(System.Exception e)");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("System.Console.WriteLine(e.ToString());");
@@ -215,7 +213,7 @@ namespace TableGenerate
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("finally");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();");
+                    writer.WriteLineEx("uncompressedMemoryStream?.Dispose();");
                     writer.WriteLineEx("}");
 
                     writer.WriteLineEx("}");
@@ -312,7 +310,7 @@ namespace TableGenerate
                     writer.Flush();
                 }
                 string tempCreateFileName = createFileName.Replace(".cs", "Manager.cs");
-                ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{tempCreateFileName}");
+                ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{tempCreateFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
             }
 
             return true;

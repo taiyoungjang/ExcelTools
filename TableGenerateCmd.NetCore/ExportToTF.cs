@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.DependencyModel;
+using TableGenerateCmd;
 
 namespace TableGenerate
 {
@@ -44,183 +45,6 @@ namespace TableGenerate
                 _enumTypeDir = value;
             }
         }
-
-        public static string include_str = @"
-namespace TBL 
-{
-	using System.Collections.Generic;
-	using System.Runtime.CompilerServices;
-    public static class Base_
-    {
-        public static string Path { get; set; }
-        public static string Language { get; set; }
-    }
-	public interface ILoader
-	{
-		void ReadStream(System.IO.Stream stream);
-		void ExcelLoad(string path, string language);
-		void CheckReplaceFile(string tempFileName, string fileName);
-		string GetFileName();
-		byte[] GetHash(System.IO.Stream stream);
-		//void GetMapAndArray(System.Collections.Generic.Dictionary<string, object> container);
-	}
-    
-public static class Encoder
-    {
-        public static void Write(this System.IO.BinaryWriter writer__, string value)
-        {
-            var bytes = System.Text.Encoding.UTF8.GetBytes(value);
-            Write7BitEncodedInt(writer__, bytes.Length);
-            if(bytes.Length>0)
-            {
-                writer__.Write(bytes, 0, bytes.Length);
-            }
-        }
-        public static string ReadString(ref System.IO.BinaryReader reader__)
-        {
-            int count = Read7BitEncodedInt(ref reader__);
-            byte[] bytes = reader__.ReadBytes(count);
-            if (count > 0)
-            {
-                return System.Text.Encoding.UTF8.GetString(bytes);
-            }
-            return string.Empty;
-        }
-        public static void Write7BitEncodedInt(System.IO.BinaryWriter writer__, int value)
-        {
-#if ENCODED
-            uint v = (uint) value;   // support negative numbers
-            while (v >= 0x80)
-            {
-                writer__.Write((byte) (v | 0x80));
-                v >>= 7;
-            }
-            writer__.Write((byte) v);
-#else
-            writer__.Write(value);
-#endif
-        }
-        public static int Read7BitEncodedInt(ref System.IO.BinaryReader reader__)
-        {
-#if ENCODED
-            var count = 0;
-            var shift = 0;
-            byte b;
-            do
-            {
-                // Check for a corrupted stream.  Read a max of 5 bytes.
-                // In a future version, add a DataFormatException.
-                if (shift == 5 * 7)  // 5 bytes max per Int32, shift += 7
-                {
-                    //throw new FormatException();
-                }
-
-                // ReadByte handles end of stream cases for us.
-                b = reader__.ReadByte();
-                count |= (b & 0x7F) << shift;
-                shift += 7;
-            } while ((b & 0x80) != 0);
-            return count;
-#else
-            return reader__.ReadInt32();
-#endif
-		}
-	}
-	  
-    public struct StringEqualityComparer : IEqualityComparer<string>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(string x, string y)
-        {
-            bool x_empty = string.IsNullOrEmpty(x);
-            bool y_empty = string.IsNullOrEmpty(y);
-            if (!x_empty || y_empty)
-                return false;
-            if (x_empty || !y_empty)
-                return false;
-            if (x_empty && y_empty)
-                return true;
-            return x.Equals(y);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetHashCode(string obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-    public struct LongEqualityComparer : IEqualityComparer<long>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(long x, long y)
-        {
-            return x == y;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetHashCode(long obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-    public struct IntEqualityComparer : IEqualityComparer<int>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(int x, int y)
-        {
-            return x == y;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetHashCode(int obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-    public struct UIntEqualityComparer : IEqualityComparer<uint>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(uint x, uint y)
-        {
-            return x == y;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetHashCode(uint obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-    public struct ShortEqualityComparer : IEqualityComparer<short>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(short x, short y)
-        {
-            return x == y;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetHashCode(short obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-    public struct UShortEqualityComparer : IEqualityComparer<ushort>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(ushort x, ushort y)
-        {
-            return x == y;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetHashCode(ushort obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-}
-";
 
         public override bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
@@ -266,7 +90,9 @@ public static class Encoder
                 str_loader_class = $"{ExportToCSMgr.NameSpace}.{str_class}.Loader";
 
             object[] objects = { imp.GetFileName(), outputPath };
-            compileFiles.Add(include_str);
+            using var stream = typeof(ProgramCmd).Assembly.GetManifestResourceStream("TableGenerateCmd.ILoader.cs");
+            using var streamReader = new System.IO.StreamReader(stream);
+            compileFiles.Add(streamReader.ReadToEnd());
             str.AppendLine("namespace ScriptLibrary ");
             str.AppendLine("{");
             str.AppendLine("public class Script ");
@@ -414,6 +240,9 @@ public static class Encoder
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "netstandard.dll")));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Net.Primitives.dll")));
             references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Runtime.Serialization.Xml.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Diagnostics.Process.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.ComponentModel.Primitives.dll")));
+            
             //references.Add(MetadataReference.CreateFromFile(typeof(Dapper.Contrib.Extensions.ComputedAttribute).GetTypeInfo().Assembly.Location));
 
             CSharpCompilation compilation =

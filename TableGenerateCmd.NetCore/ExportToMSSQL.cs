@@ -53,7 +53,7 @@ namespace TableGenerate
                         ExportDataProcess(filename, trimSheetName, columns, rows,_writer);
                     }
                 }
-                ExportBaseUtil.CheckReplaceFile(_stream, $"{outputPath}/{createFileName}");
+                ExportBaseUtil.CheckReplaceFile(_stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
             }
 
             return true;

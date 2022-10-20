@@ -57,7 +57,7 @@ namespace TableGenerate
                     _writer.WriteLine(".quit");
                     _writer.Flush();
                 }
-                ExportBaseUtil.CheckReplaceFile(_stream, $"{outputPath}/{createFileName}");
+                ExportBaseUtil.CheckReplaceFile(_stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
             }
 
             string batch_file = $"{System.IO.Directory.GetCurrentDirectory()}/compile_{createFileName}.bat";

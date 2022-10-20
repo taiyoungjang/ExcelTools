@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Linq;
 using StreamWrite.Extension;
+using TableGenerateCmd;
 
 namespace TableGenerate
 {
@@ -57,7 +58,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"}}");
                     writer.Flush();
                 }
-                ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
+                ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
             }
             return true;
         }

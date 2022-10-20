@@ -60,7 +60,7 @@ namespace TableGenerate
                         writer.WriteLineEx("}");
                         writer.Flush();
                     }
-                    ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}");
+                    ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
                 }
             }
             catch (System.Exception ex)
