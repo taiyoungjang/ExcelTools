@@ -39,6 +39,7 @@ namespace TableGenerateCmd
         public static int parallel = 1;
         public static string argstr = string.Empty;
         public static bool not_array_length_full = false;
+        public static bool using_perforce = false;
 
         static DateTime _begin_time;
 
@@ -235,6 +236,8 @@ namespace TableGenerateCmd
                         async = args[++i];
                     else if (args[i] == "-p")
                         parallel = Int32.Parse(args[++i]);
+                    else if (args[i] == "-p4")
+                        using_perforce = true;
                     else
                     {
                         System.Console.WriteLine("unknown argument. [{0}]", args[i]);

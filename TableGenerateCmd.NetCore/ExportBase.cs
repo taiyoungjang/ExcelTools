@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using TableGenerateCmd;
+using File = System.IO.File;
+using Stream = System.IO.Stream;
 
 namespace TableGenerate
 {
@@ -57,7 +60,7 @@ namespace TableGenerate
 
     public abstract class ExportBase
     {
-        abstract public bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
+        public abstract bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
     }
 
     public static class ExportBaseUtil
@@ -67,7 +70,7 @@ namespace TableGenerate
             // Check the file size and CRC equality here.. if they are equal...    
             try
             {
-                using (FileStream file1 = new FileStream(fileName1, FileMode.Open), file2 = new FileStream(fileName2, FileMode.Open))
+                using FileStream file1 = new FileStream(fileName1, FileMode.Open), file2 = new FileStream(fileName2, FileMode.Open);
                     return StreamsContentsAreEqual(file1, file2);
             }
             catch (System.Exception)
@@ -81,8 +84,8 @@ namespace TableGenerate
             // Check the file size and CRC equality here.. if they are equal...    
             try
             {
-                using (var file2 = new FileStream(fileName2, FileMode.Open))
-                    return StreamsContentsAreEqual(file1, file2);
+                using var file2 = new FileStream(fileName2, FileMode.Open);
+                return StreamsContentsAreEqual(file1, file2);
             }
             catch (System.Exception)
             {
@@ -91,7 +94,7 @@ namespace TableGenerate
         }
         public static bool StreamsContentsAreEqual(Stream stream1, Stream stream2)
         {
-            using( var md5 = System.Security.Cryptography.MD5.Create() )
+            using var md5 = System.Security.Cryptography.MD5.Create();
             {
                 var stream1_md5 = md5.ComputeHash(stream1);
                 var stream2_md5 = md5.ComputeHash(stream2);
@@ -135,18 +138,21 @@ namespace TableGenerate
             fileName = System.IO.Path.GetFullPath(fileName);
             if (FileEquals(tempFile, fileName) == false)
             {
+                if (ProgramCmd.using_perforce)
+                {
+                    string command = "add";
+                    if (System.IO.File.Exists(fileName))
+                    {
+                        var attributes = System.IO.File.GetAttributes(fileName);
+                        var isReadOnly = (attributes & FileAttributes.ReadOnly) != 0;
+                        command = "edit";
+                    }
+                    Process.Start("p4", $"{command} {fileName}");
+                }
+
                 File.WriteAllBytes(fileName, tempFile.ToArray());
             }
         }
-
-        public static void CheckReplaceFile(string tempFileName, string fileName)
-        {
-            tempFileName = System.IO.Path.GetFullPath(tempFileName);
-            fileName = System.IO.Path.GetFullPath(fileName);
-            if (FileEquals(tempFileName, fileName) == false)
-                File.Copy(tempFileName, fileName, true);
-        }
-
 
         public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
         {
