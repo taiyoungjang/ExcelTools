@@ -10,6 +10,7 @@
         "dependencies": {
           "DocumentFormat.OpenXml": "2.16.0",
           "Google.Protobuf": "3.20.0",
+          "Ionic.Zlib.Core": "1.0.0",
           "Microsoft.CodeAnalysis.CSharp.Scripting": "4.1.0",
           "Microsoft.Extensions.DependencyModel": "6.0.0",
           "SharpZipLib.NETStandard": "1.0.7",
@@ -39,6 +40,14 @@
           "lib/net5.0/Google.Protobuf.dll": {
             "assemblyVersion": "3.20.0.0",
             "fileVersion": "3.20.0.0"
+          }
+        }
+      },
+      "Ionic.Zlib.Core/1.0.0": {
+        "runtime": {
+          "lib/netstandard2.0/Ionic.Zlib.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -1024,6 +1033,13 @@
       "sha512": "sha512-dZkpScgy6Lg6mjj+zqQkAZR49Jyoag5zloUw/gnQZvClbAW5lKPkXOoIRoM+3vwS9UNNBDwqiAJ+2KW2ZXOkCQ==",
       "path": "google.protobuf/3.20.0",
       "hashPath": "google.protobuf.3.20.0.nupkg.sha512"
+    },
+    "Ionic.Zlib.Core/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3GBgjMQA/uPTiqv+wMCpLsyK5dcHCF6EV8+pg4IMKLbgbMGEtIkvErEO4ql5Cv18n94Smf3NAhY/sCed2Tb+Tw==",
+      "path": "ionic.zlib.core/1.0.0",
+      "hashPath": "ionic.zlib.core.1.0.0.nupkg.sha512"
     },
     "Microsoft.CodeAnalysis.Analyzers/3.3.3": {
       "type": "package",

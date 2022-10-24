@@ -63,6 +63,7 @@ namespace TableGenerate
             string[] refAssemblies = new string[] {
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}DocumentFormat.OpenXml.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}ICSharpCode.SharpZipLib.dll",
+                $"{folder}{System.IO.Path.DirectorySeparatorChar}Ionic.Zlib.Core.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Collections.Immutable.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Private.CoreLib.dll",

@@ -6,7 +6,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using System.Text.RegularExpressions;
 using System.IO;
 using DocumentFormat.OpenXml;
-using TableGenerate;
 using TableGenerateCmd;
 
 namespace ClassUtil

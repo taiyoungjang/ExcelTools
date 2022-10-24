@@ -133,7 +133,7 @@ use binary_reader::{BinaryReader, Endian};
     let mut _compressedSize = reader.read_u32().unwrap() as usize;
     let _bytes = BufReader::with_capacity(8192, reader.read(_streamLength-1-_hashLength-4-4).unwrap().as_ref());
     // md5 compute hash
-    let mut decompressor = bzip2::read::MultiBzDecoder::new(_bytes);
+    let mut decompressor = flate2::read::ZlibDecoder::new(_bytes);
     decompressor.read_to_end(&mut _decompressed).unwrap();
     let mut decompressReader = binary_reader::BinaryReader::from_vec(&mut _decompressed);
     decompressReader.set_endian(Endian::Little);

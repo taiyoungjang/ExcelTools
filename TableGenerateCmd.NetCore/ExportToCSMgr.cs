@@ -184,12 +184,14 @@ namespace TableGenerate
                     writer.WriteLineEx("ms.Position=0;");
                     writer.WriteLineEx("stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())");
+                    writer.WriteLineEx("using System.IO.MemoryStream __zipMs = new System.IO.MemoryStream();");
+                    writer.WriteLineEx("using( Ionic.Zlib.ZlibStream zip = new Ionic.Zlib.ZlibStream(__zipMs, Ionic.Zlib.CompressionMode.Compress, true))");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(ms, __zip,false,1);");
-                    writer.WriteLineEx("using(var md5 = System.Security.Cryptography.MD5.Create())");
+                    writer.WriteLineEx("zip.Write(ms.ToArray(),0,uncompressedLength);");
+                    writer.WriteLineEx("}");
+                    writer.WriteLineEx("using var md5 = System.Security.Cryptography.MD5.Create();");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("var __compressed = __zip.ToArray();");
+                    writer.WriteLineEx("var __compressed = __zipMs.ToArray();");
                     writer.WriteLineEx("compressedLength = __compressed.Length;");
                     writer.WriteLineEx("byte[] hashBytes = md5.ComputeHash(__compressed);");
                     writer.WriteLineEx("stream.WriteByte((byte)hashBytes.Length);");
@@ -197,7 +199,6 @@ namespace TableGenerate
                     writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );");
                     writer.WriteLineEx("stream.Write( System.BitConverter.GetBytes(compressedLength), 0, 4 );");
                     writer.WriteLineEx("stream.Write(__compressed, 0, __compressed.Length);");
-                    writer.WriteLineEx("}");
                     writer.WriteLineEx("}");
 
                     writer.WriteLineEx("}");
@@ -260,7 +261,7 @@ namespace TableGenerate
                     writer.WriteLineEx("}");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("using var __ms = new System.IO.MemoryStream(bytes);");
-                    writer.WriteLineEx("using var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms);");
+                    writer.WriteLineEx("using var decompressStream = new Ionic.Zlib.ZlibStream(__ms, Ionic.Zlib.CompressionMode.Decompress, Ionic.Zlib.CompressionLevel.Default, true);");
                     writer.WriteLineEx("var uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);");
                     writer.WriteLineEx("bytes = new byte[uncompressedSize__];");
                     writer.WriteLineEx("decompressStream.Read(bytes, 0, uncompressedSize__);");

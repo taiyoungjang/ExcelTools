@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include <bzlib.h>
+#include <zlib.h>
 namespace TBL
 {
     class BufferReader 
@@ -31,69 +31,10 @@ namespace TBL
             bHasOverflowed(false)
         {
         }
-        
-        static const char* getBZ2Error(int bzError)
-        {
-            if (bzError == BZ_RUN_OK)
-            {
-                return ": BZ_RUN_OK";
-            }
-            else if (bzError == BZ_FLUSH_OK)
-            {
-                return ": BZ_FLUSH_OK";
-            }
-            else if (bzError == BZ_FINISH_OK)
-            {
-                return ": BZ_FINISH_OK";
-            }
-            else if (bzError == BZ_STREAM_END)
-            {
-                return ": BZ_STREAM_END";
-            }
-            else if (bzError == BZ_CONFIG_ERROR)
-            {
-                return ": BZ_CONFIG_ERROR";
-            }
-            else if (bzError == BZ_SEQUENCE_ERROR)
-            {
-                return ": BZ_SEQUENCE_ERROR";
-            }
-            else if (bzError == BZ_PARAM_ERROR)
-            {
-                return ": BZ_PARAM_ERROR";
-            }
-            else if (bzError == BZ_MEM_ERROR)
-            {
-                return ": BZ_MEM_ERROR";
-            }
-            else if (bzError == BZ_DATA_ERROR)
-            {
-                return ": BZ_DATA_ERROR";
-            }
-            else if (bzError == BZ_DATA_ERROR_MAGIC)
-            {
-                return ": BZ_DATA_ERROR_MAGIC";
-            }
-            else if (bzError == BZ_IO_ERROR)
-            {
-                return ": BZ_IO_ERROR";
-            }
-            else if (bzError == BZ_UNEXPECTED_EOF)
-            {
-                return ": BZ_UNEXPECTED_EOF";
-            }
-            else if (bzError == BZ_OUTBUFF_FULL)
-            {
-                return ": BZ_OUTBUFF_FULL";
-            }
-            else
-            {
-                return "";
-            }
-        }
 
         static int32 Read7BitEncodedInt(BufferReader& stream)
         {
+#ifdef ENCODED
             // Read out an Int32 7 bits at a time.  The high bit
             // of the byte when on means to continue reading more bytes.
             int32 count = 0;
@@ -113,6 +54,11 @@ namespace TBL
             }
             while ((b & 0x80) != 0);
             return count;
+#else
+            int32 count = 0;
+            stream >> count;
+            return count;
+#endif
         }
 
         /**
@@ -175,8 +121,8 @@ namespace TBL
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 4 <= Ar.NumBytes)
             {
-                uint32 D1 = Ar.Data[Ar.CurrentOffset + 0];
-                uint32 D2 = Ar.Data[Ar.CurrentOffset + 1];
+                uint32 D1 = Ar.Data[Ar.CurrentOffset + 1];
+                uint32 D2 = Ar.Data[Ar.CurrentOffset + 0];
                 D = D1 << 8 | D2;
                 Ar.CurrentOffset += 2;
             }
@@ -201,10 +147,10 @@ namespace TBL
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 4 <= Ar.NumBytes)
             {
-                uint32 D1 = Ar.Data[Ar.CurrentOffset + 0];
-                uint32 D2 = Ar.Data[Ar.CurrentOffset + 1];
-                uint32 D3 = Ar.Data[Ar.CurrentOffset + 2];
-                uint32 D4 = Ar.Data[Ar.CurrentOffset + 3];
+                uint32 D1 = Ar.Data[Ar.CurrentOffset + 3];
+                uint32 D2 = Ar.Data[Ar.CurrentOffset + 2];
+                uint32 D3 = Ar.Data[Ar.CurrentOffset + 1];
+                uint32 D4 = Ar.Data[Ar.CurrentOffset + 0];
                 D = D1 << 24 | D2 << 16 | D3 << 8 | D4;
                 Ar.CurrentOffset += 4;
             }
@@ -222,14 +168,14 @@ namespace TBL
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 8 <= Ar.NumBytes)
             {
-                Q = ((uint64)Ar.Data[Ar.CurrentOffset + 0] << 56) |
-                    ((uint64)Ar.Data[Ar.CurrentOffset + 1] << 48) |
-                    ((uint64)Ar.Data[Ar.CurrentOffset + 2] << 40) |
-                    ((uint64)Ar.Data[Ar.CurrentOffset + 3] << 32) |
-                    ((uint64)Ar.Data[Ar.CurrentOffset + 4] << 24) |
-                    ((uint64)Ar.Data[Ar.CurrentOffset + 5] << 16) |
-                    ((uint64)Ar.Data[Ar.CurrentOffset + 6] << 8) |
-                    (uint64)Ar.Data[Ar.CurrentOffset + 7];
+                Q = ((uint64)Ar.Data[Ar.CurrentOffset + 7] << 56) |
+                    ((uint64)Ar.Data[Ar.CurrentOffset + 6] << 48) |
+                    ((uint64)Ar.Data[Ar.CurrentOffset + 5] << 40) |
+                    ((uint64)Ar.Data[Ar.CurrentOffset + 4] << 32) |
+                    ((uint64)Ar.Data[Ar.CurrentOffset + 3] << 24) |
+                    ((uint64)Ar.Data[Ar.CurrentOffset + 2] << 16) |
+                    ((uint64)Ar.Data[Ar.CurrentOffset + 1] << 8) |
+                    (uint64)Ar.Data[Ar.CurrentOffset + 0];
                 Ar.CurrentOffset += 8;
             }
             else
@@ -364,10 +310,11 @@ namespace TBL
 
                 /// @TODO: hash compare
                 bytes.SetNum(uncompressedSize,true);
-                int bzError = BZ2_bzBuffToBuffDecompress((char*)bytes.GetData(), &uncompressedSize, (char*)compressed.GetData(), compressedSize, 0, 0);
-                if (bzError != BZ_OK)
+                uLong uncompressedLength = uncompressedSize;
+                int bzError = uncompress(bytes.GetData(), &uncompressedLength, compressed.GetData(), compressedSize);
+                if (bzError != Z_OK)
                 {
-                    getBZ2Error(bzError);
+                    //getBZ2Error(bzError);
                     return false;
                 }
             }

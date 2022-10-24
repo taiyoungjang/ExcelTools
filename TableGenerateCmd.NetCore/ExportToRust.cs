@@ -74,7 +74,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"// md5 compute hash");
                         writer.WriteLineEx($"let mut decompressor = bzip2::read::MultiBzDecoder::new(_bytes);");
                         writer.WriteLineEx($"decompressor.read_to_end(&mut _decompressed).unwrap();");
-                        writer.WriteLineEx($"let mut decompressReader = binary_reader::BinaryReader::from_vec(&mut _decompressed);");
+                        writer.WriteLineEx($"let mut decompressReader = zlib::Decoder::new(stream).read_to_end(binary_reader::BinaryReader::from_vec(&mut _decompressed);");
                         writer.WriteLineEx($"decompressReader.set_endian(Endian::Little);");
                         foreach (string sheetName in sheets)
                         {

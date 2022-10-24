@@ -154,6 +154,7 @@ namespace TableGenerate
             {
                 string name = column.var_name;
                 string type = column.GenerateType(_gen_type);
+                string defaultValue = column.GenerateDefaultValue(_gen_type);
                 if (column.is_generated == false)
                 {
                     continue;
@@ -177,7 +178,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"/// <param name=\"{name}\">{column.desc}</param> ");
                 }
                 {
-                    writer.WriteLineEx($"  public {type} {name} {{get; private set;}}");
+                    writer.WriteLineEx($"  public {type} {name} {{get; private set;}} = {defaultValue};");
                 }
                 //isFirst = false;
             }

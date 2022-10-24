@@ -89,46 +89,53 @@ namespace TBL.ItemTable
     }
     */
     #if !NO_EXCEL_LOADER
-    public void WriteFile(string path)
+    public void WriteFile(string path, bool usingPerforce)
     {
       int uncompressedLength = 0;
-      System.IO.MemoryStream uncompressedMemoryStream = null;
-      uncompressedMemoryStream = new System.IO.MemoryStream(128 * 1024);
+      int compressedLength = 0;
+      System.IO.MemoryStream ms = null;
+      ms = new System.IO.MemoryStream(128 * 1024);
       {
-        var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(uncompressedMemoryStream);
+        var uncompressedMemoryStreamWriter = new System.IO.BinaryWriter(ms);
         Item.WriteStream(uncompressedMemoryStreamWriter);
         ItemEffect.WriteStream(uncompressedMemoryStreamWriter);
         ItemEnchant.WriteStream(uncompressedMemoryStreamWriter);
         ItemManufacture.WriteStream(uncompressedMemoryStreamWriter);
         RandomBoxGroup.WriteStream(uncompressedMemoryStreamWriter);
-        uncompressedLength = (int) uncompressedMemoryStream.Position;
+        uncompressedLength = (int) ms.Position;
       }
       System.IO.FileStream stream = null;
       try
       {
         string tempFileName = System.IO.Path.GetTempFileName();
-        uncompressedMemoryStream.Position=0;
+        ms.Position=0;
         stream = new System.IO.FileStream(tempFileName, System.IO.FileMode.Create);
         {
-          using (System.IO.MemoryStream __zip = new System.IO.MemoryStream())
+          using System.IO.MemoryStream __zipMs = new System.IO.MemoryStream();
+          using( Ionic.Zlib.ZlibStream zip = new Ionic.Zlib.ZlibStream(__zipMs, Ionic.Zlib.CompressionMode.Compress, true))
           {
-            ICSharpCode.SharpZipLib.BZip2.BZip2.Compress(uncompressedMemoryStream, __zip,false,1);
-            using(var md5 = System.Security.Cryptography.MD5.Create())
-            {
-              var __compressed = __zip.ToArray();
-              byte[] hashBytes = md5.ComputeHash(__compressed);
-              stream.WriteByte((byte)hashBytes.Length);
-              stream.Write(hashBytes, 0, hashBytes.Length);
-              stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );
-              stream.Write( System.BitConverter.GetBytes(__compressed.Length), 0, 4 );
-              stream.Write(__compressed, 0, __compressed.Length);
-            }
+            zip.Write(ms.ToArray(),0,uncompressedLength);
+          }
+          using var md5 = System.Security.Cryptography.MD5.Create();
+          {
+            var __compressed = __zipMs.ToArray();
+            compressedLength = __compressed.Length;
+            byte[] hashBytes = md5.ComputeHash(__compressed);
+            stream.WriteByte((byte)hashBytes.Length);
+            stream.Write(hashBytes, 0, hashBytes.Length);
+            stream.Write( System.BitConverter.GetBytes(uncompressedLength), 0, 4 );
+            stream.Write( System.BitConverter.GetBytes(compressedLength), 0, 4 );
+            stream.Write(__compressed, 0, __compressed.Length);
           }
         }
         stream.Flush();
         stream.Close();
         stream = null;
-        TBL.FileExtensions.CheckReplaceFile(tempFileName, System.IO.Path.GetDirectoryName( path + "/") + "/ItemTable.bytes", false);
+        using var file  = new System.IO.FileStream(tempFileName, System.IO.FileMode.Open);
+        ms.Position=0;
+        ms.SetLength(file.Length);
+        file.CopyTo(ms);
+        TBL.FileExtensions.CheckReplaceFile(ms, System.IO.Path.GetDirectoryName( path + "/") + "/ItemTable.bytes", usingPerforce);
       }catch(System.Exception e)
       {
         System.Console.WriteLine(e.ToString());
@@ -136,7 +143,7 @@ namespace TBL.ItemTable
       }
       finally
       {
-        if(uncompressedMemoryStream != null) uncompressedMemoryStream.Dispose();
+        ms?.Dispose();
       }
     }
     #endif //NO_EXCEL_LOADER
@@ -162,7 +169,7 @@ namespace TBL.ItemTable
       }
       {
         using var __ms = new System.IO.MemoryStream(bytes);
-        using var decompressStream = new ICSharpCode.SharpZipLib.BZip2.BZip2InputStream(__ms);
+        using var decompressStream = new Ionic.Zlib.ZlibStream(__ms, Ionic.Zlib.CompressionMode.Decompress, Ionic.Zlib.CompressionLevel.Default, true);
         var uncompressedSize__ = System.BitConverter.ToInt32(uncompressedSize,0);
         bytes = new byte[uncompressedSize__];
         decompressStream.Read(bytes, 0, uncompressedSize__);

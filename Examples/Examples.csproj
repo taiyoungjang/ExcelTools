@@ -1,15 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-      <DefineConstants>$(DefineConstants);NO_EXCEL_LOADER</DefineConstants>
+      <DefineConstants>$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.18.0" />
+    <PackageReference Include="Ionic.Zlib.Core" Version="1.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <Compile Include="../TableGenerateCmd.NetCore/ILoader.cs" Link="ILoader.cs" />
+    <Compile Include="../TableGenerateCmd.NetCore/ExcelImporter.cs" Link="ExcelImporter.cs" />
+    <Compile Include="../TableGenerateCmd.NetCore/ExcelOLEClient.cs" Link="ExcelOLEClient.cs" />
+    <Compile Include="../TableGenerateCmd.NetCore/StringWithDesc.cs" Link="StringWithDesc.cs" />
   </ItemGroup>
 
 </Project>
