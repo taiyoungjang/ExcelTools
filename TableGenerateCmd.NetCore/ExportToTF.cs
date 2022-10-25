@@ -17,7 +17,7 @@ namespace TableGenerate
     {
         private string _csFileDir;
         private string _enumTypeDir;
-        private string _dllOutputDir;
+        private string _dllOutputDir = string.Empty;
 
         public string DllOutputDir
         {
@@ -165,7 +165,7 @@ namespace TableGenerate
             str.AppendLine("}");
             compileFiles.Add(str.ToString());
             System.Reflection.Assembly assembly = null;
-            if (System.IO.Directory.Exists(_dllOutputDir) == false)
+            if (!string.IsNullOrEmpty(_dllOutputDir) && System.IO.Directory.Exists(_dllOutputDir) == false)
             {
                 System.IO.Directory.CreateDirectory(_dllOutputDir);
             }

@@ -46,6 +46,7 @@ namespace TableGenerate
                         writer.WriteLineEx("use std::collections::HashMap;");
                         writer.WriteLineEx("use std::io::BufReader;");
                         writer.WriteLineEx("use binary_reader::{BinaryReader, Endian};");
+                        writer.WriteLineEx("use flate2::read::ZlibDecoder;");
                         string[] sheets = imp.GetSheetList();
 
                         filename = filename.Replace(".rs", string.Empty);
@@ -66,15 +67,14 @@ namespace TableGenerate
                         writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> StaticData {{");
                         writer.WriteLineEx($"let _streamLength = reader.length;");
                         writer.WriteLineEx($"let _hashLength = reader.read_i8().unwrap() as usize;");
-                        writer.WriteLineEx($"let _hashBytes = reader.read(_hashLength);");
+                        writer.WriteLineEx($"let _ = reader.read(_hashLength);");
                         writer.WriteLineEx($"let _decompressedSize = reader.read_u32().unwrap() as usize;");
-                        writer.WriteLineEx($"let mut _decompressed = Vec::new();");
                         writer.WriteLineEx($"let mut _compressedSize = reader.read_u32().unwrap() as usize;");
-                        writer.WriteLineEx($"let _bytes = BufReader::with_capacity(8192, reader.read(_streamLength-1-_hashLength-4-4).unwrap().as_ref());");
-                        writer.WriteLineEx($"// md5 compute hash");
-                        writer.WriteLineEx($"let mut decompressor = bzip2::read::MultiBzDecoder::new(_bytes);");
-                        writer.WriteLineEx($"decompressor.read_to_end(&mut _decompressed).unwrap();");
-                        writer.WriteLineEx($"let mut decompressReader = zlib::Decoder::new(stream).read_to_end(binary_reader::BinaryReader::from_vec(&mut _decompressed);");
+                        writer.WriteLineEx($"let mut compressed = reader.read(_compressedSize).unwrap();");
+                        writer.WriteLineEx($"let mut decoder = ZlibDecoder::new(&mut compressed);");
+                        writer.WriteLineEx($"let mut decompressed = Vec::new();");
+                        writer.WriteLineEx($"let _ = decoder.read_to_end(&mut decompressed).unwrap();");
+                        writer.WriteLineEx($"let mut decompressReader = BinaryReader::from_vec(&mut decompressed);");
                         writer.WriteLineEx($"decompressReader.set_endian(Endian::Little);");
                         foreach (string sheetName in sheets)
                         {
