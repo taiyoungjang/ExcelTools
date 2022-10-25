@@ -163,7 +163,6 @@
     <ClCompile Include="generated\table\ItemTable.cpp" />
     <ClCompile Include="generated\table\ItemTableTableManager.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="TableManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -81,10 +81,10 @@ namespace TableGenerate
             string keyType = keyColumn.GenerateType(_gen_type);
 
             writer.WriteLine($"//static {sheetName} Find( const {keyType}& {keyColumn.var_name});");
-            writer.WriteLine($"typedef TArray<{sheetName}> Array;");
-            writer.WriteLine($"typedef TMap<{keyType},{sheetName}> Map;");
-            writer.WriteLine("static const Array array;");
-            writer.WriteLine("static const Map map;");
+            writer.WriteLine($"typedef TArray<{sheetName}> FArray;");
+            writer.WriteLine($"typedef TMap<{keyType},{sheetName}> FMap;");
+            writer.WriteLine("static const FArray Array_;");
+            writer.WriteLine("static const FMap Map_;");
             writer.WriteLineEx($"//GENERATED_BODY()");
             writer.WriteLine("");
 
@@ -113,10 +113,10 @@ namespace TableGenerate
         private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
             writer.WriteLineEx($"{sheetName}(void);");
-            writer.WriteLineEx($"{sheetName}& operator=(const {sheetName}& rhs);");
+            writer.WriteLineEx($"{sheetName}& operator=(const {sheetName}& RHS);");
             writer.WriteLineEx(string.Format("{0} ({1});",
                 sheetName,
-                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}__").ToArray()))
+                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}").ToArray()))
             );
         }
     }

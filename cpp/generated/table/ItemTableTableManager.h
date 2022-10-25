@@ -6,9 +6,9 @@
 #include "TableManager.h"
 namespace TBL::ItemTable
 {
-  class TableManager
+  class FTableManager
   {
     public:
-    bool LoadTable(BufferReader& stream);
+    static bool LoadTable(FBufferReader& Reader);
   };
 }

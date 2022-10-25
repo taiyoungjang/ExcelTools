@@ -62,7 +62,6 @@ namespace TableGenerate
             //string folder = System.IO.Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName).ToString();
             string[] refAssemblies = new string[] {
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}DocumentFormat.OpenXml.dll",
-                $"{folder}{System.IO.Path.DirectorySeparatorChar}ICSharpCode.SharpZipLib.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}Ionic.Zlib.Core.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Collections.Immutable.dll",

@@ -49,18 +49,18 @@ namespace TableGenerate
                     }
 
                     //ManagerProcess(filename, sheets);
-                    writer.WriteLineEx($"bool TableManager::LoadTable(BufferReader& stream)");
+                    writer.WriteLineEx($"bool FTableManager::LoadTable(FBufferReader& Reader_)");
                     writer.WriteLineEx($"{{");
-                    writer.WriteLineEx($"bool rtn = true;");
-                    writer.WriteLineEx($"TArray<uint8> bytes;");
-                    writer.WriteLineEx($"if({ExportToCSMgr.NameSpace}::BufferReader::Decompress(stream,bytes)==false) return false;");
-                    writer.WriteLineEx($"BufferReader bufferReader((uint8*)bytes.GetData(),(int32)bytes.Num());");
+                    writer.WriteLineEx($"auto bRtn = true;");
+                    writer.WriteLineEx($"TArray<uint8> Bytes_;");
+                    writer.WriteLineEx($"if({ExportToCSMgr.NameSpace}::FBufferReader::Decompress(Reader_,Bytes_)==false) return false;");
+                    writer.WriteLineEx($"FBufferReader BufferReader((uint8*)Bytes_.GetData(),(int32)Bytes_.Num());");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"{trimSheetName}TableManager {trimSheetName}TableManager;");
+                        writer.WriteLineEx($"F{trimSheetName}TableManager {trimSheetName}TableManager;");
                     }
                     writer.WriteLineEx($"");
                     foreach (string sheetName in sheets)
@@ -68,9 +68,9 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"rtn &= {trimSheetName}TableManager.LoadTable(bufferReader);");
+                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.LoadTable(BufferReader);");
                     }
-                    writer.WriteLineEx($"return rtn;");
+                    writer.WriteLineEx($"return bRtn;");
                     writer.WriteLineEx($"}};");
                     writer.WriteLineEx($"}}");
                     writer.Flush();
@@ -83,11 +83,12 @@ namespace TableGenerate
 
         private void SheetProcess(string filename, string sheetName, List<Column> columns, StreamWriter _writer)
         {
-            _writer.WriteLineEx($"class {sheetName}TableManager : public {ExportToCSMgr.NameSpace}::TableManager");
+            _writer.WriteLineEx($"class F{sheetName}TableManager final : public {ExportToCSMgr.NameSpace}::FTableManager");
             _writer.WriteLineEx("{");
             _writer.WriteLineEx("public:");
-            _writer.WriteLineEx($"  {sheetName}TableManager(void){{}}");
-            _writer.WriteLineEx($"bool LoadTable(BufferReader& stream__) override");
+            _writer.WriteLineEx($"  F{sheetName}TableManager(void){{}}");
+            _writer.WriteLineEx($"  virtual ~F{sheetName}TableManager(void) override {{}}");
+            _writer.WriteLineEx($"virtual bool LoadTable(FBufferReader& Reader_) override");
             _writer.WriteLineEx("{");
             InnerSheetProcess(sheetName, columns,_writer);
             _writer.WriteLineEx("return true;");
@@ -115,11 +116,11 @@ namespace TableGenerate
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
             string primaryName = "" + keyColumn.var_name;
 
-            writer.WriteLineEx($"int32 count__ = 0;");
-            writer.WriteLineEx($"stream__ >> count__;");
+            writer.WriteLineEx($"int32 Count_ = 0;");
+            writer.WriteLineEx($"Reader_ >> Count_;");
 
-            writer.WriteLineEx($"if(count__ == 0) return true;");
-
+            writer.WriteLineEx($"if(Count_ == 0) return true;");
+            
 
             foreach (var column in columns.Where(column => column.is_generated != false).Where(column => column.array_index <= 0))
             {
@@ -130,9 +131,9 @@ namespace TableGenerate
                     writer.WriteLineEx($"{column.GenerateType(this._gen_type)} {column.var_name};");
                 }
             }
-            writer.WriteLineEx($"{sheetName}::Array array; array.SetNum(count__,true);");
-            writer.WriteLineEx($"{sheetName}::Map map;");
-            writer.WriteLineEx($"for(int i__=0;i__<count__;++i__)");
+            writer.WriteLineEx($"{sheetName}::FArray Array_; Array_.SetNum(Count_,true);");
+            writer.WriteLineEx($"{sheetName}::FMap Map_;");
+            writer.WriteLineEx($"for(auto Idx_=0;Idx_<Count_;++Idx_)");
             writer.WriteLineEx($"{{");
             foreach (var column in columns)
             {
@@ -143,23 +144,23 @@ namespace TableGenerate
                 if (column.array_index == 0)
                 {
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx($"int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);");
-                    writer.WriteLineEx($"{column.var_name}.SetNum(arrayCount__,true);");
-                    writer.WriteLineEx($"for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)");
+                    writer.WriteLineEx($"auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);");
+                    writer.WriteLineEx($"{column.var_name}.SetNum(ArrayCount_,true);");
+                    writer.WriteLineEx($"for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)");
                     writer.WriteLineEx("{");
                     switch (column.base_type)
                     {
                         case eBaseType.Boolean:
-                            writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; stream__ >> element__; {column.var_name}[arrayIndex__] = element__; }}");
+                            writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = element__; }}");
                             break;
                         case eBaseType.TimeSpan:
-                            writer.WriteLineEx($"  {{ int64 element__; stream__ >> element__; {column.var_name}[arrayIndex__] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
+                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
                             break;
                         case eBaseType.DateTime:
-                            writer.WriteLineEx($"  {{ int64 element__; stream__ >> element__; {column.var_name}[arrayIndex__] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         default:
-                            writer.WriteLineEx($"stream__ >> {column.var_name}[arrayIndex__];");
+                            writer.WriteLineEx($"Reader_ >> {column.var_name}[ArrayIndex_];");
                             break;
                     }
                     writer.WriteLineEx("}");
@@ -170,33 +171,33 @@ namespace TableGenerate
                     switch (column.base_type)
                     {
                         case eBaseType.TimeSpan:
-                            writer.WriteLineEx($"  {{int64 element__; stream__ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
+                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
                             break;
                         case eBaseType.DateTime:
-                            writer.WriteLineEx($"  {{int64 element__; stream__ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         default:
-                            writer.WriteLineEx($"stream__ >> {column.var_name};");
+                            writer.WriteLineEx($"Reader_ >> {column.var_name};");
                             break;
                     }
                 }
             }
-            writer.WriteLineEx(string.Format($"auto item__ = {sheetName}({{0}});",
+            writer.WriteLineEx(string.Format($"auto {sheetName}Var = {sheetName}({{0}});",
                 string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}").ToArray()))
             );
-            writer.WriteLineEx("array[i__] = item__;");
-            writer.WriteLineEx($"map.Emplace({primaryName},item__);");
+            writer.WriteLineEx($"Array_[Idx_] = {sheetName}Var;");
+            writer.WriteLineEx($"Map_.Emplace({primaryName},{sheetName}Var);");
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"{sheetName}::Array& target = const_cast<{sheetName}::Array&>({sheetName}::array);");
-            writer.WriteLineEx($"target.Reset();");
-            writer.WriteLineEx($"target.SetNum(count__,true);");
-            writer.WriteLineEx($"target.Append(array);");
+            writer.WriteLineEx($"auto& TargetArray = const_cast<{sheetName}::FArray&>({sheetName}::Array_);");
+            writer.WriteLineEx($"TargetArray.Reset();");
+            writer.WriteLineEx($"TargetArray.SetNum(Count_,true);");
+            writer.WriteLineEx($"TargetArray.Append(Array_);");
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"{sheetName}::Map& target = const_cast<{sheetName}::Map&>({sheetName}::map);");
-            writer.WriteLineEx($"target.Reset();");
-            writer.WriteLineEx($"target.Append(map);");
+            writer.WriteLineEx($"auto& TargetMap = const_cast<{sheetName}::FMap&>({sheetName}::Map_);");
+            writer.WriteLineEx($"TargetMap.Reset();");
+            writer.WriteLineEx($"TargetMap.Append(Map_);");
             writer.WriteLineEx($"}}");
         }
 

@@ -3,7 +3,7 @@
 #include <zlib.h>
 namespace TBL
 {
-    class BufferReader 
+    class FBufferReader 
     {
         protected:
         /** Pointer to the data this reader is attached to */
@@ -16,7 +16,7 @@ namespace TBL
         bool bHasOverflowed;
 
         /** Hidden on purpose */
-        BufferReader(void);
+        FBufferReader(void);
         public:
         /**
          * Initializes the buffer, size, and zeros the read offset
@@ -24,7 +24,7 @@ namespace TBL
          * @param InData the buffer to attach to
          * @param Length the size of the buffer we are attaching to
          */
-        BufferReader(const uint8* InData,int32 Length) :
+        FBufferReader(const uint8* InData,int32 Length) :
             Data(InData),
             NumBytes(Length),
             CurrentOffset(0),
@@ -32,7 +32,7 @@ namespace TBL
         {
         }
 
-        static int32 Read7BitEncodedInt(BufferReader& stream)
+        static int32 Read7BitEncodedInt(FBufferReader& stream)
         {
 #ifdef ENCODED
             // Read out an Int32 7 bits at a time.  The high bit
@@ -64,7 +64,7 @@ namespace TBL
         /**
          * Reads a char from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,char& Ch)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,char& Ch)
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 1 <= Ar.NumBytes)
             {
@@ -79,7 +79,7 @@ namespace TBL
         /**
          * Reads a bool from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,bool& B)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,bool& B)
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 1 <= Ar.NumBytes)
             {
@@ -94,7 +94,7 @@ namespace TBL
         /**
          * Reads a byte from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,uint8& B)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,uint8& B)
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 1 <= Ar.NumBytes)
             {
@@ -109,7 +109,7 @@ namespace TBL
         /**
          * Reads an int32 from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,int16& I)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,int16& I)
         {
             return Ar >> *(uint16*)&I;
         }
@@ -117,7 +117,7 @@ namespace TBL
         /**
          * Reads a uint32 from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,uint16& D)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,uint16& D)
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 4 <= Ar.NumBytes)
             {
@@ -135,7 +135,7 @@ namespace TBL
         /**
          * Reads an int32 from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,int32& I)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,int32& I)
         {
             return Ar >> *(uint32*)&I;
         }
@@ -143,7 +143,7 @@ namespace TBL
         /**
          * Reads a uint32 from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,uint32& D)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,uint32& D)
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 4 <= Ar.NumBytes)
             {
@@ -164,7 +164,7 @@ namespace TBL
         /**
          * Adds a uint64 to the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,uint64& Q)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,uint64& Q)
         {
             if (!Ar.HasOverflow() && Ar.CurrentOffset + 8 <= Ar.NumBytes)
             {
@@ -188,7 +188,7 @@ namespace TBL
         /**
          * Reads a float from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,float& F)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,float& F)
         {
             return Ar >> *(uint32*)&F;
         }
@@ -196,7 +196,7 @@ namespace TBL
         /**
          * Reads a double from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,double& Dbl)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,double& Dbl)
         {
             return Ar >> *(uint64*)&Dbl;
         }
@@ -204,7 +204,7 @@ namespace TBL
         /**
          * Reads a FString from the buffer
          */
-        friend inline BufferReader& operator>>(BufferReader& Ar,FString& String)
+        friend inline FBufferReader& operator>>(FBufferReader& Ar,FString& String)
         {
             // We send strings length prefixed
             int32 Len = Read7BitEncodedInt(Ar);
@@ -283,7 +283,7 @@ namespace TBL
             }
         }
 
-        static bool Decompress(BufferReader& stream, TArray<uint8>& bytes)
+        static bool Decompress(FBufferReader& stream, TArray<uint8>& bytes)
         {
             bool rtn = true;
 

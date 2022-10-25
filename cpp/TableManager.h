@@ -4,14 +4,15 @@
 
 namespace TBL
 {
-    class TableManager 
+    class FTableManager
     {
         public:
-        virtual bool LoadTable(BufferReader& stream) = 0;
+        virtual ~FTableManager() = default;
+        virtual bool LoadTable(FBufferReader& Reader) = 0;
 
-        void GetTableName(FString& name)
+        virtual void GetTableName(FString& Name)
         {
-            name = TEXT("TableManager");
+            Name = TEXT("TableManager");
         }
 
     };

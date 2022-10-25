@@ -50,10 +50,10 @@ namespace TableGenerate
                     //    var columns = ExportBaseUtil.GetColumnInfo(trimSheetName, rows, except);
                     //    SheetProcess(filename, trimSheetName, columns);
                     //}
-                    writer.WriteLineEx($"class TableManager");
+                    writer.WriteLineEx($"class FTableManager");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx("public:");
-                    writer.WriteLineEx($"bool LoadTable(BufferReader& stream);");
+                    writer.WriteLineEx($"static bool LoadTable(FBufferReader& Reader);");
                     writer.WriteLineEx($"}};");
                     writer.WriteLineEx($"}}");
                     writer.Flush();

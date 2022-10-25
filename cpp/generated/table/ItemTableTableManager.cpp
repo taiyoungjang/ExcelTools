@@ -1,15 +1,16 @@
 ﻿#include "ItemTableTableManager.h"
 namespace TBL::ItemTable
 {
-  class ItemTableManager : public TBL::TableManager
+  class FItemTableManager final : public TBL::FTableManager
   {
     public:
-    ItemTableManager(void){}
-    bool LoadTable(BufferReader& stream__) override
+    FItemTableManager(void){}
+    virtual ~FItemTableManager(void) override {}
+    virtual bool LoadTable(FBufferReader& Reader_) override
     {
-      int32 count__ = 0;
-      stream__ >> count__;
-      if(count__ == 0) return true;
+      int32 Count_ = 0;
+      Reader_ >> Count_;
+      if(Count_ == 0) return true;
       int32 Item_ID;
       FString Name;
       int32 Item_grade;
@@ -58,120 +59,121 @@ namespace TBL::ItemTable
       int32 Sub_Item;
       int32 WeaponType;
       TArray<int32> RandomBoxGroup_NO;
-      FItem::Array array; array.SetNum(count__,true);
-      FItem::Map map;
-      for(int i__=0;i__<count__;++i__)
+      FItem::FArray Array_; Array_.SetNum(Count_,true);
+      FItem::FMap Map_;
+      for(auto Idx_=0;Idx_<Count_;++Idx_)
       {
-        stream__ >> Item_ID;
-        stream__ >> Name;
-        stream__ >> Item_grade;
-        stream__ >> Require_lv;
-        stream__ >> Enchant_lv;
-        stream__ >> PhysicalAttack;
-        stream__ >> PhysicalDefense;
-        stream__ >> MagicalAttack;
-        stream__ >> MagicalDefense;
-        stream__ >> Critical;
-        stream__ >> HP;
-        stream__ >> KnockBackResist;
-        stream__ >> DictionaryType;
-        stream__ >> ItemType;
-        stream__ >> Gear_Score;
-        stream__ >> InventoryType;
-        stream__ >> UsageType;
-        stream__ >> Socket_quantity;
-        stream__ >> Removal_cost;
-        stream__ >> Belonging;
-        stream__ >> Sub_stats_quantity;
-        stream__ >> Stack;
-        stream__ >> DesignScroll_ID;
-        stream__ >> BindingSkill_ID;
-        stream__ >> BindingAttack_ID;
-        stream__ >> Manufacture_gold;
-        stream__ >> Manufacture_cash;
-        stream__ >> SummonCompanion_ID;
-        stream__ >> Next_itemID;
-        stream__ >> Next_item_price;
+        Reader_ >> Item_ID;
+        Reader_ >> Name;
+        Reader_ >> Item_grade;
+        Reader_ >> Require_lv;
+        Reader_ >> Enchant_lv;
+        Reader_ >> PhysicalAttack;
+        Reader_ >> PhysicalDefense;
+        Reader_ >> MagicalAttack;
+        Reader_ >> MagicalDefense;
+        Reader_ >> Critical;
+        Reader_ >> HP;
+        Reader_ >> KnockBackResist;
+        Reader_ >> DictionaryType;
+        Reader_ >> ItemType;
+        Reader_ >> Gear_Score;
+        Reader_ >> InventoryType;
+        Reader_ >> UsageType;
+        Reader_ >> Socket_quantity;
+        Reader_ >> Removal_cost;
+        Reader_ >> Belonging;
+        Reader_ >> Sub_stats_quantity;
+        Reader_ >> Stack;
+        Reader_ >> DesignScroll_ID;
+        Reader_ >> BindingSkill_ID;
+        Reader_ >> BindingAttack_ID;
+        Reader_ >> Manufacture_gold;
+        Reader_ >> Manufacture_cash;
+        Reader_ >> SummonCompanion_ID;
+        Reader_ >> Next_itemID;
+        Reader_ >> Next_item_price;
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          Next_Item_material.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          Next_Item_material.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> Next_Item_material[arrayIndex__];
+            Reader_ >> Next_Item_material[ArrayIndex_];
           }
         }
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          Next_Item_material_quantity.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          Next_Item_material_quantity.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> Next_Item_material_quantity[arrayIndex__];
+            Reader_ >> Next_Item_material_quantity[ArrayIndex_];
           }
         }
-        stream__ >> Resource_Path;
-        stream__ >> WeaponName;
-        stream__ >> WeaponIndex;
+        Reader_ >> Resource_Path;
+        Reader_ >> WeaponName;
+        Reader_ >> WeaponIndex;
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          PartName.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          PartName.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> PartName[arrayIndex__];
+            Reader_ >> PartName[ArrayIndex_];
           }
         }
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          PartIndex.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          PartIndex.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> PartIndex[arrayIndex__];
+            Reader_ >> PartIndex[ArrayIndex_];
           }
         }
-        stream__ >> Icon_path;
-        stream__ >> EXP;
-        stream__ >> Buy_cost;
-        stream__ >> Sell_reward;
-        stream__ >> Consignment_maxprice;
-        stream__ >> QuestBringer;
-        stream__ >> ItemEvent_ID;
-        stream__ >> Description;
-        stream__ >> Sub_Item;
-        stream__ >> WeaponType;
+        Reader_ >> Icon_path;
+        Reader_ >> EXP;
+        Reader_ >> Buy_cost;
+        Reader_ >> Sell_reward;
+        Reader_ >> Consignment_maxprice;
+        Reader_ >> QuestBringer;
+        Reader_ >> ItemEvent_ID;
+        Reader_ >> Description;
+        Reader_ >> Sub_Item;
+        Reader_ >> WeaponType;
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          RandomBoxGroup_NO.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          RandomBoxGroup_NO.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> RandomBoxGroup_NO[arrayIndex__];
+            Reader_ >> RandomBoxGroup_NO[ArrayIndex_];
           }
         }
-        auto item__ = FItem(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO);
-        array[i__] = item__;
-        map.Emplace(Item_ID,item__);
+        auto FItemVar = FItem(Item_ID,Name,Item_grade,Require_lv,Enchant_lv,PhysicalAttack,PhysicalDefense,MagicalAttack,MagicalDefense,Critical,HP,KnockBackResist,DictionaryType,ItemType,Gear_Score,InventoryType,UsageType,Socket_quantity,Removal_cost,Belonging,Sub_stats_quantity,Stack,DesignScroll_ID,BindingSkill_ID,BindingAttack_ID,Manufacture_gold,Manufacture_cash,SummonCompanion_ID,Next_itemID,Next_item_price,Next_Item_material,Next_Item_material_quantity,Resource_Path,WeaponName,WeaponIndex,PartName,PartIndex,Icon_path,EXP,Buy_cost,Sell_reward,Consignment_maxprice,QuestBringer,ItemEvent_ID,Description,Sub_Item,WeaponType,RandomBoxGroup_NO);
+        Array_[Idx_] = FItemVar;
+        Map_.Emplace(Item_ID,FItemVar);
       }
       {
-        FItem::Array& target = const_cast<FItem::Array&>(FItem::array);
-        target.Reset();
-        target.SetNum(count__,true);
-        target.Append(array);
+        auto& TargetArray = const_cast<FItem::FArray&>(FItem::Array_);
+        TargetArray.Reset();
+        TargetArray.SetNum(Count_,true);
+        TargetArray.Append(Array_);
       }
       {
-        FItem::Map& target = const_cast<FItem::Map&>(FItem::map);
-        target.Reset();
-        target.Append(map);
+        auto& TargetMap = const_cast<FItem::FMap&>(FItem::Map_);
+        TargetMap.Reset();
+        TargetMap.Append(Map_);
       }
       return true;
     }
   };
-  class ItemEffectTableManager : public TBL::TableManager
+  class FItemEffectTableManager final : public TBL::FTableManager
   {
     public:
-    ItemEffectTableManager(void){}
-    bool LoadTable(BufferReader& stream__) override
+    FItemEffectTableManager(void){}
+    virtual ~FItemEffectTableManager(void) override {}
+    virtual bool LoadTable(FBufferReader& Reader_) override
     {
-      int32 count__ = 0;
-      stream__ >> count__;
-      if(count__ == 0) return true;
+      int32 Count_ = 0;
+      Reader_ >> Count_;
+      if(Count_ == 0) return true;
       int32 Index;
       int32 Item_ID;
       int32 Effect_type;
@@ -182,47 +184,48 @@ namespace TBL::ItemTable
       float Time;
       float Duration;
       FString Description;
-      FItemEffect::Array array; array.SetNum(count__,true);
-      FItemEffect::Map map;
-      for(int i__=0;i__<count__;++i__)
+      FItemEffect::FArray Array_; Array_.SetNum(Count_,true);
+      FItemEffect::FMap Map_;
+      for(auto Idx_=0;Idx_<Count_;++Idx_)
       {
-        stream__ >> Index;
-        stream__ >> Item_ID;
-        stream__ >> Effect_type;
-        stream__ >> Effect_min;
-        stream__ >> Effect_max;
-        stream__ >> Time_type;
-        stream__ >> Time_rate;
-        stream__ >> Time;
-        stream__ >> Duration;
-        stream__ >> Description;
-        auto item__ = FItemEffect(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description);
-        array[i__] = item__;
-        map.Emplace(Index,item__);
+        Reader_ >> Index;
+        Reader_ >> Item_ID;
+        Reader_ >> Effect_type;
+        Reader_ >> Effect_min;
+        Reader_ >> Effect_max;
+        Reader_ >> Time_type;
+        Reader_ >> Time_rate;
+        Reader_ >> Time;
+        Reader_ >> Duration;
+        Reader_ >> Description;
+        auto FItemEffectVar = FItemEffect(Index,Item_ID,Effect_type,Effect_min,Effect_max,Time_type,Time_rate,Time,Duration,Description);
+        Array_[Idx_] = FItemEffectVar;
+        Map_.Emplace(Index,FItemEffectVar);
       }
       {
-        FItemEffect::Array& target = const_cast<FItemEffect::Array&>(FItemEffect::array);
-        target.Reset();
-        target.SetNum(count__,true);
-        target.Append(array);
+        auto& TargetArray = const_cast<FItemEffect::FArray&>(FItemEffect::Array_);
+        TargetArray.Reset();
+        TargetArray.SetNum(Count_,true);
+        TargetArray.Append(Array_);
       }
       {
-        FItemEffect::Map& target = const_cast<FItemEffect::Map&>(FItemEffect::map);
-        target.Reset();
-        target.Append(map);
+        auto& TargetMap = const_cast<FItemEffect::FMap&>(FItemEffect::Map_);
+        TargetMap.Reset();
+        TargetMap.Append(Map_);
       }
       return true;
     }
   };
-  class ItemEnchantTableManager : public TBL::TableManager
+  class FItemEnchantTableManager final : public TBL::FTableManager
   {
     public:
-    ItemEnchantTableManager(void){}
-    bool LoadTable(BufferReader& stream__) override
+    FItemEnchantTableManager(void){}
+    virtual ~FItemEnchantTableManager(void) override {}
+    virtual bool LoadTable(FBufferReader& Reader_) override
     {
-      int32 count__ = 0;
-      stream__ >> count__;
-      if(count__ == 0) return true;
+      int32 Count_ = 0;
+      Reader_ >> Count_;
+      if(Count_ == 0) return true;
       int32 Index;
       int32 Item_ID;
       int32 Enchant_lv;
@@ -237,155 +240,157 @@ namespace TBL::ItemTable
       TArray<int32> Material_quantitys;
       int32 Require_gold;
       int32 Require_cash;
-      FItemEnchant::Array array; array.SetNum(count__,true);
-      FItemEnchant::Map map;
-      for(int i__=0;i__<count__;++i__)
+      FItemEnchant::FArray Array_; Array_.SetNum(Count_,true);
+      FItemEnchant::FMap Map_;
+      for(auto Idx_=0;Idx_<Count_;++Idx_)
       {
-        stream__ >> Index;
-        stream__ >> Item_ID;
-        stream__ >> Enchant_lv;
-        stream__ >> Physical_attack;
-        stream__ >> Physical_defense;
-        stream__ >> Magic_attack;
-        stream__ >> Magic_defense;
-        stream__ >> Critical;
-        stream__ >> HP;
-        stream__ >> KnockBack_resist;
+        Reader_ >> Index;
+        Reader_ >> Item_ID;
+        Reader_ >> Enchant_lv;
+        Reader_ >> Physical_attack;
+        Reader_ >> Physical_defense;
+        Reader_ >> Magic_attack;
+        Reader_ >> Magic_defense;
+        Reader_ >> Critical;
+        Reader_ >> HP;
+        Reader_ >> KnockBack_resist;
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          Material_IDS.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          Material_IDS.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> Material_IDS[arrayIndex__];
+            Reader_ >> Material_IDS[ArrayIndex_];
           }
         }
         {
-          int arrayCount__ = BufferReader::Read7BitEncodedInt(stream__);
-          Material_quantitys.SetNum(arrayCount__,true);
-          for(int arrayIndex__=0;arrayIndex__<arrayCount__;++arrayIndex__)
+          auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);
+          Material_quantitys.SetNum(ArrayCount_,true);
+          for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)
           {
-            stream__ >> Material_quantitys[arrayIndex__];
+            Reader_ >> Material_quantitys[ArrayIndex_];
           }
         }
-        stream__ >> Require_gold;
-        stream__ >> Require_cash;
-        auto item__ = FItemEnchant(Index,Item_ID,Enchant_lv,Physical_attack,Physical_defense,Magic_attack,Magic_defense,Critical,HP,KnockBack_resist,Material_IDS,Material_quantitys,Require_gold,Require_cash);
-        array[i__] = item__;
-        map.Emplace(Index,item__);
+        Reader_ >> Require_gold;
+        Reader_ >> Require_cash;
+        auto FItemEnchantVar = FItemEnchant(Index,Item_ID,Enchant_lv,Physical_attack,Physical_defense,Magic_attack,Magic_defense,Critical,HP,KnockBack_resist,Material_IDS,Material_quantitys,Require_gold,Require_cash);
+        Array_[Idx_] = FItemEnchantVar;
+        Map_.Emplace(Index,FItemEnchantVar);
       }
       {
-        FItemEnchant::Array& target = const_cast<FItemEnchant::Array&>(FItemEnchant::array);
-        target.Reset();
-        target.SetNum(count__,true);
-        target.Append(array);
+        auto& TargetArray = const_cast<FItemEnchant::FArray&>(FItemEnchant::Array_);
+        TargetArray.Reset();
+        TargetArray.SetNum(Count_,true);
+        TargetArray.Append(Array_);
       }
       {
-        FItemEnchant::Map& target = const_cast<FItemEnchant::Map&>(FItemEnchant::map);
-        target.Reset();
-        target.Append(map);
+        auto& TargetMap = const_cast<FItemEnchant::FMap&>(FItemEnchant::Map_);
+        TargetMap.Reset();
+        TargetMap.Append(Map_);
       }
       return true;
     }
   };
-  class ItemManufactureTableManager : public TBL::TableManager
+  class FItemManufactureTableManager final : public TBL::FTableManager
   {
     public:
-    ItemManufactureTableManager(void){}
-    bool LoadTable(BufferReader& stream__) override
+    FItemManufactureTableManager(void){}
+    virtual ~FItemManufactureTableManager(void) override {}
+    virtual bool LoadTable(FBufferReader& Reader_) override
     {
-      int32 count__ = 0;
-      stream__ >> count__;
-      if(count__ == 0) return true;
+      int32 Count_ = 0;
+      Reader_ >> Count_;
+      if(Count_ == 0) return true;
       int32 Index;
       int32 Subject_item_ID;
       int32 Material_item_ID;
       int32 Material_quantity;
-      FItemManufacture::Array array; array.SetNum(count__,true);
-      FItemManufacture::Map map;
-      for(int i__=0;i__<count__;++i__)
+      FItemManufacture::FArray Array_; Array_.SetNum(Count_,true);
+      FItemManufacture::FMap Map_;
+      for(auto Idx_=0;Idx_<Count_;++Idx_)
       {
-        stream__ >> Index;
-        stream__ >> Subject_item_ID;
-        stream__ >> Material_item_ID;
-        stream__ >> Material_quantity;
-        auto item__ = FItemManufacture(Index,Subject_item_ID,Material_item_ID,Material_quantity);
-        array[i__] = item__;
-        map.Emplace(Index,item__);
+        Reader_ >> Index;
+        Reader_ >> Subject_item_ID;
+        Reader_ >> Material_item_ID;
+        Reader_ >> Material_quantity;
+        auto FItemManufactureVar = FItemManufacture(Index,Subject_item_ID,Material_item_ID,Material_quantity);
+        Array_[Idx_] = FItemManufactureVar;
+        Map_.Emplace(Index,FItemManufactureVar);
       }
       {
-        FItemManufacture::Array& target = const_cast<FItemManufacture::Array&>(FItemManufacture::array);
-        target.Reset();
-        target.SetNum(count__,true);
-        target.Append(array);
+        auto& TargetArray = const_cast<FItemManufacture::FArray&>(FItemManufacture::Array_);
+        TargetArray.Reset();
+        TargetArray.SetNum(Count_,true);
+        TargetArray.Append(Array_);
       }
       {
-        FItemManufacture::Map& target = const_cast<FItemManufacture::Map&>(FItemManufacture::map);
-        target.Reset();
-        target.Append(map);
+        auto& TargetMap = const_cast<FItemManufacture::FMap&>(FItemManufacture::Map_);
+        TargetMap.Reset();
+        TargetMap.Append(Map_);
       }
       return true;
     }
   };
-  class RandomBoxGroupTableManager : public TBL::TableManager
+  class FRandomBoxGroupTableManager final : public TBL::FTableManager
   {
     public:
-    RandomBoxGroupTableManager(void){}
-    bool LoadTable(BufferReader& stream__) override
+    FRandomBoxGroupTableManager(void){}
+    virtual ~FRandomBoxGroupTableManager(void) override {}
+    virtual bool LoadTable(FBufferReader& Reader_) override
     {
-      int32 count__ = 0;
-      stream__ >> count__;
-      if(count__ == 0) return true;
+      int32 Count_ = 0;
+      Reader_ >> Count_;
+      if(Count_ == 0) return true;
       int32 ID;
       int32 RandomItemGroup_NO;
       int32 ClassType;
       int32 Item_ID;
       int32 RatioAmount;
       int32 Item_Quantity;
-      FRandomBoxGroup::Array array; array.SetNum(count__,true);
-      FRandomBoxGroup::Map map;
-      for(int i__=0;i__<count__;++i__)
+      FRandomBoxGroup::FArray Array_; Array_.SetNum(Count_,true);
+      FRandomBoxGroup::FMap Map_;
+      for(auto Idx_=0;Idx_<Count_;++Idx_)
       {
-        stream__ >> ID;
-        stream__ >> RandomItemGroup_NO;
-        stream__ >> ClassType;
-        stream__ >> Item_ID;
-        stream__ >> RatioAmount;
-        stream__ >> Item_Quantity;
-        auto item__ = FRandomBoxGroup(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity);
-        array[i__] = item__;
-        map.Emplace(ID,item__);
+        Reader_ >> ID;
+        Reader_ >> RandomItemGroup_NO;
+        Reader_ >> ClassType;
+        Reader_ >> Item_ID;
+        Reader_ >> RatioAmount;
+        Reader_ >> Item_Quantity;
+        auto FRandomBoxGroupVar = FRandomBoxGroup(ID,RandomItemGroup_NO,ClassType,Item_ID,RatioAmount,Item_Quantity);
+        Array_[Idx_] = FRandomBoxGroupVar;
+        Map_.Emplace(ID,FRandomBoxGroupVar);
       }
       {
-        FRandomBoxGroup::Array& target = const_cast<FRandomBoxGroup::Array&>(FRandomBoxGroup::array);
-        target.Reset();
-        target.SetNum(count__,true);
-        target.Append(array);
+        auto& TargetArray = const_cast<FRandomBoxGroup::FArray&>(FRandomBoxGroup::Array_);
+        TargetArray.Reset();
+        TargetArray.SetNum(Count_,true);
+        TargetArray.Append(Array_);
       }
       {
-        FRandomBoxGroup::Map& target = const_cast<FRandomBoxGroup::Map&>(FRandomBoxGroup::map);
-        target.Reset();
-        target.Append(map);
+        auto& TargetMap = const_cast<FRandomBoxGroup::FMap&>(FRandomBoxGroup::Map_);
+        TargetMap.Reset();
+        TargetMap.Append(Map_);
       }
       return true;
     }
   };
-  bool TableManager::LoadTable(BufferReader& stream)
+  bool FTableManager::LoadTable(FBufferReader& Reader_)
   {
-    bool rtn = true;
-    TArray<uint8> bytes;
-    if(TBL::BufferReader::Decompress(stream,bytes)==false) return false;
-    BufferReader bufferReader((uint8*)bytes.GetData(),(int32)bytes.Num());
-    ItemTableManager ItemTableManager;
-    ItemEffectTableManager ItemEffectTableManager;
-    ItemEnchantTableManager ItemEnchantTableManager;
-    ItemManufactureTableManager ItemManufactureTableManager;
-    RandomBoxGroupTableManager RandomBoxGroupTableManager;
+    auto bRtn = true;
+    TArray<uint8> Bytes_;
+    if(TBL::FBufferReader::Decompress(Reader_,Bytes_)==false) return false;
+    FBufferReader BufferReader((uint8*)Bytes_.GetData(),(int32)Bytes_.Num());
+    FItemTableManager ItemTableManager;
+    FItemEffectTableManager ItemEffectTableManager;
+    FItemEnchantTableManager ItemEnchantTableManager;
+    FItemManufactureTableManager ItemManufactureTableManager;
+    FRandomBoxGroupTableManager RandomBoxGroupTableManager;
     
-    rtn &= ItemTableManager.LoadTable(bufferReader);
-    rtn &= ItemEffectTableManager.LoadTable(bufferReader);
-    rtn &= ItemEnchantTableManager.LoadTable(bufferReader);
-    rtn &= ItemManufactureTableManager.LoadTable(bufferReader);
-    rtn &= RandomBoxGroupTableManager.LoadTable(bufferReader);
-    return rtn;
+    bRtn &= ItemTableManager.LoadTable(BufferReader);
+    bRtn &= ItemEffectTableManager.LoadTable(BufferReader);
+    bRtn &= ItemEnchantTableManager.LoadTable(BufferReader);
+    bRtn &= ItemManufactureTableManager.LoadTable(BufferReader);
+    bRtn &= RandomBoxGroupTableManager.LoadTable(BufferReader);
+    return bRtn;
   };
 }

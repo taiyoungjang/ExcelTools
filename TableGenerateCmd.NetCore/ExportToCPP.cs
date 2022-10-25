@@ -75,8 +75,8 @@ namespace TableGenerate
         private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, IReadOnlyCollection<Column> columns)
         {
             sheetName = 'F' + sheetName;
-            writer.WriteLineEx($"const {sheetName}::Array {sheetName}::array;");
-            writer.WriteLineEx($"const {sheetName}::Map {sheetName}::map;");
+            writer.WriteLineEx($"const {sheetName}::FArray {sheetName}::Array_;");
+            writer.WriteLineEx($"const {sheetName}::FMap {sheetName}::Map_;");
             writer.WriteLineEx($"{sheetName}::{sheetName}(void)");
             /*
             bool isFirst =true;
@@ -93,19 +93,19 @@ namespace TableGenerate
             */
             writer.WriteLineEx("{");
             writer.WriteLineEx("}");
-            writer.WriteLineEx($"{sheetName}& {sheetName}::operator=(const {sheetName}& rhs)");
+            writer.WriteLineEx($"{sheetName}& {sheetName}::operator=(const {sheetName}& RHS)");
             writer.WriteLineEx("{");
             foreach(var column in columns.Where(t => t.is_generated == true && t.array_index <= 0))
             {
                 string genType = column.GenerateType(_gen_type);
-                writer.WriteLineEx($"const_cast<{genType}&>({column.var_name})=rhs.{column.var_name};");
+                writer.WriteLineEx($"const_cast<{genType}&>({column.var_name})=RHS.{column.var_name};");
             }
             writer.WriteLineEx("return *this;");
             writer.WriteLineEx("}");
             writer.WriteLineEx(string.Format("{0} ({1})\n:{2}",
                 $"{sheetName}::{sheetName}",
-                string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}__").ToArray()),
-                string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}({t.var_name}__)").ToArray()))
+                string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}").ToArray()),
+                string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}({t.var_name})").ToArray()))
             );
             writer.WriteLineEx($"{{");
             writer.WriteLineEx($"}}");
