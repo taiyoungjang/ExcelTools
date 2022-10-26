@@ -11,8 +11,6 @@ namespace TableGenerate
 {
     public class ExportToRust : ExportBase
     {
-        private readonly string _unityDefine = "UNITY_2018_2_OR_NEWER";
-
         private string _async = string.Empty;
         public string SetAsync
         {
@@ -24,9 +22,8 @@ namespace TableGenerate
         public int m_current = 0;
         public eGenType _gen_type = eGenType.rust;
         private bool _useInterface;
-        public ExportToRust(string unityDefine, bool useInterface)
+        public ExportToRust(bool useInterface)
         {
-            _unityDefine = unityDefine;
             _useInterface = useInterface;
         }
 
@@ -44,9 +41,9 @@ namespace TableGenerate
 
                         writer.WriteLineEx("use std::io::prelude::*;");
                         writer.WriteLineEx("use std::collections::HashMap;");
-                        writer.WriteLineEx("use std::io::BufReader;");
-                        writer.WriteLineEx("use binary_reader::{BinaryReader, Endian};");
+                        writer.WriteLine("use binary_reader::{BinaryReader, Endian};");
                         writer.WriteLineEx("use flate2::read::ZlibDecoder;");
+                        writer.WriteLineEx("use crate::tbl::lib;");
                         string[] sheets = imp.GetSheetList();
 
                         filename = filename.Replace(".rs", string.Empty);
@@ -65,6 +62,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
                         writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> StaticData {{");
+                        writer.WriteLineEx($"reader.set_endian(Endian::Little);");
                         writer.WriteLineEx($"let _streamLength = reader.length;");
                         writer.WriteLineEx($"let _hashLength = reader.read_i8().unwrap() as usize;");
                         writer.WriteLineEx($"let _ = reader.read(_hashLength);");
@@ -118,8 +116,19 @@ namespace TableGenerate
                             writer.WriteLineEx($"pub {sheetName}_map: HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
-                        //writer.WriteLineEx("}");
-                        //writer.WriteLineEx("}");
+                        
+                        writer.WriteLineEx($"#[test]");
+                        writer.WriteLineEx($"fn read_tests() {{");
+                        writer.WriteLineEx($"let mut file = std::fs::File::open(r\"assets/tbl/English/{filename}.bytes\").unwrap();");
+                        writer.WriteLineEx($"let mut reader = BinaryReader::from_file(&mut file);");
+                        writer.WriteLineEx($"let _static_data = readStream(&mut reader);");
+                        foreach (string sheetName in sheets)
+                        {
+                            writer.WriteLineEx($"  println!(\"{sheetName}:{{}}\", _static_data.{sheetName}_vec.len());");
+                        }
+                        
+                        writer.WriteLineEx($"}}");
+                        
                         writer.Flush();
                     }
                     ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
@@ -221,6 +230,7 @@ namespace TableGenerate
             var firstColumnType = firstColumn.GenerateType(_gen_type);
             var firstColumnName = firstColumn.var_name;
             writer.WriteLineEx($"#[allow(dead_code)]");
+            writer.WriteLineEx($"#[allow(non_snake_case)]");
             writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> (Vec<{sheetName}>,HashMap<{firstColumnType},{sheetName}>) {{");
             writer.WriteLineEx($"let size = reader.read_u32().unwrap() as usize;");
             writer.WriteLineEx($"let mut vec: Vec<{sheetName}> = Vec::with_capacity(size);");
@@ -260,7 +270,7 @@ namespace TableGenerate
                     eBaseType.Int64 => "reader.read_i64().unwrap()",
                     eBaseType.Float => "reader.read_f32().unwrap()",
                     eBaseType.Double => "reader.read_f64().unwrap()",
-                    eBaseType.String => "crate::lib::read_string(reader)",
+                    eBaseType.String => "lib::read_string(reader)",
                     _ => "util::reader.read_i32().unwrap()"
                 };
                 writer.WriteLineEx(column.is_array

@@ -64,7 +64,7 @@ namespace TableGenerateCmd
             }
 
             _JobList.Add(new JobImportTable(0, ProgramCmd.TABLE_DIR, "TableGenerate", "TableInput", _srcDir));        // JobList의 Index 0은 항상 Import Table 정보를 저장함.
-            if ((_cmdMask & ProgramCmd.EXPORT_RUST) > 0) _JobList.Add(new JobExportData(new ExportToRust(unityDefine, useInterface), ProgramCmd.EXPORT_RUST, ProgramCmd.CS_DIR, "Directory", "RUST", "RUST_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_RUST) > 0) _JobList.Add(new JobExportData(new ExportToRust(useInterface), ProgramCmd.EXPORT_RUST, ProgramCmd.CS_DIR, "Directory", "RUST", "RUST_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_PROTO) > 0) _JobList.Add(new JobExportData(new ExportToProto(unityDefine, useInterface), ProgramCmd.EXPORT_PROTO, ProgramCmd.CS_DIR, "Directory", "PROTO", "PROTO_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(unityDefine, useInterface), ProgramCmd.EXPORT_CS, ProgramCmd.CS_DIR, "Directory", "CS", "C#_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CSMGR) > 0) _JobList.Add(new JobExportData(new ExportToCSMgr(unityDefine), ProgramCmd.EXPORT_CSMGR, ProgramCmd.CS_DIR, "Directory", "CSMGR", "C#_FILES"));
