@@ -190,14 +190,11 @@ namespace TableGenerate
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"{{");
             writer.WriteLineEx($"auto& TargetArray = const_cast<{sheetName}::FArray&>({sheetName}::Array_);");
-            writer.WriteLineEx($"TargetArray.Reset();");
-            writer.WriteLineEx($"TargetArray.SetNum(Count_,true);");
-            writer.WriteLineEx($"TargetArray.Append(Array_);");
+            writer.WriteLineEx($"TargetArray = Array_;");
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"{{");
             writer.WriteLineEx($"auto& TargetMap = const_cast<{sheetName}::FMap&>({sheetName}::Map_);");
-            writer.WriteLineEx($"TargetMap.Reset();");
-            writer.WriteLineEx($"TargetMap.Append(Map_);");
+            writer.WriteLineEx($"TargetMap = Map_;");
             writer.WriteLineEx($"}}");
         }
 
