@@ -92,6 +92,15 @@ namespace TableGenerate
             }
             return false;
         }
+       public static string ToHex(this byte[] bytes, bool upperCase = false)
+        {
+            System.Text.StringBuilder result = new (bytes.Length*2);
+    
+            for (int i = 0; i < bytes.Length; i++)
+                result.Append(bytes[i].ToString(upperCase ? "X2" : "x2"));
+    
+            return result.ToString();
+        }
         public static bool StreamsContentsAreEqual(Stream stream1, Stream stream2)
         {
             using var md5 = System.Security.Cryptography.MD5.Create();
@@ -133,25 +142,32 @@ namespace TableGenerate
             */
         }
 
-        public static void CheckReplaceFile( MemoryStream tempFile, string fileName, bool usingPerforce)
+        public static void CheckReplaceFile( MemoryStream tempFile, string fileName2, bool usingPerforce)
         {
-            fileName = System.IO.Path.GetFullPath(fileName);
-            if (FileEquals(tempFile, fileName) == false)
+            var fileName1 = System.IO.Path.GetTempFileName();
             {
-                if (usingPerforce)
+                using var file1 = new System.IO.FileStream(fileName1, FileMode.Create);
+                tempFile.TryGetBuffer(out var buffer);
+                file1.Write(buffer);
+            }   
+            fileName2 = System.IO.Path.GetFullPath(fileName2);
+            if (FileEquals(fileName1, fileName2) == false)
+            {
+                if (usingPerforce && !fileName2.Contains(System.IO.Path.GetTempPath()) )
                 {
                     string command = "add";
-                    if (System.IO.File.Exists(fileName))
+                    if (System.IO.File.Exists(fileName2))
                     {
-                        var attributes = System.IO.File.GetAttributes(fileName);
+                        var attributes = System.IO.File.GetAttributes(fileName2);
                         var isReadOnly = (attributes & FileAttributes.ReadOnly) != 0;
                         command = "edit";
                     }
-                    Process.Start("p4", $"{command} {fileName}");
+                    Process.Start("p4", $"{command} {fileName2}").WaitForExit();
                 }
 
-                File.WriteAllBytes(fileName, tempFile.ToArray());
+                File.Copy(fileName1, fileName2, overwrite: true);
             }
+            File.Delete(fileName1);
         }
 
         public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)

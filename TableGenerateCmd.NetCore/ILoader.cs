@@ -1,4 +1,6 @@
-﻿namespace TBL
+﻿using System.Diagnostics;
+
+namespace TBL
 {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
@@ -251,45 +253,52 @@
             }
             */
         }
-        public static void CheckReplaceFile(string tempFileName, string fileName, bool usingPerforce)
+        public static void CheckReplaceFile(string tempFileName, string fileName2, bool usingPerforce)
         {
             tempFileName = System.IO.Path.GetFullPath(tempFileName);
-            fileName = System.IO.Path.GetFullPath(fileName);
-            if (FileEquals(tempFileName, fileName) == false)
+            fileName2 = System.IO.Path.GetFullPath(fileName2);
+            if (FileEquals(tempFileName, fileName2) == false)
             {
                 if (usingPerforce)
                 {
                     string command = "add";
-                    if (System.IO.File.Exists(fileName))
+                    if (System.IO.File.Exists(fileName2))
                     {
-                        var attributes = System.IO.File.GetAttributes(fileName);
+                        var attributes = System.IO.File.GetAttributes(fileName2);
                         var isReadOnly = (attributes & FileAttributes.ReadOnly) != 0;
                         command = "edit";
                     }
-                    System.Diagnostics.Process.Start("p4", $"{command} {fileName}");
+                    System.Diagnostics.Process.Start("p4", $"{command} {fileName2}");
                 }
-                File.Copy(tempFileName, fileName, true);
+                File.Copy(tempFileName, fileName2, true);
             }
         }
-        public static void CheckReplaceFile( MemoryStream tempFile, string fileName, bool usingPerforce)
+        public static void CheckReplaceFile( MemoryStream tempFile, string fileName2, bool usingPerforce)
         {
-            fileName = System.IO.Path.GetFullPath(fileName);
-            if (FileEquals(tempFile, fileName) == false)
+            var fileName1 = System.IO.Path.GetTempFileName();
             {
-                if (usingPerforce)
+                using var file1 = new System.IO.FileStream(fileName1, FileMode.Create);
+                var array = tempFile.ToArray();
+                file1.Write(array, 0, array.Length);
+            }   
+            fileName2 = System.IO.Path.GetFullPath(fileName2);
+            if (FileEquals(fileName1, fileName2) == false)
+            {
+                if (usingPerforce && !fileName2.Contains(System.IO.Path.GetTempPath()) )
                 {
                     string command = "add";
-                    if (System.IO.File.Exists(fileName))
+                    if (System.IO.File.Exists(fileName2))
                     {
-                        var attributes = System.IO.File.GetAttributes(fileName);
+                        var attributes = System.IO.File.GetAttributes(fileName2);
                         var isReadOnly = (attributes & FileAttributes.ReadOnly) != 0;
                         command = "edit";
                     }
-                    System.Diagnostics.Process.Start("p4", $"{command} {fileName}");
+                    Process.Start("p4", $"{command} {fileName2}").WaitForExit();
                 }
 
-                File.WriteAllBytes(fileName, tempFile.ToArray());
+                File.Copy(fileName1, fileName2, overwrite: true);
             }
+            File.Delete(fileName1);
         }
     }
 }
