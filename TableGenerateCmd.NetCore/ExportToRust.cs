@@ -44,6 +44,7 @@ namespace TableGenerate
                         writer.WriteLine("use binary_reader::{BinaryReader, Endian};");
                         writer.WriteLineEx("use flate2::read::ZlibDecoder;");
                         writer.WriteLineEx("use crate::tbl::lib;");
+                        writer.WriteLineEx("tonic::include_proto!(\"_\");");
                         string[] sheets = imp.GetSheetList();
 
                         filename = filename.Replace(".rs", string.Empty);
@@ -265,7 +266,7 @@ namespace TableGenerate
                     eBaseType.Boolean => "reader.read_bool().unwrap()",
                     eBaseType.Int8 => "reader.read_i8().unwrap()",
                     eBaseType.Int16 => "reader.read_i16().unwrap()",
-                    eBaseType.Enum => "reader.read_i32().unwrap()",
+                    eBaseType.Enum => "unsafe { std::mem::transmute(reader.read_i32().unwrap()) }",
                     eBaseType.Int32 => "reader.read_i32().unwrap()",
                     eBaseType.Int64 => "reader.read_i64().unwrap()",
                     eBaseType.Float => "reader.read_f32().unwrap()",
