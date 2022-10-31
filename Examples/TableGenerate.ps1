@@ -63,7 +63,7 @@ function Building_Table
     foreach($LangVer in $LangVers) 
     { 
     # set Table {
-        $Project_Table_Generater_Path = "${CurrentDirectory}/../TableGenerateCmd.NetCore/bin/Debug/net6.0/" 
+        $Project_Table_Generater_Path = "${CurrentDirectory}/../TableGenerateCmd.NetCore/Binaries/win-x64/" 
         $Project_Table_Generater_File = "${Project_Table_Generater_Path}TableGenerateCmd.dll"
         $Project_Table_Generater_INI_File = "${CurrentDirectory}/TableGenerateCmd.ini" 
         [array] $Project_Table_Generater_Command = "-i", $Project_Table_Generater_INI_File, "-c", "c#", "cpp", "table", "-l", "$LangVer", "-a", "unity3d", "-p", $CPU_Count, "-k", "true"

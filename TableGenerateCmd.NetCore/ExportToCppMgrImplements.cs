@@ -11,7 +11,7 @@ namespace TableGenerate
         //public StreamWriter _writer = null;
         public eGenType _gen_type = eGenType.cpp;
 
-        public override bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
+        public override bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
             string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableManager.cpp");
 
@@ -159,6 +159,10 @@ namespace TableGenerate
                         case eBaseType.DateTime:
                             writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
+                        case eBaseType.Struct:
+                        case eBaseType.Enum:
+                            writer.WriteLineEx($"Reader_ >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) {column.var_name}[ArrayIndex_];");
+                            break;
                         default:
                             writer.WriteLineEx($"Reader_ >> {column.var_name}[ArrayIndex_];");
                             break;
@@ -175,6 +179,10 @@ namespace TableGenerate
                             break;
                         case eBaseType.DateTime:
                             writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            break;
+                        case eBaseType.Struct:
+                        case eBaseType.Enum:
+                            writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>({column.var_name});");
                             break;
                         default:
                             writer.WriteLineEx($"Reader_ >> {column.var_name};");

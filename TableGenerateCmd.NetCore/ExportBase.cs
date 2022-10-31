@@ -56,11 +56,12 @@ namespace TableGenerate
         public eBaseType primitive_type;
         public string min_value;
         public string desc;
+        public string assemblyName;
     };
 
     public abstract class ExportBase
     {
-        public abstract bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
+        public abstract bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
     }
 
     public static class ExportBaseUtil
@@ -91,15 +92,6 @@ namespace TableGenerate
             {
             }
             return false;
-        }
-       public static string ToHex(this byte[] bytes, bool upperCase = false)
-        {
-            System.Text.StringBuilder result = new (bytes.Length*2);
-    
-            for (int i = 0; i < bytes.Length; i++)
-                result.Append(bytes[i].ToString(upperCase ? "X2" : "x2"));
-    
-            return result.ToString();
         }
         public static bool StreamsContentsAreEqual(Stream stream1, Stream stream2)
         {
@@ -170,7 +162,7 @@ namespace TableGenerate
             File.Delete(fileName1);
         }
 
-        public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
+        public static List<Column> GetColumnInfo(System.Reflection.Assembly[] refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
         {
             var columns = new List<Column>();
             for (int i = 0; i < rows.GetLength(1); i++)
@@ -437,7 +429,7 @@ namespace TableGenerate
             return returnTypeName;
         }
 
-        private static void GetBaseType(ref Column column, System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
+        private static void GetBaseType(ref Column column, System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
         {
             column.base_type = eBaseType.Null;
             string type_name = typename;
@@ -471,10 +463,11 @@ namespace TableGenerate
                         column.base_type = eBaseType.Enum;
                         if (refAssembly != null)
                         {
-                            System.Reflection.TypeInfo type = refAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
+                            System.Reflection.TypeInfo type = refAssembly.SelectMany(t=>t.DefinedTypes).FirstOrDefault(t => t.FullName.Equals(sizeChecker));
                             if( type == null)
                             {
                                 type = mscorlibAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
+
                                 if(type == null && sizeChecker.Equals("System.DayOfWeek"))
                                 {
                                     type = typeof(System.DayOfWeek).GetTypeInfo();
@@ -490,6 +483,7 @@ namespace TableGenerate
                             }
                             if (type != null)
                             {
+                                column.assemblyName = type.Assembly.GetName().Name;
                                 var Values = type.DeclaredFields.Where(t => t.FieldType.BaseType == typeof(System.Enum)).Select(t => t.Name.ToString()).ToArray();
                                 if(Values.Any())column.min_value = $"{type.FullName}.{Values[0]}";
                                 var DeclaredField = type.DeclaredFields.First();
@@ -527,7 +521,7 @@ namespace TableGenerate
                         column.base_type = eBaseType.Struct;
                         if (refAssembly != null)
                         {
-                            System.Reflection.TypeInfo type = refAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
+                            System.Reflection.TypeInfo type = refAssembly.SelectMany(t=>t.DefinedTypes).FirstOrDefault(t => t.FullName.Equals(sizeChecker));
                             if (type == null)
                             {
                                 type = mscorlibAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
@@ -864,13 +858,13 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int32>"; break;
+                                case eGenType.cpp: returnTypeName = $"TArray<{column.type_name}>"; break;
                                 case eGenType.cs: returnTypeName = $"{column.type_name}[]"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
                                 case eGenType.mysql: returnTypeName = "int"; break;
                                 case eGenType.sqllite: returnTypeName = "integer"; break;
-                                case eGenType.rust: returnTypeName = "Vec<i32>"; break;
+                                case eGenType.rust: returnTypeName = $"Vec<{column.type_name}>"; break;
                             }
                         }
                         break;
@@ -1025,13 +1019,13 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "int32"; break;
+                            case eGenType.cpp: returnTypeName = $"::{column.type_name}"; break;
                             case eGenType.cs: returnTypeName = column.type_name; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;
                             case eGenType.mysql: returnTypeName = "int"; break;
                             case eGenType.sqllite: returnTypeName = "integer"; break;
-                            case eGenType.rust: returnTypeName = "i32"; break;
+                            case eGenType.rust: returnTypeName = column.type_name; break;
                         }
                     }
                     break;

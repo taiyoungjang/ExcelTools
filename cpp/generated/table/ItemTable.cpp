@@ -21,7 +21,7 @@ FItem& FItem::operator=(const FItem& RHS)
     const_cast<float&>(Critical)=RHS.Critical;
     const_cast<int32&>(HP)=RHS.HP;
     const_cast<int32&>(KnockBackResist)=RHS.KnockBackResist;
-    const_cast<int32&>(DictionaryType)=RHS.DictionaryType;
+    const_cast<::eDictionaryType&>(DictionaryType)=RHS.DictionaryType;
     const_cast<int32&>(ItemType)=RHS.ItemType;
     const_cast<int16&>(Gear_Score)=RHS.Gear_Score;
     const_cast<int16&>(InventoryType)=RHS.InventoryType;
@@ -71,7 +71,7 @@ FItem::FItem (const int32& Item_ID
 ,const float& Critical
 ,const int32& HP
 ,const int32& KnockBackResist
-,const int32& DictionaryType
+,const ::eDictionaryType& DictionaryType
 ,const int32& ItemType
 ,const int16& Gear_Score
 ,const int16& InventoryType

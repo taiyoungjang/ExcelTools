@@ -13,7 +13,7 @@ namespace TableGenerate
         //public StreamWriter _writer = null;
         public eGenType _gen_type = eGenType.cpp;
 
-        public override bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
+        public override bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
             string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableManager.h");
 
@@ -34,8 +34,8 @@ namespace TableGenerate
 
                     filename = filename.Replace("TableManager.h", string.Empty);
 
-                    writer.WriteLineEx($"#include \"{filename}.h\"");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
+                    writer.WriteLineEx($"#include \"{filename}.h\"");
                     max = sheets.GetLength(0);
                     current = 0;
 

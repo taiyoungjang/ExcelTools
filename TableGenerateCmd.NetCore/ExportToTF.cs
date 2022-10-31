@@ -46,7 +46,7 @@ namespace TableGenerate
             }
         }
 
-        public override bool Generate(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
+        public override bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
             System.Text.Encoding enc = new System.Text.ASCIIEncoding();
             string viewFilename = System.IO.Path.GetFileName(sFileName);

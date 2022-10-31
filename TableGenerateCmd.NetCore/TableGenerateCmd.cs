@@ -83,15 +83,14 @@ namespace TableGenerateCmd
             _extType = ini.IniReadValue("TableGenerate", "ExtType");
             _ignoreCase = ini.IniReadValue("TableGenerate", "IgnoreCase");
             _enumFilePath = ini.IniReadValue("Directory", "ENUMTYPES");
-            System.Reflection.Assembly _Assembly = null;
+            List<System.Reflection.Assembly> _Assembly = new List<Assembly>();
             if (!string.IsNullOrEmpty(_enumFilePath))
             {
-                List<string> textList = new List<string>();
-                foreach(var text in System.IO.Directory.GetFiles(_enumFilePath, "*.cs"))
+                foreach(var file in System.IO.Directory.GetFiles(_enumFilePath, "*.cs"))
                 {
-                    textList.Add(System.IO.File.ReadAllText(text));
+                    List<string> textList = new List<string> { System.IO.File.ReadAllText(file) };
+                    _Assembly.Add(CompileFiles( System.IO.Path.GetFileNameWithoutExtension(file) , textList));
                 }
-                _Assembly = CompileFiles(textList);
             }
 
             _except = ini.IniReadValue("TableGenerate", "Except").Split(',').Select( item => item.Trim().ToLower()).ToList();
@@ -124,20 +123,20 @@ namespace TableGenerateCmd
                 var job = _JobList[i];
                 job.SetEtc(_version, _lang, ini.IniReadValue("LANG", _lang+"_TBL"), ini.IniReadValue("LANG", _lang+"_SRC"), ini.IniReadValue("LANG", _lang+"_EXT"));
                 job.SetDefaultDir(ini.IniReadValue("Default", job.GetItem()));
-                bool sub_folder = ProgramCmd.single_file.Contains(System.IO.Path.DirectorySeparatorChar);
+                bool subFolder = ProgramCmd.single_file.Contains(System.IO.Path.DirectorySeparatorChar);
                 if(_Assembly != null)
                     job.SetEnumTypesAssembly(_Assembly);
-                if (sub_folder && (job.GetExportBase() is ExportToCS || job.GetExportBase() is ExportToCSMgr ))
+                switch (subFolder)
                 {
-                    job.SetDest(_outputPath, System.IO.Path.GetTempPath());
-                }
-                else if(sub_folder && job.GetExportBase() is ExportToTF)
-                {
-                    job.SetDest(_outputPath, ini.IniReadValue(job.GetSection(), job.GetItem()) + System.IO.Path.DirectorySeparatorChar + ProgramCmd.single_file.Substring(0,ProgramCmd.single_file.IndexOf(System.IO.Path.DirectorySeparatorChar)) );
-                }
-                else 
-                {
-                    job.SetDest(_outputPath, ini.IniReadValue(job.GetSection(), job.GetItem()));
+                    case true when (job.GetExportBase() is ExportToCS || job.GetExportBase() is ExportToCSMgr ):
+                        job.SetDest(_outputPath, System.IO.Path.GetTempPath());
+                        break;
+                    case true when job.GetExportBase() is ExportToTF:
+                        job.SetDest(_outputPath, ini.IniReadValue(job.GetSection(), job.GetItem()) + System.IO.Path.DirectorySeparatorChar + ProgramCmd.single_file.Substring(0,ProgramCmd.single_file.IndexOf(System.IO.Path.DirectorySeparatorChar)) );
+                        break;
+                    default:
+                        job.SetDest(_outputPath, ini.IniReadValue(job.GetSection(), job.GetItem()));
+                        break;
                 }
                 if (job.GetFileItem() != null)
                     job.SetExportFileList(ini.IniReadValue(job.GetSection(), job.GetFileItem()));
@@ -178,7 +177,7 @@ namespace TableGenerateCmd
             }
             return true;
         }
-        public static System.Reflection.Assembly CompileFiles(List<string> textList)
+        public static System.Reflection.Assembly CompileFiles(string name, List<string> textList)
         {
             string output_path = System.IO.Path.GetTempFileName() + ".dll";
             SyntaxTree[] syntaxTrees = new SyntaxTree[textList.Count()];
@@ -186,19 +185,19 @@ namespace TableGenerateCmd
             {
                 syntaxTrees[i] = CSharpSyntaxTree.ParseText(textList[i]);
             };
-            string assemblyName = Path.GetRandomFileName();
+            string assemblyName = name;
             List<MetadataReference> references = new List<MetadataReference>();
-            string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
+            string sharedDirectory = System.IO.Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
             //string[] references_dir = refAssemblies.Select(t => System.IO.Path.GetDirectoryName(t)).Distinct().ToArray();
             references.Add(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(System.Numerics.Vector3).GetTypeInfo().Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(Google.Protobuf.Reflection.FieldDescriptor).GetTypeInfo().Assembly.Location));
-            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "mscorlib.dll")));
-            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Runtime.dll")));
-            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "netstandard.dll")));
-            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Net.Primitives.dll")));
-            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(shared_directory, "System.Runtime.Serialization.Xml.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(sharedDirectory, "mscorlib.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(sharedDirectory, "System.Runtime.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(sharedDirectory, "netstandard.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(sharedDirectory, "System.Net.Primitives.dll")));
+            references.Add(MetadataReference.CreateFromFile(System.IO.Path.Combine(sharedDirectory, "System.Runtime.Serialization.Xml.dll")));
             //references.Add(MetadataReference.CreateFromFile(typeof(Dapper.Contrib.Extensions.ComputedAttribute).GetTypeInfo().Assembly.Location));
 
             CSharpCompilation compilation =
@@ -250,7 +249,7 @@ namespace TableGenerateCmd
                 }
 
                 {
-                    var foundDlls = Directory.GetFileSystemEntries(new FileInfo(shared_directory).FullName, name.Name + ".dll", SearchOption.AllDirectories);
+                    var foundDlls = Directory.GetFileSystemEntries(new FileInfo(sharedDirectory).FullName, name.Name + ".dll", SearchOption.AllDirectories);
                     if (foundDlls.Any())
                     {
                         return context.LoadFromAssemblyPath(foundDlls[0]);
@@ -524,7 +523,7 @@ namespace TableGenerateCmd
         protected int current, max;
         protected ExportBase expBase;
         protected List<string> files;
-        protected System.Reflection.Assembly _Assembly = null;
+        protected System.Reflection.Assembly[] _Assembly = null;
         protected System.Reflection.Assembly mscorlibAssembly = null;
         public JobItem(long JobType, string Default, string INISection, string INIItem)
         {
@@ -587,9 +586,9 @@ namespace TableGenerateCmd
                 DestDir = Path.GetDirectoryName( output + System.IO.Path.DirectorySeparatorChar + dir + System.IO.Path.DirectorySeparatorChar ).Replace("//", "/");
         }
 
-        virtual public void SetEnumTypesAssembly(System.Reflection.Assembly Assembly)
+        virtual public void SetEnumTypesAssembly(List<System.Reflection.Assembly> Assembly)
         {
-            _Assembly = Assembly;
+            _Assembly = Assembly.ToArray();
             string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location);
             mscorlibAssembly = System.Reflection.Assembly.LoadFile(System.IO.Path.Combine(shared_directory, "System.dll"));
         }

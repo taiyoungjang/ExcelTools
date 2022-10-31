@@ -12,7 +12,7 @@ namespace TableGenerate
         //public StreamWriter _writer = null;
         public eGenType _gen_type = eGenType.sqllite;
 
-        public override bool Generate(System.Reflection.Assembly refAssemly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
+        public override bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
             string exec_path = System.IO.Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName).ToString();
 
@@ -41,7 +41,7 @@ namespace TableGenerate
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
-                        var columns = ExportBaseUtil.GetColumnInfo(refAssemly, mscorlibAssembly, trimSheetName, rows, except);
+                        var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                         CreateTableProcess(filename, trimSheetName, columns,_writer);
                     }
 
@@ -50,7 +50,7 @@ namespace TableGenerate
                         current++;
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheet(sheetName, language);
-                        var columns = ExportBaseUtil.GetColumnInfo(refAssemly, mscorlibAssembly, trimSheetName, rows, except);
+                        var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                         ExportDataProcess(filename, trimSheetName, columns, rows,_writer);
                     }
 

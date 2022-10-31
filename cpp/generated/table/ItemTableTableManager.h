@@ -2,8 +2,8 @@
 // DO NOT TOUCH SOURCE....
 #pragma once
 
-#include "ItemTable.h"
 #include "TableManager.h"
+#include "ItemTable.h"
 namespace TBL::ItemTable
 {
   class FTableManager

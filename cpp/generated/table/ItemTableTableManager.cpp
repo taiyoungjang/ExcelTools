@@ -23,7 +23,7 @@ namespace TBL::ItemTable
       float Critical;
       int32 HP;
       int32 KnockBackResist;
-      int32 DictionaryType;
+      ::eDictionaryType DictionaryType;
       int32 ItemType;
       int16 Gear_Score;
       int16 InventoryType;
@@ -75,7 +75,7 @@ namespace TBL::ItemTable
         Reader_ >> Critical;
         Reader_ >> HP;
         Reader_ >> KnockBackResist;
-        Reader_ >> DictionaryType;
+        Reader_ >> reinterpret_cast<int32&>(DictionaryType);
         Reader_ >> ItemType;
         Reader_ >> Gear_Score;
         Reader_ >> InventoryType;
@@ -152,14 +152,11 @@ namespace TBL::ItemTable
       }
       {
         auto& TargetArray = const_cast<FItem::FArray&>(FItem::Array_);
-        TargetArray.Reset();
-        TargetArray.SetNum(Count_,true);
-        TargetArray.Append(Array_);
+        TargetArray = Array_;
       }
       {
         auto& TargetMap = const_cast<FItem::FMap&>(FItem::Map_);
-        TargetMap.Reset();
-        TargetMap.Append(Map_);
+        TargetMap = Map_;
       }
       return true;
     }
@@ -204,14 +201,11 @@ namespace TBL::ItemTable
       }
       {
         auto& TargetArray = const_cast<FItemEffect::FArray&>(FItemEffect::Array_);
-        TargetArray.Reset();
-        TargetArray.SetNum(Count_,true);
-        TargetArray.Append(Array_);
+        TargetArray = Array_;
       }
       {
         auto& TargetMap = const_cast<FItemEffect::FMap&>(FItemEffect::Map_);
-        TargetMap.Reset();
-        TargetMap.Append(Map_);
+        TargetMap = Map_;
       }
       return true;
     }
@@ -278,14 +272,11 @@ namespace TBL::ItemTable
       }
       {
         auto& TargetArray = const_cast<FItemEnchant::FArray&>(FItemEnchant::Array_);
-        TargetArray.Reset();
-        TargetArray.SetNum(Count_,true);
-        TargetArray.Append(Array_);
+        TargetArray = Array_;
       }
       {
         auto& TargetMap = const_cast<FItemEnchant::FMap&>(FItemEnchant::Map_);
-        TargetMap.Reset();
-        TargetMap.Append(Map_);
+        TargetMap = Map_;
       }
       return true;
     }
@@ -318,14 +309,11 @@ namespace TBL::ItemTable
       }
       {
         auto& TargetArray = const_cast<FItemManufacture::FArray&>(FItemManufacture::Array_);
-        TargetArray.Reset();
-        TargetArray.SetNum(Count_,true);
-        TargetArray.Append(Array_);
+        TargetArray = Array_;
       }
       {
         auto& TargetMap = const_cast<FItemManufacture::FMap&>(FItemManufacture::Map_);
-        TargetMap.Reset();
-        TargetMap.Append(Map_);
+        TargetMap = Map_;
       }
       return true;
     }
@@ -362,14 +350,11 @@ namespace TBL::ItemTable
       }
       {
         auto& TargetArray = const_cast<FRandomBoxGroup::FArray&>(FRandomBoxGroup::Array_);
-        TargetArray.Reset();
-        TargetArray.SetNum(Count_,true);
-        TargetArray.Append(Array_);
+        TargetArray = Array_;
       }
       {
         auto& TargetMap = const_cast<FRandomBoxGroup::FMap&>(FRandomBoxGroup::Map_);
-        TargetMap.Reset();
-        TargetMap.Append(Map_);
+        TargetMap = Map_;
       }
       return true;
     }

@@ -38,7 +38,7 @@ namespace TBL.ItemTable
     public int Next_itemID {get; private set;} = default;
     public int Next_item_price {get; private set;} = default;
     public int[] Next_Item_material {get; private set;} = System.Array.Empty<int>();
-    /// <param name="Next_Item_material_quantity">젬의 경우 전체 필요한 수량을 여기에 적는다상위 젬을 만들기 위해 하위 젬이 4개 필요한 경우 4라고 기재</param> 
+    /// 젬의 경우 전체 필요한 수량을 여기에 적는다상위 젬을 만들기 위해 하위 젬이 4개 필요한 경우 4라고 기재
     public int[] Next_Item_material_quantity {get; private set;} = System.Array.Empty<int>();
     public string Resource_Path {get; private set;} = string.Empty;
     public string WeaponName {get; private set;} = string.Empty;
@@ -53,9 +53,9 @@ namespace TBL.ItemTable
     public int QuestBringer {get; private set;} = default;
     public int ItemEvent_ID {get; private set;} = default;
     public string Description {get; private set;} = string.Empty;
-    /// <param name="Sub_Item">NETEASE-SH:방패등 서브아이템 아이디</param> 
+    /// NETEASE-SH:방패등 서브아이템 아이디
     public int Sub_Item {get; private set;} = default;
-    /// <param name="WeaponType">wlfh qkr:0: 맨손1: 왼손무기2: 오른손 무기</param> 
+    /// wlfh qkr:0: 맨손1: 왼손무기2: 오른손 무기
     public int WeaponType {get; private set;} = default;
     public int[] RandomBoxGroup_NO {get; private set;} = System.Array.Empty<int>();
   }

@@ -23,7 +23,7 @@ namespace TableGenerate
         public int m_current = 0;
         public eGenType _gen_type = eGenType.cpp;
 
-        public override bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
+        public override bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
             try
             {
@@ -37,11 +37,27 @@ namespace TableGenerate
                         string[] sheets = imp.GetSheetList();
                         filename = filename.Replace(".h", string.Empty);
 
+                        Dictionary<string, List<Column>> sheetsColumns = new ();
+                        foreach (string sheetName in sheets)
+                        {
+                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
+                            var rows = imp.GetSheetShortCut(sheetName, language);
+                            var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
+                            sheetsColumns.Add(trimSheetName,columns);
+                        }
+
+                        var refAssemFiles = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType())
+                            .Select(t => t.assemblyName).Distinct();
+                        
                         writer.WriteLineEx($"// generate {filename}");
                         
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"CoreMinimal.h\"");
+                        foreach (var assem in refAssemFiles)
+                        {
+                            writer.WriteLineEx($"#include \"{assem}.pb.h\"");
+                        }
                         writer.WriteLineEx($"//#include \"{filename}.generated.h\"");
 
                         max = sheets.GetLength(0);
@@ -49,13 +65,10 @@ namespace TableGenerate
 
                         writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename}");
                         writer.WriteLineEx("{");
-                        foreach (string sheetName in sheets)
+                        foreach (var sheet in sheetsColumns)
                         {
                             current++;
-                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            var rows = imp.GetSheetShortCut(sheetName, language);
-                            var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                            SheetProcess(writer, trimSheetName, columns);
+                            SheetProcess(writer, sheet.Key, sheet.Value);
                         }
                         writer.WriteLineEx("}");
                         writer.Flush();
@@ -107,7 +120,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"    const {type} {name} {{}};{(column.desc.Any()?$"  ///< {column.desc}":string.Empty)}");
+                writer.WriteLineEx($"    const {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
         private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
