@@ -120,7 +120,7 @@ namespace TableGenerate
                         
                         writer.WriteLineEx($"#[test]");
                         writer.WriteLineEx($"fn read_tests() {{");
-                        writer.WriteLineEx($"let mut file = std::fs::File::open(r\"assets/tbl/English/{filename}.bytes\").unwrap();");
+                        writer.WriteLineEx($"let mut file = std::fs::File::open(r\"../../GameDesign/TBL/English/{filename}.bytes\").unwrap();");
                         writer.WriteLineEx($"let mut reader = BinaryReader::from_file(&mut file);");
                         writer.WriteLineEx($"let _static_data = readStream(&mut reader);");
                         foreach (string sheetName in sheets)
