@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using StreamWrite.Extension;
 using System.CodeDom.Compiler;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TableGenerate
 {
@@ -88,6 +89,7 @@ namespace TableGenerate
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"CoreMinimal.h\"");
+                        writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
                         foreach (var typeInfo in enums)
                         {
                             writer.WriteLineEx($"#include \"{typeInfo.Name}.h\"");
@@ -121,26 +123,26 @@ namespace TableGenerate
         private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
             writer.WriteLineEx($"USTRUCT(BlueprintType)");
-            writer.WriteLineEx($"struct {sheetName}");
+            writer.WriteLineEx($"struct {sheetName} : public FTableRowBase");
             writer.WriteLineEx("{");
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type);
 
-            writer.WriteLine($"//static {sheetName} Find( const {keyType}& {keyColumn.var_name});");
             writer.WriteLine($"typedef TArray<{sheetName}> FArray;");
             writer.WriteLine($"typedef TMap<{keyType},{sheetName}> FMap;");
             writer.WriteLine("static const FArray Array_;");
             writer.WriteLine("static const FMap Map_;");
-            writer.WriteLineEx($"GENERATED_BODY()");
+            writer.WriteLineEx($"GENERATED_USTRUCT_BODY()");
             writer.WriteLine("");
 
-            InnerSheetProcess(writer, columns);
+            InnerSheetProcess(writer, sheetName, columns);
             SheetConstructorProcess(writer, sheetName, columns);
             writer.WriteLineEx("};");
         }
 
-        private void InnerSheetProcess(IndentedTextWriter writer, List<Column> columns)
+        private void InnerSheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
+            var sn = sheetName.Remove(0, 1);
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -153,7 +155,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"UPROPERTY({(column.IsEnumType()?$"EditAnywhere, Meta = (Bitmask, BitmaskEnum = \"E{column.type_name}\") ":string.Empty)})");
+                writer.WriteLineEx($"UPROPERTY({(column.IsEnumType()?$"Meta = (Bitmask, BitmaskEnum = \"E{column.type_name}\"), ":string.Empty)} EditAnywhere, BlueprintReadWrite, Category = {sn} )");
                 writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
