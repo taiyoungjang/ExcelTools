@@ -56,7 +56,7 @@ namespace TableGenerate
         public eBaseType primitive_type;
         public string min_value;
         public string desc;
-        public string assemblyName;
+        public System.Reflection.TypeInfo TypeInfo;
     };
 
     public abstract class ExportBase
@@ -483,7 +483,7 @@ namespace TableGenerate
                             }
                             if (type != null)
                             {
-                                column.assemblyName = type.Assembly.GetName().Name;
+                                column.TypeInfo = type;
                                 var Values = type.DeclaredFields.Where(t => t.FieldType.BaseType == typeof(System.Enum)).Select(t => t.Name.ToString()).ToArray();
                                 if(Values.Any())column.min_value = $"{type.FullName}.{Values[0]}";
                                 var DeclaredField = type.DeclaredFields.First();
@@ -858,7 +858,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = $"TArray<{column.type_name}>"; break;
+                                case eGenType.cpp: returnTypeName = $"TArray<{(column.IsEnumType()?"int32":column.type_name)}>"; break;
                                 case eGenType.cs: returnTypeName = $"{column.type_name}[]"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1019,7 +1019,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = $"::{column.type_name}"; break;
+                            case eGenType.cpp: returnTypeName = $"{(column.IsEnumType()?"int32":column.type_name)}"; break;
                             case eGenType.cs: returnTypeName = column.type_name; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;

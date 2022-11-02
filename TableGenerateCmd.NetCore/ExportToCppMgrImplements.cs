@@ -90,7 +90,7 @@ namespace TableGenerate
             _writer.WriteLineEx($"  virtual ~F{sheetName}TableManager(void) override {{}}");
             _writer.WriteLineEx($"virtual bool LoadTable(FBufferReader& Reader_) override");
             _writer.WriteLineEx("{");
-            InnerSheetProcess(sheetName, columns,_writer);
+            InnerSheetProcess($"F{filename.Replace("TableManager",string.Empty)}_{sheetName}", columns,_writer);
             _writer.WriteLineEx("return true;");
             _writer.WriteLineEx("}");
             _writer.WriteLineEx("};");
@@ -112,7 +112,6 @@ namespace TableGenerate
         
         private void InnerSheetProcess(string sheetName, List<Column> columns, StreamWriter writer)
         {
-            sheetName = 'F' + sheetName;
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
             string primaryName = "" + keyColumn.var_name;
 

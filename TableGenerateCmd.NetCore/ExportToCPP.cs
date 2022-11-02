@@ -37,7 +37,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"// generate {filename}");
                     writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                     writer.WriteLineEx($"#include \"{filename.Replace(".cpp", ".h")}\"");
-                    writer.WriteLineEx($"using namespace {@namespace};");
+                    //writer.WriteLineEx($"using namespace {@namespace};");
 
                     string[] sheets = imp.GetSheetList();
 
@@ -52,7 +52,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        SheetProcess(writer, trimSheetName, columns);
+                        SheetProcess(writer, $"F{filename.Replace(".cpp","")}_{trimSheetName}", columns);
                     }
                     writer.Flush();
                 }
@@ -74,7 +74,6 @@ namespace TableGenerate
 
         private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, IReadOnlyCollection<Column> columns)
         {
-            sheetName = 'F' + sheetName;
             writer.WriteLineEx($"const {sheetName}::FArray {sheetName}::Array_;");
             writer.WriteLineEx($"const {sheetName}::FMap {sheetName}::Map_;");
             writer.WriteLineEx($"{sheetName}::{sheetName}(void)");
@@ -112,7 +111,6 @@ namespace TableGenerate
         }
         private void SheetFindFunction(IndentedTextWriter writer, string sheetName, IEnumerable<Column> columns)
         {
-            sheetName = 'F' + sheetName;
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
             string keyType = keyColumn.GenerateType(_gen_type);
 

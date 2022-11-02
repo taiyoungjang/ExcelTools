@@ -46,31 +46,65 @@ namespace TableGenerate
                             sheetsColumns.Add(trimSheetName,columns);
                         }
 
-                        var refAssemFiles = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType())
-                            .Select(t => t.assemblyName).Distinct();
+                        var enums = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType()).Select(t => t.TypeInfo).Distinct();
+                        {
+                            foreach (var typeInfo in enums)
+                            {
+                                using var stream2 = new MemoryStream();
+                                var writer2 = new IndentedTextWriter(new StreamWriter(stream2, Encoding.UTF8), "  ");
+                                //writer.WriteLineEx($"#ifndef ENUM_E{typeInfo.Name}");
+                                //writer.WriteLineEx($"#define ENUM_E{typeInfo.Name}");
+                                writer2.WriteLineEx($"// generate E{typeInfo.Name}");
+                        
+                                writer2.WriteLineEx("// DO NOT TOUCH SOURCE....");
+                                writer2.WriteLineEx($"#pragma once");
+                                writer2.WriteLineEx($"#include \"CoreMinimal.h\"");
+                                writer2.WriteLineEx($"UENUM(Meta = ({typeInfo.Name}))");
+                                writer2.WriteLineEx($"enum class E{typeInfo.Name} : int32 {{");
+                                {
+                                    var types = typeInfo.DeclaredFields.Where(t => t.IsStatic).ToArray();
+                                    System.Type enumUnderlyingType = System.Enum.GetUnderlyingType(typeInfo);
+                                    System.Array enumValues = System.Enum.GetValues(typeInfo);
+                                    for (int i = 0; i < enumValues.Length; i++)
+                                    {
+                                        // Retrieve the value of the ith enum item.
+                                        object? value = enumValues.GetValue(i);
+                                        // Convert the value to its underlying type (int, byte, long, ...)
+                                        object? underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
+                                        writer2.WriteLineEx(
+                                            $"{types[i].Name}={underlyingValue}{(i < enumValues.Length ? "," : string.Empty)}");
+                                    }
+                                }
+                                writer2.WriteLineEx($"}};");
+                                writer2.WriteLineEx($"ENUM_CLASS_FLAGS(E{typeInfo.Name});");
+                                //writer.WriteLineEx($"#endif");
+                                writer2.Flush();
+                                ExportBaseUtil.CheckReplaceFile(stream2, $"{outputPath}/{typeInfo.Name}.h", TableGenerateCmd.ProgramCmd.using_perforce);
+                            }
+                        }
                         
                         writer.WriteLineEx($"// generate {filename}");
                         
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"CoreMinimal.h\"");
-                        foreach (var assem in refAssemFiles)
+                        foreach (var typeInfo in enums)
                         {
-                            writer.WriteLineEx($"#include \"{assem}.pb.h\"");
+                            writer.WriteLineEx($"#include \"{typeInfo.Name}.h\"");
                         }
-                        writer.WriteLineEx($"//#include \"{filename}.generated.h\"");
+                        writer.WriteLineEx($"#include \"{filename}.generated.h\"");
 
                         max = sheets.GetLength(0);
                         current = 0;
 
-                        writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename}");
-                        writer.WriteLineEx("{");
+                        //writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename}");
+                        //writer.WriteLineEx("{");
                         foreach (var sheet in sheetsColumns)
                         {
                             current++;
-                            SheetProcess(writer, sheet.Key, sheet.Value);
+                            SheetProcess(writer, $"F{filename}_{sheet.Key}", sheet.Value);
                         }
-                        writer.WriteLineEx("}");
+                        //writer.WriteLineEx("}");
                         writer.Flush();
                     }
                     ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
@@ -86,8 +120,7 @@ namespace TableGenerate
 
         private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
-            sheetName = 'F' + sheetName;
-            writer.WriteLineEx($"//USTRUCT(BlueprintType)");
+            writer.WriteLineEx($"USTRUCT(BlueprintType)");
             writer.WriteLineEx($"struct {sheetName}");
             writer.WriteLineEx("{");
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
@@ -98,7 +131,7 @@ namespace TableGenerate
             writer.WriteLine($"typedef TMap<{keyType},{sheetName}> FMap;");
             writer.WriteLine("static const FArray Array_;");
             writer.WriteLine("static const FMap Map_;");
-            writer.WriteLineEx($"//GENERATED_BODY()");
+            writer.WriteLineEx($"GENERATED_BODY()");
             writer.WriteLine("");
 
             InnerSheetProcess(writer, columns);
@@ -120,7 +153,8 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"    const {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineEx($"UPROPERTY({(column.IsEnumType()?$"EditAnywhere, Meta = (Bitmask, BitmaskEnum = \"E{column.type_name}\") ":string.Empty)})");
+                writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
         private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
