@@ -156,7 +156,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"UPROPERTY({(column.IsEnumType()?$"Meta = (Bitmask, BitmaskEnum = \"E{column.type_name}\"), ":string.Empty)} EditAnywhere, BlueprintReadWrite, Category = {sn} {(column.desc.Any()?$", DisplayName = \"{column.desc}\"":string.Empty)} )");
+                writer.WriteLineEx($"UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = {sn} {(column.desc.Any()?$", DisplayName = \"{column.desc}\"":string.Empty)} )");
                 writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }

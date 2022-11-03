@@ -31,6 +31,14 @@ namespace TableGenerate
                     //            writer.WriteLine("#include <Base/service.h>");
 
                     writer.WriteLineEx($"#include \"{filename}.h\"");
+                    writer.WriteLineEx($"#include \"AssetRegistryModule.h\"");
+                    writer.WriteLineEx($"#include \"ISourceControlOperation.h\"");
+                    writer.WriteLineEx($"#include \"SourceControlOperations.h\"");
+                    writer.WriteLineEx($"#include \"ISourceControlRevision.h\"");
+                    writer.WriteLineEx($"#include \"ISourceControlModule.h\"");
+                    writer.WriteLineEx($"#include \"SourceControlHelpers.h\"");
+                    writer.WriteLineEx($"#include \"UObject/SavePackage.h\"");
+                    
                     string fn = filename.Replace("TableManager", string.Empty);
                     
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
@@ -51,7 +59,7 @@ namespace TableGenerate
                     }
 
                     //ManagerProcess(filename, sheets);
-                    writer.WriteLineEx($"bool FTableManager::LoadTable(FBufferReader& Reader_, TMap<FName,UDataTable*>& DataTableMap)");
+                    writer.WriteLineEx($"bool FTableManager::ConvertToUAsset(FBufferReader& Reader_, TMap<FName,UDataTable*>& DataTableMap)");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes_;");
@@ -70,7 +78,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.LoadTable(BufferReader, DataTableMap);");
+                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.ConvertToUAsset(BufferReader, DataTableMap);");
                     }
                     writer.WriteLineEx($"return bRtn;");
                     writer.WriteLineEx($"}};");
@@ -90,12 +98,25 @@ namespace TableGenerate
             writer.WriteLineEx("public:");
             writer.WriteLineEx($"  F{sheetName}TableManager(void){{}}");
             writer.WriteLineEx($"virtual ~F{sheetName}TableManager(void) = default;");
-            writer.WriteLineEx($"bool LoadTable(FBufferReader& Reader_, TMap<FName,UDataTable*>& DataTableMap)");
+            writer.WriteLineEx($"bool ConvertToUAsset(FBufferReader& Reader_, TMap<FName,UDataTable*>& DataTableMap)");
             writer.WriteLineEx("{");
-            writer.WriteLineEx($"UDataTable* DataTable = NewObject<U{filename.Replace("TableManager",string.Empty)}_{sheetName}DataTable>();");
+            string packageName = $"TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}\")";
+            writer.WriteLineEx($"FString PackageName =  *FPaths::Combine(TEXT(\"/Game/Data\"), {packageName});");
+            writer.WriteLineEx($"FString FileName = *FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());");
+            writer.WriteLineEx($"if( FPaths::FileExists(*FileName) && !IFileManager::Get().IsReadOnly(*FileName) )");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"IFileManager::Get().Delete(*FileName);");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx($"UPackage *Package = CreatePackage( *PackageName );");
+            writer.WriteLineEx($"UDataTable* DataTable = NewObject<UDataTable>(Package, UDataTable::StaticClass(), {packageName}, RF_Public | RF_Standalone | RF_Transactional);");
+            writer.WriteLineEx($"DataTable->RowStruct = F{filename.Replace("TableManager",string.Empty)}_{sheetName}::StaticStruct();");
             InnerSheetProcess(filename, sheetName, columns, writer);
             writer.WriteLineEx($"DataTableMap.Emplace(TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}\"), DataTable);");
-            writer.WriteLineEx("return true;");
+            writer.WriteLineEx($"FAssetRegistryModule::AssetCreated(DataTable);");
+            writer.WriteLineEx($"Package->MarkPackageDirty();");
+            writer.WriteLineEx($"FSavePackageArgs SaveArgs;");
+            writer.WriteLineEx($"SaveArgs.TopLevelFlags = RF_Standalone;");
+            writer.WriteLineEx($"return UPackage::SavePackage(Package, nullptr, *FileName, SaveArgs);");
             writer.WriteLineEx("}");
             writer.WriteLineEx("};");
         }
@@ -124,7 +145,8 @@ namespace TableGenerate
 
             writer.WriteLineEx($"if(Count == 0) return true;");
             
-            writer.WriteLineEx($"F{fileName.Replace("TableManager",string.Empty)}_{sheetName} Item;");
+            string structName =$"F{fileName.Replace("TableManager",string.Empty)}_{sheetName}"; 
+            writer.WriteLineEx($"{structName} Item;");
             writer.WriteLineEx($"for(auto Idx=0;Idx<Count;++Idx)");
             writer.WriteLineEx($"{{");
             foreach (var column in columns)
@@ -172,10 +194,10 @@ namespace TableGenerate
                         case eBaseType.DateTime:
                             writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item.{column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
-                        // case eBaseType.Struct:
-                        // case eBaseType.Enum:
-                        //     writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item.{column.var_name});");
-                        //     break;
+                        case eBaseType.Struct:
+                        case eBaseType.Enum:
+                            writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item.{column.var_name});");
+                            break;
                         default:
                             writer.WriteLineEx($"Reader_ >> Item.{column.var_name};");
                             break;

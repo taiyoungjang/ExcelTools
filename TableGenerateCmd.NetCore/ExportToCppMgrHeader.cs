@@ -37,7 +37,6 @@ namespace TableGenerate
                     writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
                     writer.WriteLineEx($"#include \"{filename}.h\"");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
-                    writer.WriteLineEx($"#include \"{filename}TableManager.generated.h\"");
                     
                     writer.WriteLineEx(string.Empty);
 
@@ -55,29 +54,14 @@ namespace TableGenerate
                         sheetsColumns.Add(trimSheetName,columns);
                     }
                         current++;
-                        foreach (var sheet in sheetsColumns)
-                        {
-                            writer.WriteLineEx($"UCLASS(BlueprintType)");
-                            writer.WriteLineEx($"class {CPPClassPredefine} U{filename}_{sheet.Key}DataTable : public UDataTable");
-                            writer.WriteLineEx("{");
-                            writer.WriteLineEx("GENERATED_BODY()");
-                            writer.WriteLineEx("};");
-                        }
+
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
 
-                    //foreach (string sheetName in sheets)
-                    //{
-                    //    current++;
-                    //    string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                    //    var rows = imp.GetSheetShortCut(sheetName, language);
-                    //    var columns = ExportBaseUtil.GetColumnInfo(trimSheetName, rows, except);
-                    //    SheetProcess(filename, trimSheetName, columns);
-                    //}
                     writer.WriteLineEx($"class FTableManager");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx("public:");
-                    writer.WriteLineEx($"static bool LoadTable(FBufferReader& Reader, TMap<FName,UDataTable*>& DataTableMap);");
+                    writer.WriteLineEx($"static bool ConvertToUAsset(FBufferReader& Reader, TMap<FName,UDataTable*>& DataTableMap);");
                     writer.WriteLineEx($"}};");
                     writer.WriteLineEx($"}}");
                     writer.Flush();
@@ -101,7 +85,7 @@ namespace TableGenerate
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type); 
             _writer.WriteLineEx("public:");
-            _writer.WriteLineEx("bool LoadTable(BufferReader& stream) override;");
+            _writer.WriteLineEx("bool ConvertToUAsset(BufferReader& stream) override;");
         }
     }
 }

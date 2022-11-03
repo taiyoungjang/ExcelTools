@@ -858,7 +858,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = $"TArray<{(column.IsEnumType()?"int32":column.type_name)}>"; break;
+                                case eGenType.cpp: returnTypeName = $"TArray<{(column.IsEnumType()?"E":"F")}{column.type_name}>"; break;
                                 case eGenType.cs: returnTypeName = $"{column.type_name}[]"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1019,7 +1019,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = $"{(column.IsEnumType()?"int32":column.type_name)}"; break;
+                            case eGenType.cpp: returnTypeName = $"{(column.IsEnumType()?"E":"F")}{column.type_name}"; break;
                             case eGenType.cs: returnTypeName = column.type_name; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;
