@@ -55,29 +55,14 @@ namespace TableGenerate
                         sheetsColumns.Add(trimSheetName,columns);
                     }
                         current++;
-                        writer.WriteLineEx($"UCLASS(BlueprintType)");
-                        writer.WriteLineEx($"class {CPPClassPredefine} U{filename}DataTable : public UDataTable");
-                        writer.WriteLineEx("{");
-
-                        writer.WriteLineEx($"GENERATED_BODY()");
-                        writer.WriteLineEx($"public:");
-                        writer.WriteLineEx($"U{filename}DataTable();");
-                        writer.WriteLineEx($"virtual ~U{filename}DataTable() = default;");
-                        writer.WriteLineEx($"//~ Begin UObject Interface.");
-                        writer.WriteLineEx($"virtual void PostLoad() override;");
-                        writer.WriteLineEx($"//~ End UObject Interface");
                         foreach (var sheet in sheetsColumns)
                         {
-                            var keyColumn = sheet.Value.FirstOrDefault(compare => compare.is_key == true);
-                            string keyType = keyColumn.GenerateType(_gen_type);
-                            string sheetName = $"{filename}_{sheet.Key}";
-                            writer.WriteLineEx($"UPROPERTY(EditAnywhere)");
-                            writer.WriteLineEx($"TArray<F{sheetName}> {sheet.Key}Array;");
-                            writer.WriteLineEx($"UPROPERTY(EditAnywhere)");
-                            writer.WriteLineEx($"TMap<{keyType},F{sheetName}> {sheet.Key}Map;");
-                            writer.WriteLineEx("");
+                            writer.WriteLineEx($"UCLASS(BlueprintType)");
+                            writer.WriteLineEx($"class {CPPClassPredefine} U{filename}_{sheet.Key}DataTable : public UDataTable");
+                            writer.WriteLineEx("{");
+                            writer.WriteLineEx("GENERATED_BODY()");
+                            writer.WriteLineEx("};");
                         }
-                        writer.WriteLineEx("};");
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
 
@@ -92,7 +77,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"class FTableManager");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx("public:");
-                    writer.WriteLineEx($"static bool LoadTable(FBufferReader& Reader, U{filename}DataTable& DataTable);");
+                    writer.WriteLineEx($"static bool LoadTable(FBufferReader& Reader, TMap<FName,UDataTable*>& DataTableMap);");
                     writer.WriteLineEx($"}};");
                     writer.WriteLineEx($"}}");
                     writer.Flush();

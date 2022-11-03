@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -31,13 +32,6 @@ namespace TableGenerate
 
                     writer.WriteLineEx($"#include \"{filename}.h\"");
                     string fn = filename.Replace("TableManager", string.Empty);
-                    writer.WriteLineEx($"U{fn}DataTable::U{fn}DataTable()");
-                    writer.WriteLineEx($"{{");
-                    writer.WriteLineEx($"}}");
-                    writer.WriteLineEx($"void U{fn}DataTable::PostLoad()");
-                    writer.WriteLineEx($"{{");
-                    writer.WriteLineEx($"Super::PostLoad();");
-                    writer.WriteLineEx($"}}");
                     
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
@@ -57,7 +51,7 @@ namespace TableGenerate
                     }
 
                     //ManagerProcess(filename, sheets);
-                    writer.WriteLineEx($"bool FTableManager::LoadTable(FBufferReader& Reader_, U{filename.Replace("TableManager",string.Empty)}DataTable& DataTable)");
+                    writer.WriteLineEx($"bool FTableManager::LoadTable(FBufferReader& Reader_, TMap<FName,UDataTable*>& DataTableMap)");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes_;");
@@ -76,7 +70,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.LoadTable(BufferReader, DataTable);");
+                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.LoadTable(BufferReader, DataTableMap);");
                     }
                     writer.WriteLineEx($"return bRtn;");
                     writer.WriteLineEx($"}};");
@@ -89,19 +83,21 @@ namespace TableGenerate
             return true;
         }
 
-        private void SheetProcess(string filename, string sheetName, List<Column> columns, StreamWriter _writer)
+        private void SheetProcess(string filename, string sheetName, List<Column> columns, StreamWriter writer)
         {
-            _writer.WriteLineEx($"class F{sheetName}TableManager final");
-            _writer.WriteLineEx("{");
-            _writer.WriteLineEx("public:");
-            _writer.WriteLineEx($"  F{sheetName}TableManager(void){{}}");
-            _writer.WriteLineEx($"virtual ~F{sheetName}TableManager(void) = default;");
-            _writer.WriteLineEx($"bool LoadTable(FBufferReader& Reader_, U{filename.Replace("TableManager", string.Empty)}DataTable& DataTable)");
-            _writer.WriteLineEx("{");
-            InnerSheetProcess(filename, sheetName, columns,_writer);
-            _writer.WriteLineEx("return true;");
-            _writer.WriteLineEx("}");
-            _writer.WriteLineEx("};");
+            writer.WriteLineEx($"class F{sheetName}TableManager final");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx("public:");
+            writer.WriteLineEx($"  F{sheetName}TableManager(void){{}}");
+            writer.WriteLineEx($"virtual ~F{sheetName}TableManager(void) = default;");
+            writer.WriteLineEx($"bool LoadTable(FBufferReader& Reader_, TMap<FName,UDataTable*>& DataTableMap)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"UDataTable* DataTable = NewObject<U{filename.Replace("TableManager",string.Empty)}_{sheetName}DataTable>();");
+            InnerSheetProcess(filename, sheetName, columns, writer);
+            writer.WriteLineEx($"DataTableMap.Emplace(TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}\"), DataTable);");
+            writer.WriteLineEx("return true;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("};");
         }
 
         private void GetItemProcess(string sheetName, List<Column> columns, StreamWriter writer)
@@ -123,16 +119,14 @@ namespace TableGenerate
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
             string primaryName = "" + keyColumn.var_name;
 
-            writer.WriteLineEx($"int32 Count_ = 0;");
-            writer.WriteLineEx($"Reader_ >> Count_;");
+            writer.WriteLineEx($"int32 Count = 0;");
+            writer.WriteLineEx($"Reader_ >> Count;");
 
-            writer.WriteLineEx($"if(Count_ == 0) return true;");
+            writer.WriteLineEx($"if(Count == 0) return true;");
             
-            writer.WriteLineEx($"auto& Array_ = DataTable.{sheetName}Array; Array_.SetNum(Count_,true);");
-            writer.WriteLineEx($"auto& Map_ = DataTable.{sheetName}Map;");
-            writer.WriteLineEx($"for(auto Idx_=0;Idx_<Count_;++Idx_)");
+            writer.WriteLineEx($"F{fileName.Replace("TableManager",string.Empty)}_{sheetName} Item;");
+            writer.WriteLineEx($"for(auto Idx=0;Idx<Count;++Idx)");
             writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"auto& Item_ = Array_[Idx_];");
             foreach (var column in columns)
             {
                 if (column.is_generated == false)
@@ -142,27 +136,27 @@ namespace TableGenerate
                 if (column.array_index == 0)
                 {
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx($"auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);");
-                    writer.WriteLineEx($"Item_.{column.var_name}.SetNum(ArrayCount_,true);");
-                    writer.WriteLineEx($"for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)");
+                    writer.WriteLineEx($"auto ArrayCount = FBufferReader::Read7BitEncodedInt(Reader_);");
+                    writer.WriteLineEx($"Item.{column.var_name}.SetNum(ArrayCount,true);");
+                    writer.WriteLineEx($"for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount;++ArrayIndex_)");
                     writer.WriteLineEx("{");
                     switch (column.base_type)
                     {
                         case eBaseType.Boolean:
-                            writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Reader_ >> element__; Item_.{column.var_name}[ArrayIndex_] = element__; }}");
+                            writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Reader_ >> element__; Item.{column.var_name}[ArrayIndex_] = element__; }}");
                             break;
                         case eBaseType.TimeSpan:
-                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; Item_.{column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
+                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; Item.{column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
                             break;
                         case eBaseType.DateTime:
-                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; Item_.{column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; Item.{column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         case eBaseType.Struct:
                         case eBaseType.Enum:
-                            writer.WriteLineEx($"Reader_ >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) Item_.{column.var_name}[ArrayIndex_];");
+                            writer.WriteLineEx($"Reader_ >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) Item.{column.var_name}[ArrayIndex_];");
                             break;
                         default:
-                            writer.WriteLineEx($"Reader_ >> Item_.{column.var_name}[ArrayIndex_];");
+                            writer.WriteLineEx($"Reader_ >> Item.{column.var_name}[ArrayIndex_];");
                             break;
                     }
                     writer.WriteLineEx("}");
@@ -173,22 +167,32 @@ namespace TableGenerate
                     switch (column.base_type)
                     {
                         case eBaseType.TimeSpan:
-                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item_.{column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
+                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item.{column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
                             break;
                         case eBaseType.DateTime:
-                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item_.{column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item.{column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         // case eBaseType.Struct:
                         // case eBaseType.Enum:
-                        //     writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item_.{column.var_name});");
+                        //     writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item.{column.var_name});");
                         //     break;
                         default:
-                            writer.WriteLineEx($"Reader_ >> Item_.{column.var_name};");
+                            writer.WriteLineEx($"Reader_ >> Item.{column.var_name};");
                             break;
                     }
                 }
             }
-            writer.WriteLineEx($"Map_.Emplace(Item_.{primaryName},Item_);");
+
+            switch (keyColumn.base_type)
+            {
+                case eBaseType.String:
+                    writer.WriteLineEx($"FName Key = Item.{primaryName};");
+                    break;
+                default:
+                    writer.WriteLineEx($"FName Key; Key.SetNumber(Item.{primaryName});");
+                    break;
+            }
+            writer.WriteLineEx($"DataTable->AddRow(Key,Item);");
             writer.WriteLineEx($"}}");
         }
 
