@@ -33,7 +33,7 @@ namespace TableGenerate
                     writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
 
                     writer.WriteLineEx($"#pragma once");
-
+                    writer.WriteLineEx($"#ifdef WITH_EDITOR");
                     writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
                     writer.WriteLineEx($"#include \"{filename}.h\"");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
@@ -53,17 +53,23 @@ namespace TableGenerate
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                         sheetsColumns.Add(trimSheetName,columns);
                     }
-                        current++;
+                    current++;
 
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
 
-                    writer.WriteLineEx($"class FTableManager");
+                    writer.WriteLineEx($"class UTableManager : public ITableManager");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx("public:");
-                    writer.WriteLineEx($"static bool ConvertToUAsset(FBufferReader& Reader, TMap<FName,UDataTable*>& DataTableMap);");
+                    writer.WriteLineEx("static UTableManager* Register;");
+                    writer.WriteLineEx($"virtual bool ConvertToUAsset(FBufferReader& Reader, const FString& Language) override;");
+                    writer.WriteLineEx($"virtual FString GetTableName() override");
+                    writer.WriteLineEx( "{");
+                    writer.WriteLineEx($"return TEXT(\"{filename}\");");
+                    writer.WriteLineEx( "}");
                     writer.WriteLineEx($"}};");
                     writer.WriteLineEx($"}}");
+                    writer.WriteLineEx($"#endif");
                     writer.Flush();
                 }
                 ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
