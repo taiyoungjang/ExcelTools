@@ -197,8 +197,9 @@ namespace TableGenerate
                 case eBaseType.String:
                     writer.WriteLineEx($"FName Key = Item.{primaryName};");
                     break;
+                case eBaseType.Int32:
                 default:
-                    writer.WriteLineEx($"FName Key; Key.SetNumber(Item.{primaryName});");
+                    writer.WriteLineEx($"FName Key = *FString::FromInt(Item.{primaryName});");
                     break;
             }
             writer.WriteLineEx($"DataTable->AddRow(Key,Item);");
