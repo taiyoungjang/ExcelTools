@@ -52,7 +52,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        SheetProcess(writer, $"F{filename.Replace(".cpp","")}_{trimSheetName}", columns);
+                        //SheetProcess(writer, $"F{filename.Replace(".cpp","")}_{trimSheetName}", columns);
                     }
                     writer.Flush();
                 }
@@ -64,60 +64,6 @@ namespace TableGenerate
                 return false;
             }
             return true;
-        }
-
-        private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
-        {
-            SheetConstructorProcess(writer, sheetName, columns);
-            SheetFindFunction(writer, sheetName, columns);
-        }
-
-        private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, IReadOnlyCollection<Column> columns)
-        {
-            writer.WriteLineEx($"const {sheetName}::FArray {sheetName}::Array_;");
-            writer.WriteLineEx($"const {sheetName}::FMap {sheetName}::Map_;");
-            writer.WriteLineEx($"{sheetName}::{sheetName}(void)");
-            /*
-            bool isFirst =true;
-            foreach (var column in columns.Where(t => t.is_generated == true && t.array_index <= 0))
-            {
-                if (!isFirst)
-                {
-                    writer.Write(',');
-                }
-                string genDefaultValue = column.GenerateDefaultValue(_gen_type);
-                writer.WriteLineEx($"{column.var_name}({genDefaultValue})");
-                isFirst = true;
-            }
-            */
-            writer.WriteLineEx("{");
-            writer.WriteLineEx("}");
-            writer.WriteLineEx($"{sheetName}& {sheetName}::operator=(const {sheetName}& RHS)");
-            writer.WriteLineEx("{");
-            foreach(var column in columns.Where(t => t.is_generated == true && t.array_index <= 0))
-            {
-                string genType = column.GenerateType(_gen_type);
-                writer.WriteLineEx($"const_cast<{genType}&>({column.var_name})=RHS.{column.var_name};");
-            }
-            writer.WriteLineEx("return *this;");
-            writer.WriteLineEx("}");
-            writer.WriteLineEx(string.Format("{0} ({1})\n:{2}",
-                $"{sheetName}::{sheetName}",
-                string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}").ToArray()),
-                string.Join("\n,", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}({t.var_name})").ToArray()))
-            );
-            writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"}}");
-        }
-        private void SheetFindFunction(IndentedTextWriter writer, string sheetName, IEnumerable<Column> columns)
-        {
-            var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
-            string keyType = keyColumn.GenerateType(_gen_type);
-
-            writer.WriteLineEx($"/*{sheetName} {sheetName}::Find(const {keyType}& {keyColumn.var_name})");
-            writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"return {sheetName}Ptr(map.Find({keyColumn.var_name}));");
-            writer.WriteLineEx($"}}*/");
         }
     }
 }

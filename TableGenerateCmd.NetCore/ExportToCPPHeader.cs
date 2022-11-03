@@ -11,6 +11,11 @@ namespace TableGenerate
 {
     public class ExportToCPPHeader : ExportBase
     {
+        private string CPPClassPredefine;
+        public ExportToCPPHeader(string cppClassPredefine)
+        {
+            CPPClassPredefine = cppClassPredefine;
+        }
         protected string iceFileDir;
 
         private string _async = string.Empty;
@@ -128,15 +133,11 @@ namespace TableGenerate
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type);
 
-            writer.WriteLine($"typedef TArray<{sheetName}> FArray;");
-            writer.WriteLine($"typedef TMap<{keyType},{sheetName}> FMap;");
-            writer.WriteLine("static const FArray Array_;");
-            writer.WriteLine("static const FMap Map_;");
             writer.WriteLineEx($"GENERATED_USTRUCT_BODY()");
             writer.WriteLine("");
 
             InnerSheetProcess(writer, sheetName, columns);
-            SheetConstructorProcess(writer, sheetName, columns);
+            //SheetConstructorProcess(writer, sheetName, columns);
             writer.WriteLineEx("};");
         }
 
@@ -155,7 +156,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"UPROPERTY({(column.IsEnumType()?$"Meta = (Bitmask, BitmaskEnum = \"E{column.type_name}\"), ":string.Empty)} EditAnywhere, BlueprintReadWrite, Category = {sn} )");
+                writer.WriteLineEx($"UPROPERTY({(column.IsEnumType()?$"Meta = (Bitmask, BitmaskEnum = \"E{column.type_name}\"), ":string.Empty)} EditAnywhere, BlueprintReadWrite, Category = {sn} {(column.desc.Any()?$", DisplayName = \"{column.desc}\"":string.Empty)} )");
                 writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }

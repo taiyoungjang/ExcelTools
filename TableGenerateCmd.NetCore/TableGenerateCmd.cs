@@ -52,6 +52,8 @@ namespace TableGenerateCmd
         {
             Ini.IniFile ini = new Ini.IniFile(_iniFile);
 
+            var cppClassPredefine = ini.IniReadValue("TableGenerate", "CPP_CLASS_PREDEFINE") ?? string.Empty;
+
             var unityDefine = ini.IniReadValue("TableGenerate", "UNITY_DEFINE");
             if(string.IsNullOrEmpty(unityDefine))
             {
@@ -69,8 +71,8 @@ namespace TableGenerateCmd
             if ((_cmdMask & ProgramCmd.EXPORT_CS) > 0) _JobList.Add(new JobExportData(new ExportToCS(unityDefine, useInterface), ProgramCmd.EXPORT_CS, ProgramCmd.CS_DIR, "Directory", "CS", "C#_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CSMGR) > 0) _JobList.Add(new JobExportData(new ExportToCSMgr(unityDefine), ProgramCmd.EXPORT_CSMGR, ProgramCmd.CS_DIR, "Directory", "CSMGR", "C#_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CPP) > 0) _JobList.Add(new JobExportData(new ExportToCPP(), ProgramCmd.EXPORT_CPP, ProgramCmd.ICECPP_DIR, "Directory", "CPP", "CPP_FILES"));
-            if ((_cmdMask & ProgramCmd.EXPORT_CPPHEADER) > 0) _JobList.Add(new JobExportData(new ExportToCPPHeader(), ProgramCmd.EXPORT_CPPHEADER, ProgramCmd.ICECPP_DIR, "Directory", "HPP", "CPP_FILES"));
-            if ((_cmdMask & ProgramCmd.EXPORT_HPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrHeader(), ProgramCmd.EXPORT_HPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "HPPMGR", "CPP_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_CPPHEADER) > 0) _JobList.Add(new JobExportData(new ExportToCPPHeader(cppClassPredefine), ProgramCmd.EXPORT_CPPHEADER, ProgramCmd.ICECPP_DIR, "Directory", "HPP", "CPP_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_HPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrHeader(cppClassPredefine), ProgramCmd.EXPORT_HPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "HPPMGR", "CPP_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrImplements(), ProgramCmd.EXPORT_CPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "CPPMGR", "CPP_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_TABLE) > 0) _JobList.Add(new JobExportData(new ExportToTF(), ProgramCmd.EXPORT_TABLE, ProgramCmd.TF_DIR, "Directory", "TableFile", "TF_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_SQLITE) > 0) _JobList.Add(new JobExportData(new ExportToSQLLite(), ProgramCmd.EXPORT_SQLITE, ProgramCmd.DB_DIR, "Directory", "SQLITE", "SQLITE_FILES"));

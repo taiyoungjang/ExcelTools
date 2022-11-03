@@ -30,7 +30,15 @@ namespace TableGenerate
                     //            writer.WriteLine("#include <Base/service.h>");
 
                     writer.WriteLineEx($"#include \"{filename}.h\"");
-
+                    string fn = filename.Replace("TableManager", string.Empty);
+                    writer.WriteLineEx($"U{fn}DataTable::U{fn}DataTable()");
+                    writer.WriteLineEx($"{{");
+                    writer.WriteLineEx($"}}");
+                    writer.WriteLineEx($"void U{fn}DataTable::PostLoad()");
+                    writer.WriteLineEx($"{{");
+                    writer.WriteLineEx($"Super::PostLoad();");
+                    writer.WriteLineEx($"}}");
+                    
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
 
@@ -49,7 +57,7 @@ namespace TableGenerate
                     }
 
                     //ManagerProcess(filename, sheets);
-                    writer.WriteLineEx($"bool FTableManager::LoadTable(FBufferReader& Reader_)");
+                    writer.WriteLineEx($"bool FTableManager::LoadTable(FBufferReader& Reader_, U{filename.Replace("TableManager",string.Empty)}DataTable& DataTable)");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes_;");
@@ -68,7 +76,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.LoadTable(BufferReader);");
+                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.LoadTable(BufferReader, DataTable);");
                     }
                     writer.WriteLineEx($"return bRtn;");
                     writer.WriteLineEx($"}};");
@@ -83,14 +91,14 @@ namespace TableGenerate
 
         private void SheetProcess(string filename, string sheetName, List<Column> columns, StreamWriter _writer)
         {
-            _writer.WriteLineEx($"class F{sheetName}TableManager final : public {ExportToCSMgr.NameSpace}::FTableManager");
+            _writer.WriteLineEx($"class F{sheetName}TableManager final");
             _writer.WriteLineEx("{");
             _writer.WriteLineEx("public:");
             _writer.WriteLineEx($"  F{sheetName}TableManager(void){{}}");
-            _writer.WriteLineEx($"  virtual ~F{sheetName}TableManager(void) override {{}}");
-            _writer.WriteLineEx($"virtual bool LoadTable(FBufferReader& Reader_) override");
+            _writer.WriteLineEx($"virtual ~F{sheetName}TableManager(void) = default;");
+            _writer.WriteLineEx($"bool LoadTable(FBufferReader& Reader_, U{filename.Replace("TableManager", string.Empty)}DataTable& DataTable)");
             _writer.WriteLineEx("{");
-            InnerSheetProcess($"F{filename.Replace("TableManager",string.Empty)}_{sheetName}", columns,_writer);
+            InnerSheetProcess(filename, sheetName, columns,_writer);
             _writer.WriteLineEx("return true;");
             _writer.WriteLineEx("}");
             _writer.WriteLineEx("};");
@@ -110,7 +118,7 @@ namespace TableGenerate
             writer.WriteLineEx($"}}");
         }
         
-        private void InnerSheetProcess(string sheetName, List<Column> columns, StreamWriter writer)
+        private void InnerSheetProcess(string fileName, string sheetName, List<Column> columns, StreamWriter writer)
         {
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
             string primaryName = "" + keyColumn.var_name;
@@ -120,20 +128,11 @@ namespace TableGenerate
 
             writer.WriteLineEx($"if(Count_ == 0) return true;");
             
-
-            foreach (var column in columns.Where(column => column.is_generated != false).Where(column => column.array_index <= 0))
-            {
-                if(column.array_index == -1)
-                    writer.WriteLineEx($"{column.GenerateType(this._gen_type)} {column.var_name};");
-                if (column.array_index == 0)
-                {
-                    writer.WriteLineEx($"{column.GenerateType(this._gen_type)} {column.var_name};");
-                }
-            }
-            writer.WriteLineEx($"{sheetName}::FArray Array_; Array_.SetNum(Count_,true);");
-            writer.WriteLineEx($"{sheetName}::FMap Map_;");
+            writer.WriteLineEx($"auto& Array_ = DataTable.{sheetName}Array; Array_.SetNum(Count_,true);");
+            writer.WriteLineEx($"auto& Map_ = DataTable.{sheetName}Map;");
             writer.WriteLineEx($"for(auto Idx_=0;Idx_<Count_;++Idx_)");
             writer.WriteLineEx($"{{");
+            writer.WriteLineEx($"auto& Item_ = Array_[Idx_];");
             foreach (var column in columns)
             {
                 if (column.is_generated == false)
@@ -144,26 +143,26 @@ namespace TableGenerate
                 {
                     writer.WriteLineEx("{");
                     writer.WriteLineEx($"auto ArrayCount_ = FBufferReader::Read7BitEncodedInt(Reader_);");
-                    writer.WriteLineEx($"{column.var_name}.SetNum(ArrayCount_,true);");
+                    writer.WriteLineEx($"Item_.{column.var_name}.SetNum(ArrayCount_,true);");
                     writer.WriteLineEx($"for(auto ArrayIndex_=0;ArrayIndex_<ArrayCount_;++ArrayIndex_)");
                     writer.WriteLineEx("{");
                     switch (column.base_type)
                     {
                         case eBaseType.Boolean:
-                            writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = element__; }}");
+                            writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Reader_ >> element__; Item_.{column.var_name}[ArrayIndex_] = element__; }}");
                             break;
                         case eBaseType.TimeSpan:
-                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
+                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; Item_.{column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
                             break;
                         case eBaseType.DateTime:
-                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; {column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            writer.WriteLineEx($"  {{ int64 element__; Reader_ >> element__; Item_.{column.var_name}[ArrayIndex_] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         case eBaseType.Struct:
                         case eBaseType.Enum:
-                            writer.WriteLineEx($"Reader_ >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) {column.var_name}[ArrayIndex_];");
+                            writer.WriteLineEx($"Reader_ >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) Item_.{column.var_name}[ArrayIndex_];");
                             break;
                         default:
-                            writer.WriteLineEx($"Reader_ >> {column.var_name}[ArrayIndex_];");
+                            writer.WriteLineEx($"Reader_ >> Item_.{column.var_name}[ArrayIndex_];");
                             break;
                     }
                     writer.WriteLineEx("}");
@@ -174,34 +173,22 @@ namespace TableGenerate
                     switch (column.base_type)
                     {
                         case eBaseType.TimeSpan:
-                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
+                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item_.{column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
                             break;
                         case eBaseType.DateTime:
-                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; {column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
+                            writer.WriteLineEx($"  {{int64 element__; Reader_ >> element__; Item_.{column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
-                        case eBaseType.Struct:
-                        case eBaseType.Enum:
-                            writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>({column.var_name});");
-                            break;
+                        // case eBaseType.Struct:
+                        // case eBaseType.Enum:
+                        //     writer.WriteLineEx($"Reader_ >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item_.{column.var_name});");
+                        //     break;
                         default:
-                            writer.WriteLineEx($"Reader_ >> {column.var_name};");
+                            writer.WriteLineEx($"Reader_ >> Item_.{column.var_name};");
                             break;
                     }
                 }
             }
-            writer.WriteLineEx(string.Format($"auto {sheetName}Var = {sheetName}({{0}});",
-                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}").ToArray()))
-            );
-            writer.WriteLineEx($"Array_[Idx_] = {sheetName}Var;");
-            writer.WriteLineEx($"Map_.Emplace({primaryName},{sheetName}Var);");
-            writer.WriteLineEx($"}}");
-            writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"auto& TargetArray = const_cast<{sheetName}::FArray&>({sheetName}::Array_);");
-            writer.WriteLineEx($"TargetArray = Array_;");
-            writer.WriteLineEx($"}}");
-            writer.WriteLineEx($"{{");
-            writer.WriteLineEx($"auto& TargetMap = const_cast<{sheetName}::FMap&>({sheetName}::Map_);");
-            writer.WriteLineEx($"TargetMap = Map_;");
+            writer.WriteLineEx($"Map_.Emplace(Item_.{primaryName},Item_);");
             writer.WriteLineEx($"}}");
         }
 
