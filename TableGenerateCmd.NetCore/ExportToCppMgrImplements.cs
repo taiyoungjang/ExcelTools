@@ -30,8 +30,10 @@ namespace TableGenerate
                     //            writer.WriteLine("#include <Base/properties.h>");
                     //            writer.WriteLine("#include <Base/service.h>");
                     writer.WriteLineEx($"#ifdef WITH_EDITOR");
+                    writer.WriteLineEx($"#include \"CoreMinimal.h\"");
                     writer.WriteLineEx($"#include \"{filename}.h\"");
                     writer.WriteLineEx($"#include \"AssetRegistryModule.h\"");
+                    writer.WriteLineEx($"#include \"UObject/Package.h\"");
                     writer.WriteLineEx($"#include \"UObject/SavePackage.h\"");
                     
                     string fn = filename.Replace("TableManager", string.Empty);
@@ -107,8 +109,20 @@ namespace TableGenerate
             string packageName = $"TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}\")";
             writer.WriteLineEx($"FString PackageName =  *FPaths::Combine(TEXT(\"/Game/Data\"), Language, {packageName});");
             writer.WriteLineEx($"FString FileName = *FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());");
-            writer.WriteLineEx($"if( FPaths::FileExists(*FileName) && !IFileManager::Get().IsReadOnly(*FileName) )");
+            writer.WriteLineEx($"if( FPaths::FileExists(*FileName) )");
             writer.WriteLineEx("{");
+            writer.WriteLineEx($"UPackage* Pkg = LoadPackage( nullptr, *PackageName, 0 );");
+            writer.WriteLineEx($"FGuid LoadGuid = Pkg->GetPersistentGuid();");
+            writer.WriteLineEx($"if( Guid == LoadGuid )");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx("UE_LOG(LogLevel, Log, TEXT(\"Guid Equal\"));");
+            writer.WriteLineEx("return true;");
+            writer.WriteLineEx("}");
+            writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx("UE_LOG(LogLevel, Error, TEXT(\"File is ReadOnly\"));");
+            writer.WriteLineEx("return false;");
+            writer.WriteLineEx("}");
             writer.WriteLineEx($"IFileManager::Get().Delete(*FileName);");
             writer.WriteLineEx("}");
             writer.WriteLineEx($"UPackage *Package = CreatePackage( *PackageName );");
