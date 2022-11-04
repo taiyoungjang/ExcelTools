@@ -110,6 +110,7 @@ namespace TableGenerate
             writer.WriteLineEx($"const FString FileName = *FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());");
             writer.WriteLineEx($"UPackage* Package = nullptr;");
             writer.WriteLineEx($"UDataTable* DataTable = nullptr;");
+            writer.WriteLineEx($"bool bCreated = false;");
             writer.WriteLineEx($"if( FPaths::FileExists(*FileName) )");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
@@ -117,7 +118,7 @@ namespace TableGenerate
             writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset file is readonly!!!\"));");
             writer.WriteLineEx($"return false;");
             writer.WriteLineEx( "}");
-            writer.WriteLineEx($"DataTable = reinterpret_cast<UDataTable*>( UEditorAssetLibrary::LoadAsset(*PackageName) );");
+            writer.WriteLineEx($"DataTable = Cast<UDataTable>( UEditorAssetLibrary::LoadAsset(*PackageName) );");
             writer.WriteLineEx($"DataTable->EmptyTable();");
             writer.WriteLineEx($"Package = DataTable->GetPackage();");
             writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset LoadAsset\"));");
@@ -126,14 +127,15 @@ namespace TableGenerate
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"Package = CreatePackage( *PackageName );");
             writer.WriteLineEx($"DataTable = NewObject<UDataTable>(Package, UDataTable::StaticClass(), {packageName}, RF_Public | RF_Standalone );");
+            writer.WriteLineEx($"DataTable->RowStruct = F{filename.Replace("TableManager",string.Empty)}_{sheetName}::StaticStruct();");
+            writer.WriteLineEx($"bCreated = true;");
             writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset CreatePackage\"));");
             writer.WriteLineEx( "}");
-            writer.WriteLineEx($"DataTable->RowStruct = F{filename.Replace("TableManager",string.Empty)}_{sheetName}::StaticStruct();");
             
             InnerSheetProcess(filename, sheetName, columns, writer);
             writer.WriteLineEx($"FSavePackageArgs SavePackageArgs;");
             writer.WriteLineEx($"SavePackageArgs.TopLevelFlags = RF_Standalone;");
-            writer.WriteLineEx($"SavePackageArgs.SaveFlags = SAVE_KeepGUID;");
+            writer.WriteLineEx($"SavePackageArgs.SaveFlags = bCreated ? SAVE_None : SAVE_KeepGUID;");
             writer.WriteLineEx($"const bool bRtn = UPackage::SavePackage(Package, nullptr, *FileName, SavePackageArgs);");
             writer.WriteLineEx($"if( bRtn )");
             writer.WriteLineEx( "{");
