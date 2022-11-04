@@ -157,7 +157,7 @@ namespace TableGenerate
                     continue;
                 }
                 writer.WriteLineEx($"UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = {sn} )");
-                writer.WriteLineEx($"{type} {name};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
         private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)

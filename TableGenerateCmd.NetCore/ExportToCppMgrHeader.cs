@@ -76,22 +76,5 @@ namespace TableGenerate
             }
             return true;
         }
-
-        private void SheetProcess(string filename, string sheetName, List<Column> columns, StreamWriter _writer)
-        {
-            _writer.WriteLineEx(string.Empty);
-            _writer.WriteLineEx($"class {sheetName}TableManager : public {ExportToCSMgr.NameSpace}::TableManager");
-            _writer.WriteLineEx("{");
-            InnerSheetProcess(sheetName, columns, _writer);
-            _writer.WriteLineEx("};");
-        }
-
-        private void InnerSheetProcess(string sheetName, List<Column> columns, StreamWriter _writer)
-        {
-            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
-            string keyType = keyColumn.GenerateType(_gen_type); 
-            _writer.WriteLineEx("public:");
-            _writer.WriteLineEx("bool ConvertToUAsset(BufferReader& stream) override;");
-        }
     }
 }

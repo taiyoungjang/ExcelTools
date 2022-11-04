@@ -65,8 +65,9 @@ namespace TableGenerate
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes;");
-                    writer.WriteLineEx($"if({ExportToCSMgr.NameSpace}::FBufferReader::Decompress(Reader,Bytes)==false) return false;");
-                    writer.WriteLineEx($"FBufferReader BufferReader((uint8*)Bytes.GetData(),(int32)Bytes.Num());");
+                    writer.WriteLineEx($"FGuid Guid;");
+                    writer.WriteLineEx($"if({ExportToCSMgr.NameSpace}::FBufferReader::Decompress( Reader, Bytes, Guid)==false) return false;");
+                    writer.WriteLineEx($"FBufferReader BufferReader( Bytes.GetData(), Bytes.Num() );");
                     foreach (string sheetName in sheets)
                     {
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
@@ -80,7 +81,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.ConvertToUAsset(BufferReader,Language);");
+                        writer.WriteLineEx($"bRtn &= {trimSheetName}TableManager.ConvertToUAsset( BufferReader, Language, Guid);");
                     }
                     writer.WriteLineEx($"return bRtn;");
                     writer.WriteLineEx($"}};");
@@ -101,7 +102,7 @@ namespace TableGenerate
             writer.WriteLineEx("public:");
             writer.WriteLineEx($"  U{sheetName}TableManager(void){{}}");
             writer.WriteLineEx($"virtual ~U{sheetName}TableManager(void) = default;");
-            writer.WriteLineEx($"bool ConvertToUAsset(FBufferReader& Reader, const FString& Language)");
+            writer.WriteLineEx($"bool ConvertToUAsset(FBufferReader& Reader, const FString& Language, const FGuid& Guid)");
             writer.WriteLineEx("{");
             string packageName = $"TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}\")";
             writer.WriteLineEx($"FString PackageName =  *FPaths::Combine(TEXT(\"/Game/Data\"), Language, {packageName});");
@@ -111,6 +112,7 @@ namespace TableGenerate
             writer.WriteLineEx($"IFileManager::Get().Delete(*FileName);");
             writer.WriteLineEx("}");
             writer.WriteLineEx($"UPackage *Package = CreatePackage( *PackageName );");
+            writer.WriteLineEx($"Package->SetPersistentGuid(Guid);");
             writer.WriteLineEx($"UDataTable* DataTable = NewObject<UDataTable>(Package, UDataTable::StaticClass(), {packageName}, RF_Public | RF_Standalone | RF_Transactional);");
             writer.WriteLineEx($"DataTable->RowStruct = F{filename.Replace("TableManager",string.Empty)}_{sheetName}::StaticStruct();");
             InnerSheetProcess(filename, sheetName, columns, writer);
