@@ -105,7 +105,7 @@ namespace TableGenerate
             writer.WriteLineEx($"virtual ~U{sheetName}TableManager(void) = default;");
             writer.WriteLineEx($"bool ConvertToUAsset(FBufferReader& Reader, const FString& Language) const");
             writer.WriteLineEx("{");
-            string packageName = $"TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}\")";
+            string packageName = $"TEXT(\"{sheetName}\")";
             writer.WriteLineEx($"const FString PackageName = *FPaths::Combine(TEXT(\"/Game/Data\"), Language, {packageName});");
             writer.WriteLineEx($"const FString FileName = *FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());");
             writer.WriteLineEx($"UPackage* Package = nullptr;");
@@ -114,20 +114,20 @@ namespace TableGenerate
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset file is readonly!!!\"));");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{sheetName}.uasset file is readonly!!!\"));");
             writer.WriteLineEx($"return false;");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"DataTable = Cast<UDataTable>( UEditorAssetLibrary::LoadAsset(*PackageName) );");
             writer.WriteLineEx($"DataTable->EmptyTable();");
             writer.WriteLineEx($"Package = DataTable->GetPackage();");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset LoadAsset\"));");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{sheetName}.uasset LoadAsset\"));");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"else");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"Package = CreatePackage( *PackageName );");
             writer.WriteLineEx($"DataTable = NewObject<UDataTable>(Package, UDataTable::StaticClass(), {packageName}, RF_Public | RF_Standalone );");
-            writer.WriteLineEx($"DataTable->RowStruct = F{filename.Replace("TableManager",string.Empty)}_{sheetName}::StaticStruct();");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset CreatePackage\"));");
+            writer.WriteLineEx($"DataTable->RowStruct = F{sheetName}::StaticStruct();");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{sheetName}.uasset CreatePackage\"));");
             writer.WriteLineEx( "}");
             
             InnerSheetProcess(filename, sheetName, columns, writer);
@@ -136,11 +136,11 @@ namespace TableGenerate
             writer.WriteLineEx($"const bool bRtn = UPackage::SavePackage(Package, nullptr, *FileName, SavePackageArgs);");
             writer.WriteLineEx($"if( bRtn )");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset SavePackage Success\"));");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{sheetName}.uasset SavePackage Success\"));");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"else");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{filename.Replace("TableManager",string.Empty)}_{sheetName}.uasset SavePackage Failure\"));");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{sheetName}.uasset SavePackage Failure\"));");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"return bRtn;");
             writer.WriteLineEx("}");
@@ -150,23 +150,29 @@ namespace TableGenerate
         private void InnerSheetProcess(string fileName, string sheetName, List<Column> columns, StreamWriter writer)
         {
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
-            string primaryName = "" + keyColumn.var_name;
+            string primaryName = keyColumn.var_name;
 
             writer.WriteLineEx($"int32 Count = 0;");
             writer.WriteLineEx($"Reader >> Count;");
 
             writer.WriteLineEx($"if(Count == 0) return true;");
             
-            string structName =$"F{fileName.Replace("TableManager",string.Empty)}_{sheetName}"; 
+            string structName =$"F{sheetName}"; 
             writer.WriteLineEx($"for(auto Idx=0;Idx<Count;++Idx)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"{structName} Item;");
+            writer.WriteLineEx( $"{keyColumn.base_type.GenerateBaseType(this._gen_type)} {keyColumn.var_name};");
             foreach (var column in columns)
             {
                 if (column.is_generated == false)
                     continue;
                 if (column.array_index > 0)
                     continue;
+                if (column.is_key)
+                {
+                    writer.WriteLineEx($"Reader >> {column.var_name};");
+                    continue;
+                }
                 if (column.array_index == 0)
                 {
                     writer.WriteLineEx("{");
@@ -220,11 +226,11 @@ namespace TableGenerate
             switch (keyColumn.base_type)
             {
                 case eBaseType.String:
-                    writer.WriteLineEx($"const FName Key = Item.{primaryName};");
+                    writer.WriteLineEx($"const FName Key = {primaryName};");
                     break;
                 case eBaseType.Int32:
                 default:
-                    writer.WriteLineEx($"const FName Key = *FString::FromInt(Item.{primaryName});");
+                    writer.WriteLineEx($"const FName Key = *FString::FromInt({primaryName});");
                     break;
             }
             writer.WriteLineEx($"DataTable->AddRow(Key,Item);");

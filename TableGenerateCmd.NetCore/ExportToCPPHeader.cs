@@ -109,7 +109,7 @@ namespace TableGenerate
                         foreach (var sheet in sheetsColumns)
                         {
                             current++;
-                            SheetProcess(writer, $"F{filename}_{sheet.Key}", sheet.Value);
+                            SheetProcess(writer, $"F{sheet.Key}", sheet.Value);
                         }
                         //writer.WriteLineEx("}");
                         writer.Flush();
@@ -152,7 +152,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                if (column.array_index > 0)
+                if (column.array_index > 0 || column.is_key)
                 {
                     continue;
                 }
