@@ -40,6 +40,7 @@ namespace TableGenerateCmd
         public static string argstr = string.Empty;
         public static bool not_array_length_full = false;
         public static bool using_perforce = false;
+        public static string dataStage = String.Empty;
 
         static DateTime _begin_time;
 

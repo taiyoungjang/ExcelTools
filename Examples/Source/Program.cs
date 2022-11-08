@@ -17,7 +17,7 @@ namespace Examples
             var loader = new TBL.ItemTable.Loader();
             foreach (var path in files)
             {
-                loader.ExcelLoad(path, language);
+                loader.ExcelLoad(path, language, "All");
                 Assert.True(TBL.ItemTable.Item.Array_.Length > 0);
             }
         }

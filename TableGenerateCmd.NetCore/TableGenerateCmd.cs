@@ -64,6 +64,7 @@ namespace TableGenerateCmd
             if (!string.IsNullOrEmpty(strUseInterface) && bool.TryParse(strUseInterface,out useInterface))
             {
             }
+            string dataStage = ini.IniReadValue("TableGenerate", "DataStage");
 
             _JobList.Add(new JobImportTable(0, ProgramCmd.TABLE_DIR, "TableGenerate", "TableInput", _srcDir));        // JobList의 Index 0은 항상 Import Table 정보를 저장함.
             if ((_cmdMask & ProgramCmd.EXPORT_RUST) > 0) _JobList.Add(new JobExportData(new ExportToRust(useInterface), ProgramCmd.EXPORT_RUST, ProgramCmd.CS_DIR, "Directory", "RUST", "RUST_FILES"));
@@ -74,7 +75,7 @@ namespace TableGenerateCmd
             if ((_cmdMask & ProgramCmd.EXPORT_CPPHEADER) > 0) _JobList.Add(new JobExportData(new ExportToCPPHeader(cppClassPredefine), ProgramCmd.EXPORT_CPPHEADER, ProgramCmd.ICECPP_DIR, "Directory", "HPP", "CPP_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_HPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrHeader(cppClassPredefine), ProgramCmd.EXPORT_HPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "HPPMGR", "CPP_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_CPPMGR) > 0) _JobList.Add(new JobExportData(new ExportToCppMgrImplements(), ProgramCmd.EXPORT_CPPMGR, ProgramCmd.ICECPP_DIR, "Directory", "CPPMGR", "CPP_FILES"));
-            if ((_cmdMask & ProgramCmd.EXPORT_TABLE) > 0) _JobList.Add(new JobExportData(new ExportToTF(), ProgramCmd.EXPORT_TABLE, ProgramCmd.TF_DIR, "Directory", "TableFile", "TF_FILES"));
+            if ((_cmdMask & ProgramCmd.EXPORT_TABLE) > 0) _JobList.Add(new JobExportData(new ExportToTF(dataStage), ProgramCmd.EXPORT_TABLE, ProgramCmd.TF_DIR, "Directory", "TableFile", "TF_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_SQLITE) > 0) _JobList.Add(new JobExportData(new ExportToSQLLite(), ProgramCmd.EXPORT_SQLITE, ProgramCmd.DB_DIR, "Directory", "SQLITE", "SQLITE_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_MSSQL) > 0) _JobList.Add(new JobExportData(new ExportToMSSQL(), ProgramCmd.EXPORT_MSSQL, ProgramCmd.DB_DIR, "Directory", "MSSQL", "MSSQL_FILES"));
             if ((_cmdMask & ProgramCmd.EXPORT_MYSQL) > 0) _JobList.Add(new JobExportData(new ExportToMySQL(), ProgramCmd.EXPORT_MYSQL, ProgramCmd.DB_DIR, "Directory", "MYSQL", "MYSQL_FILES"));

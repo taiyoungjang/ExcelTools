@@ -115,7 +115,7 @@ namespace TableGenerate
                     */
                     // ExcelLoad function
                     writer.WriteLineEx("#if !NO_EXCEL_LOADER");
-                    writer.WriteLineEx("public void ExcelLoad(string path, string language)");
+                    writer.WriteLineEx("public void ExcelLoad(string path, string language, string dataStage)");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
                     writer.WriteLineEx("{");
@@ -128,7 +128,7 @@ namespace TableGenerate
                     var sheetNames = sheets.Select(sheetName => sheetName.Trim().Replace(" ", "_"));
                     foreach (string sheetName in sheetNames)
                     {
-                        writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad(imp,directoryName,language);");
+                        writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad( imp, directoryName, language, dataStage);");
                         writer.WriteLineEx("break;");
                     }
                     writer.WriteLineEx("}");
@@ -503,15 +503,19 @@ namespace TableGenerate
                     ));
             }
         }
-        private void ExcelLoadFunction(IndentedTextWriter writer, string filename, string sheetName, List<Column> columns)
+
+        private void ExcelLoadFunction(IndentedTextWriter writer, string filename, string sheetName,
+            List<Column> columns)
         {
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
-            var nationColumn = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "nation");
+            var dataStageColumn = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "datastage");
 
-            writer.WriteLineEx( "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language)");
-            writer.WriteLineEx( "{");
-            writer.WriteLineEx( "var i=0; var j=0;");
-            writer.WriteLineEx( "TableGenerateCmd.StringWithDesc[,] rows = null;");
+            writer.WriteLineEx(
+                "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language, string dataStage)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx("dataStage = dataStage.ToLower();");
+            writer.WriteLineEx("var i=0; var j=0;");
+            writer.WriteLineEx("TableGenerateCmd.StringWithDesc[,] rows = null;");
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -520,23 +524,29 @@ namespace TableGenerate
                 {
                     continue;
                 }
+
                 if (column.array_index > 0)
                 {
                     continue;
                 }
+
                 writer.WriteLineEx($"{type} {name};");
             }
-            writer.WriteLineEx( "try");
-            writer.WriteLineEx( "{");
+
+            writer.WriteLineEx("try");
+            writer.WriteLineEx("{");
             writer.WriteLineEx($"rows = imp.GetSheet(\"{sheetName}\", language);");
-            if (nationColumn != null) writer.WriteLineEx($"      bool useNation = rows[0,{nationColumn.data_column_index}].Text.Trim().ToLower() == \"nation\";");
             writer.WriteLineEx($"var list__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 3);");
-            writer.WriteLineEx( "for (i = 3; i < rows.GetLength(0); i++)");
-            writer.WriteLineEx( "{");
+            writer.WriteLineEx("for (i = 3; i < rows.GetLength(0); i++)");
+            writer.WriteLineEx("{");
             writer.WriteLineEx($"j=0;");
             writer.WriteLineEx("if(rows[i,0].Text.Length == 0) break;");
-            if (nationColumn != null) writer.WriteLineEx($"if( useNation == true && (rows[i,{nationColumn.data_column_index}].Text.Trim().Length == 0 || rows[i,{nationColumn.data_column_index}].Text.Trim().ToLower() == \"all\") ) {{}}");
-            if (nationColumn != null) writer.WriteLineEx($"else if( useNation == true && rows[i,{nationColumn.data_column_index}].Text.Trim()/*.ToLower()*/ != language ) continue;");
+            if (dataStageColumn != null)
+            {
+                writer.WriteLineEx($"var dataStageText = rows[i,{dataStageColumn.data_column_index}].Text.ToLower().Trim();");
+                writer.WriteLineEx($"  if( dataStageText.Length == 0) {{}}");
+                writer.WriteLineEx($"  else if( dataStageText != dataStage ) {{ continue;}}");
+            }
             foreach (var column in columns)
             {
                 string type = column.GenerateType(_gen_type);
@@ -657,15 +667,32 @@ namespace TableGenerate
                 }
             }
 
-            writer.WriteLineEx(string.Format("{0} values = new {0}{{ {1} }};", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}={t.var_name}").ToArray())));
-            writer.WriteLineEx("foreach (var preValues in list__)");
+            writer.WriteLineEx(string.Format("  {0} values = new {0}{{ {1} }};", sheetName, string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"{t.var_name}={t.var_name}").ToArray())));
+            if (dataStageColumn != null)writer.WriteLineEx("bool needAdd = true;");
+            writer.WriteLineEx("for (var idx_ = list__.Count-1; idx_ >= 0; --idx_)");
             writer.WriteLineEx( "{");
+            writer.WriteLineEx( "var preValues = list__[idx_];");
             writer.WriteLineEx($"if (preValues.{keyColumn.var_name}.Equals({keyColumn.var_name}))");
             writer.WriteLineEx("{");
+            if (dataStageColumn != null)
+            {
+                writer.WriteLineEx($"if (preValues.{dataStageColumn.var_name}.ToString().ToLower().Equals(dataStage))");
+                writer.WriteLineEx("{");
+                writer.WriteLineEx("needAdd = false;");
+                writer.WriteLineEx("break;");
+                writer.WriteLineEx("}");
+                writer.WriteLineEx($"if (values.{dataStageColumn.var_name}.ToString().ToLower().Equals(dataStage))");
+                writer.WriteLineEx("{");
+                writer.WriteLineEx("list__.RemoveAt(idx_);");
+                writer.WriteLineEx("idx_++;");
+                writer.WriteLineEx("break;");
+                writer.WriteLineEx("}");
+            }
             writer.WriteLineEx($"throw new System.Exception(\"row:\" + i + \" {sheetName}.{keyColumn.var_name}:\" + preValues.{keyColumn.var_name}.ToString() + \") Duplicated!!\");");
             writer.WriteLineEx("}");
             writer.WriteLineEx( "}");
 
+            if (dataStageColumn != null)writer.WriteLineEx("if(needAdd)");
             writer.WriteLineEx("list__.Add(values);");
             writer.WriteLineEx( "}");
             writer.WriteLineEx("array_ = list__.ToArray();");

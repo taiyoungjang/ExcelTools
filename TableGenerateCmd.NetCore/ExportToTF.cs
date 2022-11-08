@@ -19,6 +19,7 @@ namespace TableGenerate
         private string _enumTypeDir;
         private string _dllOutputDir = string.Empty;
 
+        private string DataStage = string.Empty;
         public string DllOutputDir
         {
             set
@@ -44,6 +45,11 @@ namespace TableGenerate
             {
                 _enumTypeDir = value;
             }
+        }
+
+        public ExportToTF(string dataStage)
+        {
+            DataStage = dataStage;
         }
 
         public override bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
@@ -109,14 +115,14 @@ namespace TableGenerate
             str.AppendLine($"       if(System.IO.Directory.Exists(directory))");
             str.AppendLine($"         files = System.IO.Directory.GetFiles(directory,\"*.xlsm\");");
             str.AppendLine($"       excel_name = System.IO.Path.GetFileName(inputPath);");
-            str.AppendLine($"       loader__.ExcelLoad(inputPath,\"{language}\");");
+            str.AppendLine($"       loader__.ExcelLoad( inputPath, \"{language}\", \"{DataStage}\");");
             str.AppendLine($"       foreach(var file in files)");
             str.AppendLine($"       {{");
             str.AppendLine($"         excel_name = System.IO.Path.GetFileName(file);");
             str.AppendLine($"         if( excel_name.Contains(\"~$\"))continue;");
-            str.AppendLine($"         loader__.ExcelLoad(file,\"{language}\");");
+            str.AppendLine($"         loader__.ExcelLoad( file,\"{language}\", \"{DataStage}\" );");
             str.AppendLine($"       }}");
-            str.AppendLine($"       loader__.WriteFile(outputPath,{ProgramCmd.using_perforce.ToString().ToLower()});");
+            str.AppendLine($"       loader__.WriteFile( outputPath,{ProgramCmd.using_perforce.ToString().ToLower()});");
             str.AppendLine("      }");
             str.AppendLine("      catch(System.Exception ex)");
             str.AppendLine("      {");
@@ -207,6 +213,7 @@ namespace TableGenerate
                 if (status == 1)
                 {
                     //System.IO.File.WriteAllText($"{viewFilename}err.cs", str.ToString());
+                    System.IO.File.WriteAllText("C:/workspace/text.cs", str.ToString());
                     throw new System.Exception(viewFilename.ToString());
                 }
             }
