@@ -55,8 +55,10 @@ namespace TableGenerate
         public string type_name;
         public eBaseType primitive_type;
         public string min_value;
+        public string max_value;
         public string desc;
         public System.Reflection.TypeInfo TypeInfo;
+        public bool bit_flags;
     };
 
     public abstract class ExportBase
@@ -185,7 +187,8 @@ namespace TableGenerate
                     array_group_name = null,
                     array_index = -1,
                     is_array = false, 
-                    desc = desc
+                    desc = desc,
+                    bit_flags = generate.ToLower() == "bitflags"
                 };
 
                 GetBaseType(ref column, refAssem, mscorlibAssembly, type);
@@ -484,8 +487,11 @@ namespace TableGenerate
                             if (type != null)
                             {
                                 column.TypeInfo = type;
-                                var Values = type.DeclaredFields.Where(t => t.FieldType.BaseType == typeof(System.Enum)).Select(t => t.Name.ToString()).ToArray();
-                                if(Values.Any())column.min_value = $"{type.FullName}.{Values[0]}";
+                                {
+                                    var types = type.DeclaredFields.Where(t => t.IsStatic).ToArray();
+                                    column.min_value = $"global::{type.FullName}.{types.First().Name}";
+                                    column.max_value = $"global::{type.FullName}.{types.Last().Name}";
+                                }
                                 var DeclaredField = type.DeclaredFields.First();
                                 switch ("")
                                 {
@@ -858,7 +864,8 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = $"TArray<{(column.IsEnumType()?"E":"F")}{column.type_name}>"; break;
+                                case eGenType.cpp when !column.bit_flags: returnTypeName = $"TArray<int32>"; break;
+                                case eGenType.cpp when column.bit_flags: returnTypeName = $"TArray<{(column.IsEnumType()?"E":"F")}{column.type_name}>"; break;
                                 case eGenType.cs: returnTypeName = $"{column.type_name}[]"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1019,7 +1026,8 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = $"{(column.IsEnumType()?"E":"F")}{column.type_name}"; break;
+                            case eGenType.cpp when !column.bit_flags: returnTypeName = $"{(column.IsEnumType()?"E":"F")}{column.type_name}"; break;
+                            case eGenType.cpp when column.bit_flags: returnTypeName = $"int32"; break;
                             case eGenType.cs: returnTypeName = column.type_name; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;

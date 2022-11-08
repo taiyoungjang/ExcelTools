@@ -52,9 +52,9 @@ namespace TableGenerate
                             sheetsColumns.Add(trimSheetName,columns);
                         }
 
-                        var enums = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType()).Select(t => t.TypeInfo).Distinct();
+                        var enums = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType()).Select(t => (t,t.TypeInfo)).Distinct();
                         {
-                            foreach (var typeInfo in enums)
+                            foreach (var (column, typeInfo) in enums)
                             {
                                 using var stream2 = new MemoryStream();
                                 var writer2 = new IndentedTextWriter(new StreamWriter(stream2, Encoding.UTF8), "  ");
@@ -65,7 +65,7 @@ namespace TableGenerate
                                 writer2.WriteLineEx("// DO NOT TOUCH SOURCE....");
                                 writer2.WriteLineEx($"#pragma once");
                                 writer2.WriteLineEx($"#include \"CoreMinimal.h\"");
-                                writer2.WriteLineEx($"UENUM(Meta = ({typeInfo.Name}))");
+                                writer2.WriteLineEx($"UENUM(Meta = ({(column.bit_flags?"Bitflags, UseEnumValuesAsMaskValuesInEditor = \"true\"":typeInfo.Name)}))");
                                 writer2.WriteLineEx($"enum class E{typeInfo.Name} : int32 {{");
                                 {
                                     var types = typeInfo.DeclaredFields.Where(t => t.IsStatic).ToArray();
@@ -78,7 +78,7 @@ namespace TableGenerate
                                         // Convert the value to its underlying type (int, byte, long, ...)
                                         object? underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
                                         writer2.WriteLineEx(
-                                            $"{types[i].Name}={underlyingValue}{(i < enumValues.Length ? "," : string.Empty)}");
+                                            $"{types[i].Name}={underlyingValue}{(i==0&&column.bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)}");
                                     }
                                 }
                                 writer2.WriteLineEx($"}};");
@@ -95,7 +95,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"CoreMinimal.h\"");
                         writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
-                        foreach (var typeInfo in enums)
+                        foreach (var (_,typeInfo) in enums)
                         {
                             writer.WriteLineEx($"#include \"{typeInfo.Name}.h\"");
                         }
@@ -128,13 +128,12 @@ namespace TableGenerate
         private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
             writer.WriteLineEx($"USTRUCT(BlueprintType)");
-            writer.WriteLineEx($"struct {sheetName} : public FTableRowBase");
+            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName} : public FTableRowBase");
             writer.WriteLineEx("{");
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type);
 
             writer.WriteLineEx($"GENERATED_USTRUCT_BODY()");
-            writer.WriteLine("");
 
             InnerSheetProcess(writer, sheetName, columns);
             //SheetConstructorProcess(writer, sheetName, columns);
@@ -156,7 +155,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = {sn} )");
+                writer.WriteLineEx($"UPROPERTY( EditAnywhere{(column.bit_flags? $", Meta = (BitMask, BitmaskEnum =\"E{column.type_name}\" )": $", BlueprintReadWrite, Category = {sn}")} )");
                 writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }

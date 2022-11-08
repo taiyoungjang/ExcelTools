@@ -85,6 +85,7 @@ namespace TableGenerate
                     // Init class
                     writer.WriteLineEx($"namespace {NameSpace}.{filename}");
                     writer.WriteLineEx("{");
+                    writer.WriteLineEx("using System.Linq;");
                     writer.WriteLineEx($"[System.CodeDom.Compiler.GeneratedCode(\"TableGenerateCmd\",\"1.0.0\")]");
                     writer.WriteLineEx( "public class Loader : ILoader");
                     writer.WriteLineEx( "{");
@@ -513,7 +514,11 @@ namespace TableGenerate
             writer.WriteLineEx(
                 "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language, string dataStage)");
             writer.WriteLineEx("{");
-            writer.WriteLineEx("dataStage = dataStage.ToLower();");
+            if (dataStageColumn != null)
+            {
+                writer.WriteLineEx($"dataStage = dataStage.Length == 0 ? ({dataStageColumn.max_value}).ToString() : char.ToUpper(dataStage[0])+dataStage[1..].ToLower();");
+                writer.WriteLineEx($"var dataStageEnum__ = System.Enum.Parse<{dataStageColumn.type_name}>( dataStage );");
+            }
             writer.WriteLineEx("var i=0; var j=0;");
             writer.WriteLineEx("TableGenerateCmd.StringWithDesc[,] rows = null;");
             foreach (var column in columns)
@@ -543,9 +548,8 @@ namespace TableGenerate
             writer.WriteLineEx("if(rows[i,0].Text.Length == 0) break;");
             if (dataStageColumn != null)
             {
-                writer.WriteLineEx($"var dataStageText = rows[i,{dataStageColumn.data_column_index}].Text.ToLower().Trim();");
-                writer.WriteLineEx($"  if( dataStageText.Length == 0) {{}}");
-                writer.WriteLineEx($"  else if( dataStageText != dataStage ) {{ continue;}}");
+                writer.WriteLineEx($"var dataStageText = rows[i,{dataStageColumn.data_column_index}].Text.Trim();");
+                writer.WriteLineEx($"  if( !string.IsNullOrEmpty(dataStageText) && (dataStageText.Split('|').Select(x__=>(int)System.Enum.Parse<{dataStageColumn.type_name}>(char.ToUpper(x__[0])+x__[1..].ToLower())).Sum() & (int)dataStageEnum__) != (int) dataStageEnum__ ) {{ continue;}}");
             }
             foreach (var column in columns)
             {
@@ -622,7 +626,12 @@ namespace TableGenerate
                     }
                     continue;
                 }
-                if (column.IsDateTime() == true)
+                if (column.IsEnumType() && column.bit_flags)
+                {
+                    writer.WriteLineEx($"j = {column.data_column_index};");
+                    writer.WriteLineEx($"    {{{column.var_name} = {arg}.Length == 0 ? {column.max_value} : ({column.type_name}) {arg}.Split('|').Select(x__ => (int) System.Enum.Parse<{column.GetPrimitiveType(_gen_type)}>(char.ToUpper(x__[0])+x__[1..].ToLower())).Sum(); }}");
+                }
+                else if (column.IsDateTime() == true)
                 {
                     writer.WriteLineEx($"j = {column.data_column_index};");
                     writer.WriteLineEx($"if(string.IsNullOrEmpty({arg})){{{column.var_name} = new System.DateTime(1970,1,1);}} else{{{column.var_name} = {convert_function};}}");
@@ -676,12 +685,12 @@ namespace TableGenerate
             writer.WriteLineEx("{");
             if (dataStageColumn != null)
             {
-                writer.WriteLineEx($"if (preValues.{dataStageColumn.var_name}.ToString().ToLower().Equals(dataStage))");
+                writer.WriteLineEx($"if ( (preValues.{dataStageColumn.var_name} & dataStageEnum__) == dataStageEnum__ )");
                 writer.WriteLineEx("{");
                 writer.WriteLineEx("needAdd = false;");
                 writer.WriteLineEx("break;");
                 writer.WriteLineEx("}");
-                writer.WriteLineEx($"if (values.{dataStageColumn.var_name}.ToString().ToLower().Equals(dataStage))");
+                writer.WriteLineEx($"if ( (values.{dataStageColumn.var_name} & dataStageEnum__) == dataStageEnum__ )");
                 writer.WriteLineEx("{");
                 writer.WriteLineEx("list__.RemoveAt(idx_);");
                 writer.WriteLineEx("idx_++;");
