@@ -516,8 +516,8 @@ namespace TableGenerate
             writer.WriteLineEx("{");
             if (dataStageColumn != null)
             {
-                writer.WriteLineEx($"dataStage = dataStage.Length == 0 ? ({dataStageColumn.max_value}).ToString() : char.ToUpper(dataStage[0])+dataStage[1..].ToLower();");
-                writer.WriteLineEx($"var dataStageEnum__ = System.Enum.Parse<{dataStageColumn.type_name}>( dataStage );");
+                writer.WriteLineEx($"dataStage = dataStage.Length == 0 ? ({dataStageColumn.max_value}).ToString() : dataStage;");
+                writer.WriteLineEx($"var dataStageEnum__ = System.Enum.Parse<{dataStageColumn.type_name}>( dataStage, ignoreCase: true );");
             }
             writer.WriteLineEx("var i=0; var j=0;");
             writer.WriteLineEx("TableGenerateCmd.StringWithDesc[,] rows = null;");
@@ -549,7 +549,7 @@ namespace TableGenerate
             if (dataStageColumn != null)
             {
                 writer.WriteLineEx($"var dataStageText = rows[i,{dataStageColumn.data_column_index}].Text.Trim();");
-                writer.WriteLineEx($"  if( !string.IsNullOrEmpty(dataStageText) && (dataStageText.Split('|').Select(x__=>(int)System.Enum.Parse<{dataStageColumn.type_name}>(char.ToUpper(x__[0])+x__[1..].ToLower())).Sum() & (int)dataStageEnum__) != (int) dataStageEnum__ ) {{ continue;}}");
+                writer.WriteLineEx($"  if( !string.IsNullOrEmpty(dataStageText) && (dataStageText.Split('|').Select(x__=>(int)System.Enum.Parse<{dataStageColumn.type_name}>(x__, ignoreCase: true)).Sum() & (int)dataStageEnum__) != (int) dataStageEnum__ ) {{ continue;}}");
             }
             foreach (var column in columns)
             {
@@ -629,7 +629,7 @@ namespace TableGenerate
                 if (column.IsEnumType() && column.bit_flags)
                 {
                     writer.WriteLineEx($"j = {column.data_column_index};");
-                    writer.WriteLineEx($"    {{{column.var_name} = {arg}.Length == 0 ? {column.max_value} : ({column.type_name}) {arg}.Split('|').Select(x__ => (int) System.Enum.Parse<{column.GetPrimitiveType(_gen_type)}>(char.ToUpper(x__[0])+x__[1..].ToLower())).Sum(); }}");
+                    writer.WriteLineEx($"    {{{column.var_name} = {arg}.Length == 0 ? {column.max_value} : ({column.type_name}) {arg}.Split('|').Select(x__ => (int) System.Enum.Parse<{column.GetPrimitiveType(_gen_type)}>(x__, ignoreCase: true)).Sum(); }}");
                 }
                 else if (column.IsDateTime() == true)
                 {

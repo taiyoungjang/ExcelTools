@@ -187,25 +187,8 @@ namespace TBL
             // Check the file size and CRC equality here.. if they are equal...    
             try
             {
-                using FileStream file1 = new FileStream(fileName1, FileMode.Open), file2 = new FileStream(fileName2, FileMode.Open);
-                    return StreamsContentsAreEqual(file1, file2);
-            }
-            catch (System.Exception)
-            {
-            }
-            return false;
-        }
-
-        static bool FileEquals(Stream file1, string fileName2)
-        {
-            // Check the file size and CRC equality here.. if they are equal...    
-            try
-            {
-                using var file2 = new FileStream(fileName2, FileMode.Open);
-                if (file1.Length != file2.Length)
-                {
-                    return false;
-                }
+                byte[] file1 = System.IO.File.ReadAllBytes(fileName1);
+                byte[] file2 = System.IO.File.ReadAllBytes(fileName2);
                 return StreamsContentsAreEqual(file1, file2);
             }
             catch (System.Exception)
@@ -213,46 +196,17 @@ namespace TBL
             }
             return false;
         }
-        public static bool StreamsContentsAreEqual(Stream stream1, Stream stream2)
+
+        public static bool StreamsContentsAreEqual(byte[] bytes1, byte[] bytes2)
         {
             using var md5 = System.Security.Cryptography.MD5.Create();
             {
-                var stream1_md5 = md5.ComputeHash(stream1);
-                var stream2_md5 = md5.ComputeHash(stream2);
-                return Enumerable.SequenceEqual(stream1_md5, stream2_md5);
+                var md51 = md5.ComputeHash(bytes1, 0, bytes1.Length);
+                var md52 = md5.ComputeHash(bytes2, 0, bytes2.Length);
+                return Enumerable.SequenceEqual(md51, md52);
             }
-            /*
-            const int bufferSize = 2048 * 2;
-
-            var buffer1 = new byte[bufferSize];
-            var buffer2 = new byte[bufferSize];
-
-            while (true)
-            {
-                int count1 = stream1.Read(buffer1, 0, bufferSize);
-                int count2 = stream2.Read(buffer2, 0, bufferSize);
-
-                if (count1 != count2)
-                {
-                    return false;
-                }
-
-                if (count1 == 0)
-                {
-                    return true;
-                }
-
-                int iterations = (int)Math.Ceiling((double)count1 / sizeof(Int64));
-                for (int i = 0; i < iterations; i++)
-                {
-                    if (BitConverter.ToInt64(buffer1, i * sizeof(Int64)) != BitConverter.ToInt64(buffer2, i * sizeof(Int64)))
-                    {
-                        return false;
-                    }
-                }
-            }
-            */
         }
+
         public static void CheckReplaceFile(string tempFileName, string fileName2, bool usingPerforce)
         {
             tempFileName = System.IO.Path.GetFullPath(tempFileName);
