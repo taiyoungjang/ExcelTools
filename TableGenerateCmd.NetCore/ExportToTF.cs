@@ -96,9 +96,16 @@ namespace TableGenerate
                 str_loader_class = $"{ExportToCSMgr.NameSpace}.{str_class}.Loader";
 
             object[] objects = { imp.GetFileName(), outputPath };
-            using var stream = typeof(ProgramCmd).Assembly.GetManifestResourceStream("TableGenerateCmd.ILoader.cs");
-            using var streamReader = new System.IO.StreamReader(stream);
-            compileFiles.Add(streamReader.ReadToEnd());
+            {
+                using var stream = typeof(ProgramCmd).Assembly.GetManifestResourceStream("TableGenerateCmd.ILoader.cs");
+                using var streamReader = new System.IO.StreamReader(stream);
+                compileFiles.Add(streamReader.ReadToEnd());
+            }   
+            {
+                using var stream = typeof(ProgramCmd).Assembly.GetManifestResourceStream("TableGenerateCmd.Vector3.cs");
+                using var streamReader = new System.IO.StreamReader(stream);
+                str.AppendLine(streamReader.ReadToEnd());
+            }   
             str.AppendLine("namespace ScriptLibrary ");
             str.AppendLine("{");
             str.AppendLine("public class Script ");

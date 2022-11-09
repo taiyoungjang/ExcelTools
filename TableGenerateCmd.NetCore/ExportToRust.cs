@@ -272,6 +272,7 @@ namespace TableGenerate
                     eBaseType.Float => "reader.read_f32().unwrap()",
                     eBaseType.Double => "reader.read_f64().unwrap()",
                     eBaseType.String => "lib::read_string(reader)",
+                    eBaseType.Vector3 => "glam::f64::DVec3::new(reader.read_f64().unwrap(),reader.read_f64().unwrap(),reader.read_f64().unwrap())",
                     _ => "util::reader.read_i32().unwrap()"
                 };
                 writer.WriteLineEx(column.is_array

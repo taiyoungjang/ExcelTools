@@ -858,6 +858,12 @@ namespace TableGenerate
                         writer.Write($"__writer.Write(t__.ToBinary());");
                     else if (column.IsTimeSpan())
                         writer.Write($"__writer.Write(t__.Ticks);");
+                    else if (column.IsVector3())
+                    {
+                        writer.Write($"__writer.Write(t__.X);");
+                        writer.Write($"__writer.Write(t__.Y);");
+                        writer.Write($"__writer.Write(t__.Z);");
+                    }   
                     else if (column.IsEnumType() || column.IsStructType())
                     {
                         string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
@@ -878,6 +884,8 @@ namespace TableGenerate
                 {
                     if (column.IsDateTime())
                         writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.ToBinary());");
+                    else if (column.IsVector3())
+                        writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.X);__writer.Write(__table.{column.var_name}.Y);__writer.Write(__table.{column.var_name}.Z);");
                     else if (column.IsTimeSpan())
                         writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
@@ -909,7 +917,7 @@ namespace TableGenerate
             foreach (var column in columns.Where( t => t.array_index <= 0))
             {
                 string type = column.GenerateType(_gen_type);
-                string convert_funtion = column.GetReadStreamFunction(_gen_type);
+                string readStreamFunction = column.GetReadStreamFunction(_gen_type);
 
                 if (column.is_generated == false)
                 {
@@ -922,12 +930,12 @@ namespace TableGenerate
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("var arrayCount__ = TBL.Encoder.Read7BitEncodedInt(ref __reader);");
                     writer.WriteLineEx($"{column.var_name} = arrayCount__ > 0?new {column.GenerateBaseType(_gen_type)}[arrayCount__]:System.Array.Empty<{column.GenerateBaseType(_gen_type)}>();");
-                    writer.WriteLineEx($"for(var __j=0;__j<arrayCount__;++__j){column.var_name}[__j] = {convert_funtion};");
+                    writer.WriteLineEx($"for(var __j=0;__j<arrayCount__;++__j){column.var_name}[__j] = {readStreamFunction};");
                     writer.WriteLineEx("}");
                 }
                 else
                 {
-                    writer.WriteLineEx($"var {column.var_name} = {convert_funtion};");
+                    writer.WriteLineEx($"var {column.var_name} = {readStreamFunction};");
                 }
             }
             writer.WriteLineEx(

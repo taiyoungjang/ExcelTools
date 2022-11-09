@@ -28,6 +28,7 @@
   <ItemGroup>
     <None Remove="Binaries\**\*" />
     <EmbeddedResource Include="ILoader.cs" />
+    <EmbeddedResource Include="Vector3.cs" />
   </ItemGroup>
 
 </Project>

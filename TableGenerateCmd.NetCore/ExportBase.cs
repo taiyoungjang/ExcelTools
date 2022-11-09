@@ -25,7 +25,8 @@ namespace TableGenerate
         DateTime,
         TimeSpan,
         Enum,
-        Struct
+        Struct,
+        Vector3
     };
 
     public enum eGenType
@@ -259,6 +260,7 @@ namespace TableGenerate
         {
             string returnTypeName = baseType switch
             {
+                eBaseType.Vector3 => $"Vector3.Parse({arg})",
                 eBaseType.Int64 => $"System.Convert.ToInt64(System.Math.Round(double.Parse({arg})))",
                 eBaseType.Int32 => $"System.Convert.ToInt32(System.Math.Round(double.Parse({arg})))",
                 eBaseType.Int16 => $"System.Convert.ToInt16(System.Math.Round(double.Parse({arg})))",
@@ -312,6 +314,7 @@ namespace TableGenerate
         public static bool IsEnumType(this Column column) => column.base_type == eBaseType.Enum;
         public static bool IsStructType(this Column column) => column.base_type == eBaseType.Struct;
         public static bool IsString(this Column column) => column.base_type == eBaseType.String;
+        public static bool IsVector3(this Column column) => column.base_type == eBaseType.Vector3;
 
         public static string GetSqlitekitFunction(this Column column)
         {
@@ -352,7 +355,7 @@ namespace TableGenerate
             }
             return returnTypeName;
         }
-        public static string GetReadStreamFunction(this Column column, eGenType gen_type)
+        public static string GetReadStreamFunction(this Column column, eGenType genType)
         {
             string returnTypeName = string.Empty;
             if (column.array_index >= 0)
@@ -360,14 +363,14 @@ namespace TableGenerate
                 if(!column.IsEnumType() && !column.IsStructType() )
                     returnTypeName = GetReadStreamFunction(column.base_type);
                 else
-                    returnTypeName = $"({column.GetPrimitiveType(gen_type)}){GetReadStreamFunction(column.primitive_type)}";
+                    returnTypeName = $"({column.GetPrimitiveType(genType)}){GetReadStreamFunction(column.primitive_type)}";
             }
             else
             {
                 if (!column.IsEnumType() && !column.IsStructType())
                     returnTypeName = GetReadStreamFunction(column.base_type);
                 else
-                    returnTypeName = $"({column.GetPrimitiveType(gen_type)}){GetReadStreamFunction(column.primitive_type)}";
+                    returnTypeName = $"({column.GetPrimitiveType(genType)}){GetReadStreamFunction(column.primitive_type)}";
             }
             return returnTypeName;
         }
@@ -376,6 +379,7 @@ namespace TableGenerate
         {
             string returnTypeName = baseType switch
             {
+                eBaseType.Vector3 => $"  new Vector3(){{ X = __reader.ReadDouble(), Y = __reader.ReadDouble(), Z = __reader.ReadDouble() }}",
                 eBaseType.Int64 => $"__reader.ReadInt64()",
                 eBaseType.Int32 => $"__reader.ReadInt32()",
                 eBaseType.Int16 => $"__reader.ReadInt16()",
@@ -545,6 +549,7 @@ namespace TableGenerate
             }
             switch (type_name)
             {
+                case "vector3": column.base_type = eBaseType.Vector3; break;
                 case "long": column.base_type = eBaseType.Int64; break;
                 case "int64": column.base_type = eBaseType.Int64; break;
                 case "int": column.base_type = eBaseType.Int32; break;
@@ -563,6 +568,7 @@ namespace TableGenerate
                     {
                         switch (subtypename)
                         {
+                            case "vector3": column.base_type = eBaseType.Vector3; break;
                             case "long": column.base_type = eBaseType.Int64; break;
                             case "int64": column.base_type = eBaseType.Int64; break;
                             case "int": column.base_type = eBaseType.Int32; break;
@@ -588,6 +594,7 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             switch (column.base_type)
             {
+               case eBaseType.Vector3:    returnTypeName = "Vector3"; break;
                case eBaseType.Int64:    returnTypeName = "long"; break;
                case eBaseType.Int32:    returnTypeName = "int"; break;
                case eBaseType.Int16:    returnTypeName = "short"; break;
@@ -611,6 +618,7 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
+                    case eBaseType.Vector3: returnTypeName = "default"; break;
                     case eBaseType.Int64: returnTypeName = "0"; break;
                     case eBaseType.Int32: returnTypeName = "0"; break;
                     case eBaseType.Int16: returnTypeName = "0"; break;
@@ -629,6 +637,7 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
+                    case eBaseType.Vector3:       returnTypeName = "[0,0,0]"; break;
                     case eBaseType.Int64:       returnTypeName = "0"; break;
                     case eBaseType.Int32:       returnTypeName = "0"; break;
                     case eBaseType.Int16:       returnTypeName = "0"; break;
@@ -677,6 +686,20 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
+                    case eBaseType.Vector3:
+                    {
+                        switch (gen_type)
+                        {
+                            case eGenType.cpp: returnTypeName = "TArray<FVector>"; break;
+                            case eGenType.cs: returnTypeName = "Vector3[]"; break;
+                            case eGenType.proto: returnTypeName = "repeated Vector3"; break;
+                            case eGenType.mssql: returnTypeName = "Vector3"; break;
+                            case eGenType.mysql: returnTypeName = "Vector3"; break;
+                            case eGenType.sqllite: returnTypeName = "Vector3"; break;
+                            case eGenType.rust: returnTypeName = "Vec<glam::f64::DVec3>"; break;
+                        }
+                    }
+                    break;                    
                     case eBaseType.Int64:
                         {
                             switch (gen_type)
@@ -840,6 +863,20 @@ namespace TableGenerate
 
             switch (column.base_type)
             {
+                case eBaseType.Vector3:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector"; break;
+                        case eGenType.cs: returnTypeName = "Vector3"; break;
+                        case eGenType.proto: returnTypeName = "Vector3"; break;
+                        case eGenType.mssql: returnTypeName = "Vector3"; break;
+                        case eGenType.mysql: returnTypeName = "Vector3"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector3"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
+                    }
+                }
+                break;
                 case eBaseType.Int64:
                     {
                         switch (gen_type)
@@ -1008,6 +1045,20 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
+                    case eBaseType.Vector3:
+                    {
+                        switch (gen_type)
+                        {
+                            case eGenType.cpp: returnTypeName = "TArray<FVector>::Empty()"; break;
+                            case eGenType.cs: returnTypeName = "System.Array.Empty<Vector3>()"; break;
+                            case eGenType.proto: returnTypeName = "-"; break;
+                            case eGenType.mssql: returnTypeName = "-"; break;
+                            case eGenType.mysql: returnTypeName = "-"; break;
+                            case eGenType.sqllite: returnTypeName = "-"; break;
+                            case eGenType.rust: returnTypeName = "Vec::Empty<glam::f64::DVec3>()"; break;
+                        }
+                    }
+                    break;                    
                     case eBaseType.Int64:
                         {
                             switch (gen_type)
@@ -1170,6 +1221,20 @@ namespace TableGenerate
 
             switch (column.base_type)
             {
+                case eBaseType.Vector3:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector"; break;
+                        case eGenType.cs: returnTypeName = "default"; break;
+                        case eGenType.proto: returnTypeName = "Vector3"; break;
+                        case eGenType.mssql: returnTypeName = "Vector3"; break;
+                        case eGenType.mysql: returnTypeName = "Vector3"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector3"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
+                    }
+                }
+                break;                
                 case eBaseType.Int64:
                     {
                         switch (gen_type)
@@ -1334,6 +1399,19 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             switch (column.base_type)
             {
+                case eBaseType.Vector3:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector"; break;
+                        case eGenType.cs: returnTypeName = "Vector3"; break;
+                        case eGenType.mssql: returnTypeName = "Vector3"; break;
+                        case eGenType.mysql: returnTypeName = "Vector3"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector3"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
+                    }
+                }
+                break;                
                 case eBaseType.Int64:
                     {
                         switch (gen_type)
@@ -1490,6 +1568,19 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             switch (base_type)
             {
+                case eBaseType.Vector3:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector"; break;
+                        case eGenType.cs: returnTypeName = "Vector3"; break;
+                        case eGenType.mssql: returnTypeName = "Vector3"; break;
+                        case eGenType.mysql: returnTypeName = "Vector3"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector3"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
+                    }
+                }
+                break;                
                 case eBaseType.Int64:
                     {
                         switch (gen_type)

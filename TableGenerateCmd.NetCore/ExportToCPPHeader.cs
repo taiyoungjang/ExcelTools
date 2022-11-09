@@ -94,6 +94,7 @@ namespace TableGenerate
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"CoreMinimal.h\"");
+                        writer.WriteLineEx($"#include \"Math/UnrealMathUtility.h\"");
                         writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
                         foreach (var (_,typeInfo) in enums)
                         {
