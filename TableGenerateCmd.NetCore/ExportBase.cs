@@ -148,7 +148,7 @@ namespace TableGenerate
                     array_index = -1,
                     is_array = false, 
                     desc = desc,
-                    bit_flags = generate.ToLower() == "bitflags"
+                    bit_flags = false
                 };
 
                 GetBaseType(ref column, refAssem, mscorlibAssembly, type);
@@ -454,6 +454,17 @@ namespace TableGenerate
                                     var types = type.DeclaredFields.Where(t => t.IsStatic).ToArray();
                                     column.min_value = $"global::{type.FullName}.{types.First().Name}";
                                     column.max_value = $"global::{type.FullName}.{types.Last().Name}";
+                                }
+                                var reflection = refAssembly.GetTypes().FirstOrDefault(t => t.Name == $"{type.Name}Reflection");
+                                if (reflection != null)
+                                {
+                                    var o = reflection.GetProperty("Descriptor");
+                                    var r = o.GetValue(null) as Google.Protobuf.Reflection.FileDescriptor;
+                                    foreach (var d in r.Dependencies.Select(t=>t.ToProto()))
+                                    {
+                                        column.bit_flags = d.Extension.Any( t => t.Name.Equals("bit_flags"));
+                                        break;
+                                    }
                                 }
                                 var DeclaredField = type.DeclaredFields.First();
                                 switch ("")
