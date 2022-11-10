@@ -9,8 +9,14 @@ public struct Vector3
 
     public static Vector3 Parse(string str)
     {
-        var array = str.Split(',');
-        return new Vector3() { X = double.Parse(array[0]), Y = double.Parse(array[1]), Z = double.Parse(array[2]) };
+        str = str.Replace("(", string.Empty).Replace(")", string.Empty);
+        var pair = str.Split(',');
+        return new Vector3()
+        {
+            X = double.Parse( pair[0].Split('=')[1] ),
+            Y = double.Parse( pair[1].Split('=')[1] ),
+            Z = double.Parse( pair[2].Split('=')[1] )
+        };
     }
 }
 
