@@ -123,7 +123,7 @@ namespace TableGenerateCmd
             if((_cmdMask & ProgramCmd.EXPORT_CPPENUMHEADER) > 0)
             {
                 ExportToCPPEnumHeader header = new ExportToCPPEnumHeader(cppClassPredefine);
-                header.Generate(assembly, ini.IniReadValue("Directory", "ENUM") );
+                header.Generate(assembly, ini.IniReadValue("Directory", "HPPENUM") );
             }
             for (int i = 0; i < _JobList.Count; i++)
             {
