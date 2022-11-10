@@ -67,7 +67,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes;");
-                    writer.WriteLineEx($"if({ExportToCSMgr.NameSpace}::FBufferReader::Decompress( Reader, Bytes )==false) return false;");
+                    writer.WriteLineEx($"if(!FBufferReader::Decompress( Reader, Bytes )==false) return false;");
                     writer.WriteLineEx($"FBufferReader BufferReader( Bytes.GetData(), Bytes.Num() );");
                     foreach (string sheetName in sheets)
                     {
@@ -213,7 +213,7 @@ namespace TableGenerate
                             writer.WriteLineEx($"  {{int64 element__; Reader >> element__; Item.{column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         case eBaseType.Struct:
-                        case eBaseType.Enum:
+                        case eBaseType.Enum when !column.bit_flags:
                             writer.WriteLineEx($"Reader >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item.{column.var_name});");
                             break;
                         default:
