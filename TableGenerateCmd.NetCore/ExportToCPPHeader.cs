@@ -33,7 +33,7 @@ namespace TableGenerate
         {
             try
             {
-                string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", ".h");
+                string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableRow.h");
 
                 using var stream = new MemoryStream();
                 {
@@ -94,7 +94,7 @@ namespace TableGenerate
         private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
             writer.WriteLineEx($"USTRUCT(BlueprintType)");
-            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName} : public FTableRowBase");
+            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName}TableRow : public FTableRowBase");
             writer.WriteLineEx("{");
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type);

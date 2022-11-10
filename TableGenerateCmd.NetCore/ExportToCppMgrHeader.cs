@@ -35,7 +35,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"#pragma once");
                     writer.WriteLineEx($"#ifdef WITH_EDITOR");
                     writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
-                    writer.WriteLineEx($"#include \"{filename}.h\"");
+                    writer.WriteLineEx($"#include \"{filename}TableRow.h\"");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
                     
                     writer.WriteLineEx(string.Empty);

@@ -126,7 +126,7 @@ namespace TableGenerate
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"Package = CreatePackage( *PackageName );");
             writer.WriteLineEx($"DataTable = NewObject<UDataTable>(Package, UDataTable::StaticClass(), {packageName}, RF_Public | RF_Standalone );");
-            writer.WriteLineEx($"DataTable->RowStruct = F{sheetName}::StaticStruct();");
+            writer.WriteLineEx($"DataTable->RowStruct = F{sheetName}TableRow::StaticStruct();");
             writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{sheetName}.uasset CreatePackage\"));");
             writer.WriteLineEx( "}");
             
@@ -157,7 +157,7 @@ namespace TableGenerate
 
             writer.WriteLineEx($"if(Count == 0) return true;");
             
-            string structName =$"F{sheetName}"; 
+            string structName =$"F{sheetName}TableRow"; 
             writer.WriteLineEx($"for(auto Idx=0;Idx<Count;++Idx)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"{structName} Item;");

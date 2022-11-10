@@ -92,50 +92,6 @@ namespace TableGenerate
             }
             return true;
         }
-
-        private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
-        {
-            writer.WriteLineEx($"USTRUCT(BlueprintType)");
-            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName} : public FTableRowBase");
-            writer.WriteLineEx("{");
-            var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
-            string keyType = keyColumn.GenerateType(_gen_type);
-
-            writer.WriteLineEx($"GENERATED_USTRUCT_BODY()");
-
-            InnerSheetProcess(writer, sheetName, columns);
-            //SheetConstructorProcess(writer, sheetName, columns);
-            writer.WriteLineEx("};");
-        }
-
-        private void InnerSheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
-        {
-            var sn = sheetName.Remove(0, 1);
-            foreach (var column in columns)
-            {
-                string name = column.var_name;
-                string type = column.GenerateType(_gen_type);
-                if (column.is_generated == false)
-                {
-                    continue;
-                }
-                if (column.array_index > 0 || column.is_key)
-                {
-                    continue;
-                }
-                writer.WriteLineEx($"UPROPERTY( EditAnywhere{(column.bit_flags? $", Meta = (BitMask, BitmaskEnum =\"E{column.type_name}\" )": $", BlueprintReadWrite, Category = {sn}")} )");
-                writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
-            }
-        }
-        private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
-        {
-            writer.WriteLineEx($"{sheetName}(void);");
-            writer.WriteLineEx($"{sheetName}& operator=(const {sheetName}& RHS);");
-            writer.WriteLineEx(string.Format("{0} ({1});",
-                sheetName,
-                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}").ToArray()))
-            );
-        }
     }
 }
 
