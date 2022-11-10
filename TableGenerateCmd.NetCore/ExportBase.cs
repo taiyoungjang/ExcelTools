@@ -64,7 +64,7 @@ namespace TableGenerate
 
     public abstract class ExportBase
     {
-        public abstract bool Generate(System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
+        public abstract bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
     }
 
     public static class ExportBaseUtil
@@ -124,7 +124,7 @@ namespace TableGenerate
             File.Delete(fileName1);
         }
 
-        public static List<Column> GetColumnInfo(System.Reflection.Assembly[] refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
+        public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
         {
             var columns = new List<Column>();
             for (int i = 0; i < rows.GetLength(1); i++)
@@ -395,7 +395,7 @@ namespace TableGenerate
             return returnTypeName;
         }
 
-        private static void GetBaseType(ref Column column, System.Reflection.Assembly[] refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
+        private static void GetBaseType(ref Column column, System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
         {
             column.base_type = eBaseType.Null;
             string type_name = typename;
@@ -429,7 +429,7 @@ namespace TableGenerate
                         column.base_type = eBaseType.Enum;
                         if (refAssembly != null)
                         {
-                            System.Reflection.TypeInfo type = refAssembly.SelectMany(t=>t.DefinedTypes).FirstOrDefault(t => t.FullName.Equals(sizeChecker));
+                            System.Reflection.TypeInfo type = refAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
                             if( type == null)
                             {
                                 type = mscorlibAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
@@ -490,7 +490,7 @@ namespace TableGenerate
                         column.base_type = eBaseType.Struct;
                         if (refAssembly != null)
                         {
-                            System.Reflection.TypeInfo type = refAssembly.SelectMany(t=>t.DefinedTypes).FirstOrDefault(t => t.FullName.Equals(sizeChecker));
+                            System.Reflection.TypeInfo type = refAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
                             if (type == null)
                             {
                                 type = mscorlibAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));

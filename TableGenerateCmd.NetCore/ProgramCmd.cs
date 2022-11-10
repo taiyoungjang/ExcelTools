@@ -11,19 +11,20 @@ namespace TableGenerateCmd
 {
     public static class ProgramCmd
     {
-        public static long EXPORT_CS         = 1 << 1;     // 0000000001
-        public static long EXPORT_CPPHEADER  = 1 << 2;     // 0000000010
-        public static long EXPORT_CPP        = 1 << 3;     // 0000000010
-        public static long EXPORT_CPPMGR     = 1 << 4;     // 0000000100
-        public static long EXPORT_HPPMGR     = 1 << 5;    // 0000001000
-        public static long EXPORT_CSMGR      = 1 << 6;    // 0000010000
-        public static long EXPORT_TABLE      = 1 << 7;    // 0000100000
-        public static long EXPORT_PROTO      = 1 << 8;   // 0001000000
-        public static long EXPORT_SQLITE     = 1 << 9;   // 0010000000
-        public static long EXPORT_MSSQL      = 1 << 10;   // 0100000000
-        public static long EXPORT_MYSQL      = 1 << 11;  // 0111111111
-        public static long EXPORT_RUST       = 1 << 12;  // 1111111111
-        public static long EXPORT_ALL        = EXPORT_CS | EXPORT_CPPHEADER | EXPORT_CPP | EXPORT_CPPMGR | EXPORT_HPPMGR | EXPORT_CSMGR | EXPORT_TABLE | EXPORT_PROTO | EXPORT_RUST;  
+        public static long EXPORT_CS             = 1 << 1;     // 0000000001
+        public static long EXPORT_CPPENUMHEADER  = 1 << 2;     // 0000000001
+        public static long EXPORT_CPPHEADER      = 1 << 3;     // 0000000010
+        public static long EXPORT_CPP            = 1 << 4;     // 0000000010
+        public static long EXPORT_CPPMGR         = 1 << 5;     // 0000000100
+        public static long EXPORT_HPPMGR         = 1 << 6;     // 0000001000
+        public static long EXPORT_CSMGR          = 1 << 7;     // 0000010000
+        public static long EXPORT_TABLE          = 1 << 8;     // 0000100000
+        public static long EXPORT_PROTO          = 1 << 9;     // 0001000000
+        public static long EXPORT_SQLITE         = 1 << 10;    // 0010000000
+        public static long EXPORT_MSSQL          = 1 << 11;    // 0100000000
+        public static long EXPORT_MYSQL          = 1 << 12;    // 0111111111
+        public static long EXPORT_RUST           = 1 << 13;    // 1111111111
+        public static long EXPORT_ALL            = EXPORT_CS | EXPORT_CPPHEADER | EXPORT_CPP | EXPORT_CPPMGR | EXPORT_HPPMGR | EXPORT_CSMGR | EXPORT_TABLE | EXPORT_PROTO | EXPORT_RUST;  
 
         public static string EXT_TYPE = ".xls";
         public static string TABLE_DIR = $"Data{System.IO.Path.DirectorySeparatorChar}Table";
@@ -260,7 +261,7 @@ namespace TableGenerateCmd
         public static long CmdToMask(string val)
             => val.ToLower() switch
             {
-                "c++" or "cpp" => EXPORT_CPP | EXPORT_CPPHEADER | EXPORT_HPPMGR | EXPORT_CPPMGR,
+                "c++" or "cpp" => EXPORT_CPPENUMHEADER | EXPORT_CPP | EXPORT_CPPHEADER | EXPORT_HPPMGR | EXPORT_CPPMGR,
                 "c#" or "cs" => EXPORT_CS | EXPORT_CSMGR,
                 "table" or "tbl" or "bytes" => EXPORT_TABLE,
                 "proto" or "bytes" => EXPORT_PROTO,

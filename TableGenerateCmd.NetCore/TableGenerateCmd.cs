@@ -86,14 +86,15 @@ namespace TableGenerateCmd
             _extType = ini.IniReadValue("TableGenerate", "ExtType");
             _ignoreCase = ini.IniReadValue("TableGenerate", "IgnoreCase");
             _enumFilePath = ini.IniReadValue("Directory", "ENUMTYPES");
-            List<System.Reflection.Assembly> _Assembly = new List<Assembly>();
+            System.Reflection.Assembly assembly = null;
             if (!string.IsNullOrEmpty(_enumFilePath))
             {
+                List<string> textList = new List<string>();
                 foreach(var file in System.IO.Directory.GetFiles(_enumFilePath, "*.cs"))
                 {
-                    List<string> textList = new List<string> { System.IO.File.ReadAllText(file) };
-                    _Assembly.Add(CompileFiles( System.IO.Path.GetFileNameWithoutExtension(file) , textList));
+                     textList.Add( System.IO.File.ReadAllText(file) );
                 }
+                assembly = CompileFiles(System.IO.Path.GetFileNameWithoutExtension( System.IO.Path.GetTempFileName() ), textList);
             }
 
             _except = ini.IniReadValue("TableGenerate", "Except").Split(',').Select( item => item.Trim().ToLower()).ToList();
@@ -119,16 +120,19 @@ namespace TableGenerateCmd
                 foreach (string file in impFileList)
                     _impList.Add(file);
             }
-
-
+            if((_cmdMask & ProgramCmd.EXPORT_CPPENUMHEADER) > 0)
+            {
+                ExportToCPPEnumHeader header = new ExportToCPPEnumHeader(cppClassPredefine);
+                header.Generate(assembly, ini.IniReadValue("Directory", "ENUM") );
+            }
             for (int i = 0; i < _JobList.Count; i++)
             {
                 var job = _JobList[i];
                 job.SetEtc(_version, _lang, ini.IniReadValue("LANG", _lang+"_TBL"), ini.IniReadValue("LANG", _lang+"_SRC"), ini.IniReadValue("LANG", _lang+"_EXT"));
                 job.SetDefaultDir(ini.IniReadValue("Default", job.GetItem()));
                 bool subFolder = ProgramCmd.single_file.Contains(System.IO.Path.DirectorySeparatorChar);
-                if(_Assembly != null)
-                    job.SetEnumTypesAssembly(_Assembly);
+                if(assembly != null)
+                    job.SetEnumTypesAssembly(assembly);
                 switch (subFolder)
                 {
                     case true when (job.GetExportBase() is ExportToCS || job.GetExportBase() is ExportToCSMgr ):
@@ -526,7 +530,7 @@ namespace TableGenerateCmd
         protected int current, max;
         protected ExportBase expBase;
         protected List<string> files;
-        protected System.Reflection.Assembly[] _Assembly = null;
+        protected System.Reflection.Assembly _Assembly = null;
         protected System.Reflection.Assembly mscorlibAssembly = null;
         public JobItem(long JobType, string Default, string INISection, string INIItem)
         {
@@ -573,7 +577,7 @@ namespace TableGenerateCmd
                 this.files.Add(file);
         }
 
-        virtual public void SetDest(string output, string dir)
+        public virtual void SetDest(string output, string dir)
         {
             string newName = string.Empty;
             if (string.IsNullOrEmpty(dir) == true)
@@ -589,9 +593,9 @@ namespace TableGenerateCmd
                 DestDir = Path.GetDirectoryName( output + System.IO.Path.DirectorySeparatorChar + dir + System.IO.Path.DirectorySeparatorChar ).Replace("//", "/");
         }
 
-        virtual public void SetEnumTypesAssembly(List<System.Reflection.Assembly> Assembly)
+        virtual public void SetEnumTypesAssembly(System.Reflection.Assembly assembly)
         {
-            _Assembly = Assembly.ToArray();
+            _Assembly = assembly;
             string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location);
             mscorlibAssembly = System.Reflection.Assembly.LoadFile(System.IO.Path.Combine(shared_directory, "System.dll"));
         }

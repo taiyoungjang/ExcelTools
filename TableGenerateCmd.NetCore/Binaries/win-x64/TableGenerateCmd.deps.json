@@ -10,7 +10,7 @@
       "TableGenerateCmd/1.0.0": {
         "dependencies": {
           "DocumentFormat.OpenXml": "2.18.0",
-          "Google.Protobuf": "3.21.8",
+          "Google.Protobuf": "3.21.9",
           "Ionic.Zlib.Core": "1.0.0",
           "Microsoft.CodeAnalysis.CSharp.Scripting": "4.3.1",
           "Microsoft.Extensions.DependencyModel": "6.0.0",
@@ -35,11 +35,11 @@
           }
         }
       },
-      "Google.Protobuf/3.21.8": {
+      "Google.Protobuf/3.21.9": {
         "runtime": {
           "lib/net5.0/Google.Protobuf.dll": {
-            "assemblyVersion": "3.21.8.0",
-            "fileVersion": "3.21.8.0"
+            "assemblyVersion": "3.21.9.0",
+            "fileVersion": "3.21.9.0"
           }
         }
       },
@@ -523,12 +523,12 @@
       "path": "documentformat.openxml/2.18.0",
       "hashPath": "documentformat.openxml.2.18.0.nupkg.sha512"
     },
-    "Google.Protobuf/3.21.8": {
+    "Google.Protobuf/3.21.9": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-k6984wrXAAq92cRZ0rCPcUDE0dTZXFC4vO4z7+CG/0bp8DewYs+zX69tcgzm30EEtDuO8Ggpn2Qmb1kQa4WTcg==",
-      "path": "google.protobuf/3.21.8",
-      "hashPath": "google.protobuf.3.21.8.nupkg.sha512"
+      "sha512": "sha512-OTpFujTgkmqMLbg3KT7F/iuKi1rg6s5FCS2M9XcVLDn40zL8wgXm37CY/F6MeOEXKjdcnXGCN/h7oyMkVydVsg==",
+      "path": "google.protobuf/3.21.9",
+      "hashPath": "google.protobuf.3.21.9.nupkg.sha512"
     },
     "Ionic.Zlib.Core/1.0.0": {
       "type": "package",
