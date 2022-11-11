@@ -36,7 +36,11 @@ namespace TableGenerate
                     writer.WriteLineEx($"#include \"UObject/Package.h\"");
                     writer.WriteLineEx($"#include \"UObject/SavePackage.h\"");
                     writer.WriteLineEx($"#include \"EditorAssetLibrary.h\"");
-                    
+                    writer.WriteLineEx($"#include \"ISourceControlProvider.h\"");
+                    writer.WriteLineEx($"#include \"ISourceControlModule.h\"");
+                    writer.WriteLineEx($"#include \"SourceControlHelpers.h\"");
+                    writer.WriteLineEx($"#include \"SourceControlOperations.h\"");
+
                     string fn = filename.Replace("TableManager", string.Empty);
                     
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
@@ -156,16 +160,20 @@ namespace TableGenerate
             writer.WriteLineEx( "}");
             writer.WriteLineEx( "};");
             writer.WriteLineEx( "}");
-            writer.WriteLineEx($"if(!bNeedSave) return true;");
+            writer.WriteLineEx($"//if(!bNeedSave) return true;");
             writer.WriteLineEx($"if( FPaths::FileExists(*FileName) )");
-            writer.WriteLineEx( "{");
+            writer.WriteLineEx("{");
             writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
-            writer.WriteLineEx( "{");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{sheetName}.uasset file is readonly!!!\"));");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"if(!USourceControlHelpers::CheckOutFile(FileName))");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{sheetName}.uasset CheckOut Fail\"));");
             writer.WriteLineEx($"return false;");
-            writer.WriteLineEx( "}");
-            writer.WriteLineEx( "}");
+            writer.WriteLineEx("}");            
+            writer.WriteLineEx("}");
+            writer.WriteLineEx("}");
             writer.WriteLineEx($"DataTable->EmptyTable();");
+            writer.WriteLineEx($"DataTable->RowStruct = F{sheetName}TableRow::StaticStruct();");
             writer.WriteLineEx("for(auto Pair : ItemMap)");
             writer.WriteLineEx("{");
             writer.WriteLineEx($"DataTable->AddRow(Pair.Key,Pair.Value);");
