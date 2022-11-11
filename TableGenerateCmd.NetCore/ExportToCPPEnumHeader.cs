@@ -65,6 +65,19 @@ namespace TableGenerate
                             var types = typeInfo.DeclaredFields.Where(t => t.IsStatic).ToArray();
                             System.Type enumUnderlyingType = System.Enum.GetUnderlyingType(typeInfo);
                             System.Array enumValues = System.Enum.GetValues(typeInfo);
+                            int namePadding = 0;
+                            int valuePadding = 0;
+                            for (int i = 0; i < enumValues.Length; i++)
+                            {
+#nullable enable                                
+                                // Retrieve the value of the ith enum item.
+                                object? value = enumValues.GetValue(i);
+                                // Convert the value to its underlying type (int, byte, long, ...)
+                                object? underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
+#nullable disable
+                                namePadding = Math.Max(types[i].Name.Length,namePadding);
+                                valuePadding = Math.Max(underlyingValue.ToString().Length,valuePadding);
+                            }
                             for (int i = 0; i < enumValues.Length; i++)
                             {
                                 #nullable enable                                
@@ -74,7 +87,7 @@ namespace TableGenerate
                                 object? underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
                                 #nullable disable                                
                                 writer.WriteLineEx(
-                                    $"{types[i].Name}={underlyingValue}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)}");
+                                    $"{types[i].Name.PadRight(namePadding)} = {underlyingValue.ToString().PadLeft(valuePadding)}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)}");
                             }
                         }
                         writer.WriteLineEx($"}};");
