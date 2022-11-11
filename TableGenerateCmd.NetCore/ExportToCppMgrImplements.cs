@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -67,7 +68,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes;");
-                    writer.WriteLineEx($"if(!FBufferReader::Decompress( Reader, Bytes )==false) return false;");
+                    writer.WriteLineEx($"if(!FBufferReader::Decompress( Reader, Bytes )) return false;");
                     writer.WriteLineEx($"FBufferReader BufferReader( Bytes.GetData(), Bytes.Num() );");
                     foreach (string sheetName in sheets)
                     {
@@ -103,6 +104,12 @@ namespace TableGenerate
             writer.WriteLineEx("public:");
             writer.WriteLineEx($"U{sheetName}TableManager(void) = default;");
             writer.WriteLineEx($"virtual ~U{sheetName}TableManager(void) = default;");
+            writer.WriteLineEx($"static bool Equals(const F{sheetName}TableRow& Left, const F{sheetName}TableRow& Right)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"return ");
+            writer.Write(string.Join($" &&{Environment.NewLine}", columns.Where(t => !t.is_key && t.is_generated && t.array_index <= 0).Select(t => $"      Left.{t.var_name} == Right.{t.var_name}")));
+            writer.WriteLineEx($"");
+            writer.WriteLineEx(";}");
             writer.WriteLineEx($"bool ConvertToUAsset(FBufferReader& Reader, const FString& Language) const");
             writer.WriteLineEx("{");
             string packageName = $"TEXT(\"{sheetName}\")";
@@ -110,20 +117,16 @@ namespace TableGenerate
             writer.WriteLineEx($"const FString FileName = *FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());");
             writer.WriteLineEx($"UPackage* Package = nullptr;");
             writer.WriteLineEx($"UDataTable* DataTable = nullptr;");
+            writer.WriteLineEx($"bool bNeedSave = false;");
             writer.WriteLineEx($"if( FPaths::FileExists(*FileName) )");
             writer.WriteLineEx( "{");
-            writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
-            writer.WriteLineEx( "{");
-            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{sheetName}.uasset file is readonly!!!\"));");
-            writer.WriteLineEx($"return false;");
-            writer.WriteLineEx( "}");
             writer.WriteLineEx($"DataTable = Cast<UDataTable>( UEditorAssetLibrary::LoadAsset(*PackageName) );");
-            writer.WriteLineEx($"DataTable->EmptyTable();");
             writer.WriteLineEx($"Package = DataTable->GetPackage();");
             writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{sheetName}.uasset LoadAsset\"));");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"else");
             writer.WriteLineEx( "{");
+            writer.WriteLineEx($"bNeedSave |= true;");
             writer.WriteLineEx($"Package = CreatePackage( *PackageName );");
             writer.WriteLineEx($"DataTable = NewObject<UDataTable>(Package, UDataTable::StaticClass(), {packageName}, RF_Public | RF_Standalone );");
             writer.WriteLineEx($"DataTable->RowStruct = F{sheetName}TableRow::StaticStruct();");
@@ -131,6 +134,42 @@ namespace TableGenerate
             writer.WriteLineEx( "}");
             
             InnerSheetProcess(filename, sheetName, columns, writer);
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"auto DataTableNames = DataTable->GetRowNames();");
+            writer.WriteLineEx($"bNeedSave |= ItemMap.Num() != DataTableNames.Num();");
+            writer.WriteLineEx($"if(!bNeedSave)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"for(auto DataTableName: DataTableNames)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx( $"DataTable->ForeachRow<F{sheetName}TableRow>( DataTableName.ToString(), [ &bNeedSave, &ItemMap ](const FName& Key, const F{sheetName}TableRow& Left)");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"const auto Right = ItemMap.Find(Key);");
+            writer.WriteLineEx($"if( Right == nullptr )");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"bNeedSave |= true;");
+            writer.WriteLineEx($"return;");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx( "bNeedSave |= !Equals(Left,*Right);");            
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx( ");");
+            writer.WriteLineEx( "if(bNeedSave) break;");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx( "};");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx($"if(!bNeedSave) return true;");
+            writer.WriteLineEx($"if( FPaths::FileExists(*FileName) )");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
+            writer.WriteLineEx( "{");
+            writer.WriteLineEx($"UE_LOG(LogLevel, Error, TEXT(\"{sheetName}.uasset file is readonly!!!\"));");
+            writer.WriteLineEx($"return false;");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx( "}");
+            writer.WriteLineEx($"DataTable->EmptyTable();");
+            writer.WriteLineEx("for(auto Pair : ItemMap)");
+            writer.WriteLineEx("{");
+            writer.WriteLineEx($"DataTable->AddRow(Pair.Key,Pair.Value);");
+            writer.WriteLineEx("}");
             writer.WriteLineEx($"FSavePackageArgs SavePackageArgs;");
             writer.WriteLineEx($"SavePackageArgs.TopLevelFlags = RF_Standalone;");
             writer.WriteLineEx($"const bool bRtn = UPackage::SavePackage(Package, nullptr, *FileName, SavePackageArgs);");
@@ -158,6 +197,7 @@ namespace TableGenerate
             writer.WriteLineEx($"if(Count == 0) return true;");
             
             string structName =$"F{sheetName}TableRow"; 
+            writer.WriteLineEx($"TMap<FName,{structName}> ItemMap;");
             writer.WriteLineEx($"for(auto Idx=0;Idx<Count;++Idx)");
             writer.WriteLineEx( "{");
             writer.WriteLineEx($"{structName} Item;");
@@ -233,7 +273,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"const FName Key = *FString::FromInt({primaryName});");
                     break;
             }
-            writer.WriteLineEx($"DataTable->AddRow(Key,Item);");
+            writer.WriteLineEx($"ItemMap.Add(Key, Item);");
             writer.WriteLineEx($"}}");
         }
 

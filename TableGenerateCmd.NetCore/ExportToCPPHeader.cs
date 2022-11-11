@@ -102,7 +102,6 @@ namespace TableGenerate
             writer.WriteLineEx($"GENERATED_USTRUCT_BODY()");
 
             InnerSheetProcess(writer, sheetName, columns);
-            //SheetConstructorProcess(writer, sheetName, columns);
             writer.WriteLineEx("};");
         }
 
@@ -124,15 +123,6 @@ namespace TableGenerate
                 writer.WriteLineEx($"UPROPERTY( EditAnywhere{ (column.bit_flags? $", Meta = (BitMask, BitmaskEnum = E{column.type_name} )": $", BlueprintReadWrite, Category = {sn}")} )");
                 writer.WriteLineEx($"    {type} {name} {{}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
-        }
-        private void SheetConstructorProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
-        {
-            writer.WriteLineEx($"{sheetName}(void);");
-            writer.WriteLineEx($"{sheetName}& operator=(const {sheetName}& RHS);");
-            writer.WriteLineEx(string.Format("{0} ({1});",
-                sheetName,
-                string.Join(",", columns.Where(t => t.is_generated == true && t.array_index <= 0).Select(t => $"const {t.GenerateType(_gen_type)}& {t.var_name}").ToArray()))
-            );
         }
     }
 }
