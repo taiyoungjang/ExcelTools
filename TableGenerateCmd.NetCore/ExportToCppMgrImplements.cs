@@ -160,7 +160,7 @@ namespace TableGenerate
             writer.WriteLineEx( "}");
             writer.WriteLineEx( "};");
             writer.WriteLineEx( "}");
-            writer.WriteLineEx($"//if(!bNeedSave) return true;");
+            writer.WriteLineEx($"if(!bNeedSave) return true;");
             writer.WriteLineEx($"if( FPaths::FileExists(*FileName) )");
             writer.WriteLineEx("{");
             writer.WriteLineEx($"if( IFileManager::Get().IsReadOnly(*FileName) )");
