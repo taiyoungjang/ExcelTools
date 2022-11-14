@@ -44,7 +44,7 @@ namespace TableGenerate
                         writer.WriteLine("use binary_reader::{BinaryReader, Endian};");
                         writer.WriteLineEx("use flate2::read::ZlibDecoder;");
                         writer.WriteLineEx("use crate::tbl::lib;");
-                        writer.WriteLineEx("include!(\"_.rs\");");
+                        writer.WriteLineEx("include!(concat!(env!(\"OUT_DIR\"), concat!(\"/Enum/_.rs\")));");
                         string[] sheets = imp.GetSheetList();
 
                         filename = filename.Replace(".rs", string.Empty);
