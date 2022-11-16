@@ -43,7 +43,6 @@ namespace TableGenerate
                         writer.WriteLineEx("use std::collections::HashMap;");
                         writer.WriteLine("use binary_reader::{BinaryReader, Endian};");
                         writer.WriteLineEx("use flate2::read::ZlibDecoder;");
-                        writer.WriteLineEx("use crate::tbl::lib;");
                         writer.WriteLineEx("include!(concat!(env!(\"OUT_DIR\"), concat!(\"/Enum/_.rs\")));");
                         string[] sheets = imp.GetSheetList();
 
@@ -60,6 +59,19 @@ namespace TableGenerate
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                             SheetProcess(writer, filename, trimSheetName, columns);
                         }
+                        writer.WriteLineEx("#[allow(dead_code)]");
+                        writer.WriteLineEx("fn read_string(reader: &mut BinaryReader) -> String {");
+                        writer.WriteLineEx("let len = reader.read_u32().unwrap() as usize;");
+                        writer.WriteLineEx("let vec = reader.read_bytes(len).unwrap();");
+                        writer.WriteLineEx("let ret = String::from_utf8(Vec::from(vec)).map_err(|err| {");
+                        writer.WriteLineEx("    std::io::Error::new(");
+                        writer.WriteLineEx("        std::io::ErrorKind::InvalidData,");
+                        writer.WriteLineEx("        format!(\"failed to convert to string: {:?}\", err),");
+                        writer.WriteLineEx("    )");
+                        writer.WriteLineEx("}).unwrap();");
+                        writer.WriteLineEx("ret");
+                        writer.WriteLineEx("}");
+                        
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
                         writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> StaticData {{");
@@ -119,7 +131,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"}}");
                         
                         writer.WriteLineEx($"#[test]");
-                        writer.WriteLineEx($"fn read_tests() {{");
+                        writer.WriteLineEx($"pub fn read_tests() {{");
                         writer.WriteLineEx($"let mut file = std::fs::File::open(r\"../../GameDesign/Output/Global/{filename}.bytes\").unwrap();");
                         writer.WriteLineEx($"let mut reader = BinaryReader::from_file(&mut file);");
                         writer.WriteLineEx($"let _static_data = readStream(&mut reader);");
@@ -266,12 +278,12 @@ namespace TableGenerate
                     eBaseType.Boolean => "reader.read_bool().unwrap()",
                     eBaseType.Int8 => "reader.read_i8().unwrap()",
                     eBaseType.Int16 => "reader.read_i16().unwrap()",
-                    eBaseType.Enum => "unsafe { std::mem::transmute(reader.read_i32().unwrap()) }",
+                    eBaseType.Enum => "  unsafe { std::mem::transmute(reader.read_i32().unwrap()) }",
                     eBaseType.Int32 => "reader.read_i32().unwrap()",
                     eBaseType.Int64 => "reader.read_i64().unwrap()",
                     eBaseType.Float => "reader.read_f32().unwrap()",
                     eBaseType.Double => "reader.read_f64().unwrap()",
-                    eBaseType.String => "lib::read_string(reader)",
+                    eBaseType.String => "read_string(reader)",
                     eBaseType.Vector3 => "glam::f64::DVec3::new(reader.read_f64().unwrap(),reader.read_f64().unwrap(),reader.read_f64().unwrap())",
                     _ => "util::reader.read_i32().unwrap()"
                 };
