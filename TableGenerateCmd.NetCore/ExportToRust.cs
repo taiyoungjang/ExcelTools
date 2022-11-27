@@ -43,7 +43,7 @@ namespace TableGenerate
                         writer.WriteLineEx("use std::collections::HashMap;");
                         writer.WriteLine("use binary_reader::{BinaryReader, Endian};");
                         writer.WriteLineEx("use flate2::read::ZlibDecoder;");
-                        writer.WriteLineEx("include!(concat!(env!(\"OUT_DIR\"), concat!(\"/Enum/_.rs\")));");
+                        writer.WriteLineEx("include!(\"_.rs\");");
                         string[] sheets = imp.GetSheetList();
 
                         filename = filename.Replace(".rs", string.Empty);
