@@ -39,10 +39,6 @@ namespace TableGenerate
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
 
-                        writer.WriteLineEx("use std::io::prelude::*;");
-                        writer.WriteLineEx("use std::collections::HashMap;");
-                        writer.WriteLine("use binary_reader::{BinaryReader, Endian};");
-                        writer.WriteLineEx("use flate2::read::ZlibDecoder;");
                         writer.WriteLineEx("include!(\"_.rs\");");
                         string[] sheets = imp.GetSheetList();
 
@@ -60,7 +56,7 @@ namespace TableGenerate
                             SheetProcess(writer, filename, trimSheetName, columns);
                         }
                         writer.WriteLineEx("#[allow(dead_code)]");
-                        writer.WriteLineEx("fn read_string(reader: &mut BinaryReader) -> String {");
+                        writer.WriteLineEx("fn read_string(reader: &mut binary_reader::BinaryReader) -> String {");
                         writer.WriteLineEx("let len = reader.read_u32().unwrap() as usize;");
                         writer.WriteLineEx("let vec = reader.read_bytes(len).unwrap();");
                         writer.WriteLineEx("let ret = String::from_utf8(Vec::from(vec)).map_err(|err| {");
@@ -74,19 +70,19 @@ namespace TableGenerate
                         
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
-                        writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> StaticData {{");
-                        writer.WriteLineEx($"reader.set_endian(Endian::Little);");
+                        writer.WriteLineEx($"pub fn readStream(reader: &mut binary_reader::BinaryReader) -> StaticData {{");
+                        writer.WriteLineEx($"reader.set_endian(binary_reader::Endian::Little);");
                         writer.WriteLineEx($"let _streamLength = reader.length;");
                         writer.WriteLineEx($"let _hashLength = reader.read_i8().unwrap() as usize;");
                         writer.WriteLineEx($"let _ = reader.read(_hashLength);");
                         writer.WriteLineEx($"let _decompressedSize = reader.read_u32().unwrap() as usize;");
                         writer.WriteLineEx($"let mut _compressedSize = reader.read_u32().unwrap() as usize;");
                         writer.WriteLineEx($"let mut compressed = reader.read(_compressedSize).unwrap();");
-                        writer.WriteLineEx($"let mut decoder = ZlibDecoder::new(&mut compressed);");
+                        writer.WriteLineEx($"let mut decoder = flate2::read::ZlibDecoder::new(&mut compressed);");
                         writer.WriteLineEx($"let mut decompressed = Vec::new();");
-                        writer.WriteLineEx($"let _ = decoder.read_to_end(&mut decompressed).unwrap();");
-                        writer.WriteLineEx($"let mut decompressReader = BinaryReader::from_vec(&mut decompressed);");
-                        writer.WriteLineEx($"decompressReader.set_endian(Endian::Little);");
+                        writer.WriteLineEx($"let _ = std::io::Read::read_to_end( &mut decoder, &mut decompressed).unwrap();");
+                        writer.WriteLineEx($"let mut decompressReader = binary_reader::BinaryReader::from_vec(&mut decompressed);");
+                        writer.WriteLineEx($"decompressReader.set_endian(binary_reader::Endian::Little);");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
@@ -126,21 +122,38 @@ namespace TableGenerate
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
                             writer.WriteLineEx($"pub {sheetName}_vec: Vec<{sheetName}>,");
-                            writer.WriteLineEx($"pub {sheetName}_map: HashMap<{firstColumnType},{sheetName}>,");
+                            writer.WriteLineEx($"pub {sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
                         
                         writer.WriteLineEx($"#[test]");
-                        writer.WriteLineEx($"pub fn read_tests() {{");
-                        writer.WriteLineEx($"let mut file = std::fs::File::open(r\"../../GameDesign/Output/Global/{filename}.bytes\").unwrap();");
-                        writer.WriteLineEx($"let mut reader = BinaryReader::from_file(&mut file);");
+                        writer.WriteLineEx( "pub fn read_tests() {");
+                        writer.WriteLineEx($"let file_name = r\"{filename}.bytes\";");
+                        writer.WriteLineEx($"let output_path = r\"../../GameDesign/Output\";");
+                        writer.WriteLineEx($"let folders = std::fs::read_dir(output_path)");
+                        writer.WriteLineEx($"    .unwrap()");
+                        writer.WriteLineEx($"    .map(|r| r.map(|e| e.path()))");
+                        writer.WriteLineEx($"    .collect::<Result<Vec<std::path::PathBuf>, _>>()");
+                        writer.WriteLineEx($"    .unwrap();");
+                        writer.WriteLineEx( "for folder in folders.iter().filter(|f|f.is_dir()) {");
+                        writer.WriteLineEx($"let files = std::fs::read_dir(folder)");
+                        writer.WriteLineEx($"    .unwrap()");
+                        writer.WriteLineEx($"    .map(|r| r.map(|e| e.path()))");
+                        writer.WriteLineEx($"    .collect::<Result<Vec<std::path::PathBuf>, _>>()");
+                        writer.WriteLineEx($"    .unwrap();");
+                        writer.WriteLineEx( "for file  in files.iter().filter(|f|f.is_file()) {");
+                        writer.WriteLineEx( "if file.file_name().unwrap().eq(file_name) {");
+                        writer.WriteLineEx($"let mut file = std::fs::File::open(file).unwrap();");
+                        writer.WriteLineEx($"let mut reader = binary_reader::BinaryReader::from_file(&mut file);");
                         writer.WriteLineEx($"let _static_data = readStream(&mut reader);");
                         foreach (string sheetName in sheets)
                         {
-                            writer.WriteLineEx($"  println!(\"{sheetName}:{{}}\", _static_data.{sheetName}_vec.len());");
+                            writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), _static_data.{sheetName}_vec.len());");
                         }
-                        
-                        writer.WriteLineEx($"}}");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "}");
                         
                         writer.Flush();
                     }
@@ -244,10 +257,10 @@ namespace TableGenerate
             var firstColumnName = firstColumn.var_name;
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
-            writer.WriteLineEx($"pub fn readStream(reader: &mut BinaryReader) -> (Vec<{sheetName}>,HashMap<{firstColumnType},{sheetName}>) {{");
+            writer.WriteLineEx($"pub fn readStream(reader: &mut binary_reader::BinaryReader) -> (Vec<{sheetName}>,std::collections::HashMap<{firstColumnType},{sheetName}>) {{");
             writer.WriteLineEx($"let size = reader.read_u32().unwrap() as usize;");
             writer.WriteLineEx($"let mut vec: Vec<{sheetName}> = Vec::with_capacity(size);");
-            writer.WriteLineEx($"let mut map:HashMap<{firstColumnType},{sheetName}> = HashMap::with_capacity(size);");
+            writer.WriteLineEx($"let mut map: std::collections::HashMap<{firstColumnType},{sheetName}> = std::collections::HashMap::with_capacity(size);");
             writer.WriteLineEx($"for _ in 0..size {{");
             writer.WriteLineEx($"let v = {sheetName} {{");
             foreach (var column in columns)
