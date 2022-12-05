@@ -117,8 +117,8 @@ namespace TableGenerate
                             //SheetConstructorProcess(writer, sheetName, columns);
                             writer.WriteLineEx("}");
                         }
-                        writer.WriteLineEx($"/// STATIC_DATA");
                         writer.WriteLineEx($"lazy_static::lazy_static! {{");
+                        writer.WriteLineEx($"/// STATIC_DATA");
                         writer.WriteLineEx($"static ref STATIC_DATA: std::sync::RwLock<Vec<StaticData>> = std::sync::RwLock::new(Vec::with_capacity(100));");
                         writer.WriteLineEx($"}}");
                         foreach (string sheetName in sheets)
@@ -131,22 +131,22 @@ namespace TableGenerate
                             var firstColumnName = firstColumn.var_name;
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>> >(pred: F) -> Option<Vec<{sheetName}>> {{");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(pred: F) -> Option<Vec<{sheetName}>> {{");
                             writer.WriteLineEx($"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}> >(pred: F) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
                             writer.WriteLineEx($"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> >(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>>>(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
                             writer.WriteLineEx( $"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}> >(pred: F) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
                             writer.WriteLineEx( $"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
                         }
