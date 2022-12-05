@@ -129,25 +129,41 @@ namespace TableGenerate
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
+                            writer.WriteLineEx($"/// get vec_clone {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone() -> Option<Vec<{sheetName}>> {{");
+                            writer.WriteLineEx($"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec.clone())");
+                            writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(pred: F) -> Option<Vec<{sheetName}>> {{");
-                            writer.WriteLineEx($"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
+                            writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
-                            writer.WriteLineEx($"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
+                            writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"/// get map {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_clone() -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
+                            writer.WriteLineEx( $"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>>>(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
-                            writer.WriteLineEx( $"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
+                            writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
-                            writer.WriteLineEx( $"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
+                            writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"/// get {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}get({firstColumnName}: &{firstColumnType}) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last().unwrap().Item_map.get(&{firstColumnName}).cloned()");
                             writer.WriteLineEx( "}");
                         }
                         writer.WriteLineEx($"#[allow(dead_code)]");
@@ -194,7 +210,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap());");
                         foreach (string sheetName in sheets)
                         {
-                            writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec().len());");
+                            writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().len());");
                         }
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
