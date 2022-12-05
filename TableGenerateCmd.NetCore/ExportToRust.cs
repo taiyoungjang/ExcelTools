@@ -103,9 +103,7 @@ namespace TableGenerate
                             writer.WriteLineEx($"{sheetName}_map,");
                         }
                         writer.WriteLineEx( "};");
-                        writer.WriteLineEx("let lock = RWLOCK.write().unwrap();");
-                        writer.WriteLineEx("  unsafe { STATIC_DATA.push(static_data);}");
-                        writer.WriteLineEx("drop(lock);");
+                        writer.WriteLineEx(" STATIC_DATA.write().unwrap().push(static_data);");
                         writer.WriteLineEx($"}}");
 
                         foreach (string sheetName in sheets)
@@ -119,10 +117,10 @@ namespace TableGenerate
                             //SheetConstructorProcess(writer, sheetName, columns);
                             writer.WriteLineEx("}");
                         }
-                        writer.WriteLineEx($"/// STATIC_DATA RWLOCK");
-                        writer.WriteLineEx($"static RWLOCK: std::sync::RwLock<()> = std::sync::RwLock::new(());");
                         writer.WriteLineEx($"/// STATIC_DATA");
-                        writer.WriteLineEx($"static mut STATIC_DATA: once_cell::sync::Lazy<Vec<StaticData>> = once_cell::sync::Lazy::new(||Vec::with_capacity(100));");
+                        writer.WriteLineEx($"lazy_static::lazy_static! {{");
+                        writer.WriteLineEx($"static ref STATIC_DATA: std::sync::RwLock<Vec<StaticData>> = std::sync::RwLock::new(Vec::with_capacity(100));");
+                        writer.WriteLineEx($"}}");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
@@ -133,23 +131,23 @@ namespace TableGenerate
                             var firstColumnName = firstColumn.var_name;
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec() -> &'static Vec<{sheetName}> {{");
-                            writer.WriteLineEx( "unsafe {");
-                            writer.WriteLineEx($"let lock = RWLOCK.read().unwrap();");
-                            writer.WriteLineEx($"let ret = &STATIC_DATA.last().unwrap().{sheetName}_vec;");
-                            writer.WriteLineEx($"drop(lock);");
-                            writer.WriteLineEx($"ret");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>> >(pred: F) -> Option<Vec<{sheetName}>> {{");
+                            writer.WriteLineEx($"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"/// get vec_one {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}> >(pred: F) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx($"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map() -> &'static std::collections::HashMap<{firstColumnType},{sheetName}> {{");
-                            writer.WriteLineEx( "unsafe {");
-                            writer.WriteLineEx($"let lock = RWLOCK.read().unwrap();");
-                            writer.WriteLineEx( $"let ret = &STATIC_DATA.last().unwrap().{sheetName}_map;");
-                            writer.WriteLineEx($"drop(lock);");
-                            writer.WriteLineEx($"ret");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> >(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
+                            writer.WriteLineEx( $"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"/// get map_one {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}> >(pred: F) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx( $"pred( &STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
                         }
                         writer.WriteLineEx($"#[allow(dead_code)]");
@@ -167,15 +165,13 @@ namespace TableGenerate
                             writer.WriteLineEx($"{sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
-                        writer.WriteLineEx($"impl StaticData {{");
-                        
+                        writer.WriteLineEx($"/// read_from_file()");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
                         writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: & str) {");
                         writer.WriteLineEx($"let file_name = r\"{filename}.bytes\";");
                         writer.WriteLineEx($"let mut file = std::fs::File::open( std::path::Path::new(output_path).join(language).join(file_name) ).unwrap();");
                         writer.WriteLineEx($"let mut reader = binary_reader::BinaryReader::from_file(&mut file);");
                         writer.WriteLineEx($"read_stream(&mut reader);");
-                        writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
 
                         writer.WriteLineEx($"#[test]");
@@ -195,7 +191,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"    .unwrap();");
                         writer.WriteLineEx( "for file  in files.iter().filter(|f|f.is_file()) {");
                         writer.WriteLineEx( "if file.file_name().unwrap().eq(file_name) {");
-                        writer.WriteLineEx($"StaticData::read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap());");
+                        writer.WriteLineEx($"read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap());");
                         foreach (string sheetName in sheets)
                         {
                             writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec().len());");
