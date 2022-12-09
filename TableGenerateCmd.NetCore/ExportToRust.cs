@@ -353,7 +353,7 @@ namespace TableGenerate
                     eBaseType.Boolean => "reader.read_bool().unwrap()",
                     eBaseType.Int8 => "reader.read_i8().unwrap()",
                     eBaseType.Int16 => "reader.read_i16().unwrap()",
-                    eBaseType.Enum => "unsafe { std::mem::transmute(reader.read_i32().unwrap()) }",
+                    eBaseType.Enum => $"{type}::from_i32(reader.read_i32().unwrap()).unwrap()",
                     eBaseType.Int32 => "reader.read_i32().unwrap()",
                     eBaseType.Int64 => "reader.read_i64().unwrap()",
                     eBaseType.Float => "reader.read_f32().unwrap()",
