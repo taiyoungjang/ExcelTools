@@ -210,7 +210,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap());");
                         foreach (string sheetName in sheets)
                         {
-                            writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().len());");
+                            writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().unwrap().len());");
                         }
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
