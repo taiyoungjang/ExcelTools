@@ -163,7 +163,7 @@ namespace TableGenerate
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}get({firstColumnName}: &{firstColumnType}) -> Option<{sheetName}> {{");
-                            writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last().unwrap().Item_map.get(&{firstColumnName}).cloned()");
+                            writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map.get(&{firstColumnName}).cloned()");
                             writer.WriteLineEx( "}");
                         }
                         writer.WriteLineEx($"#[allow(dead_code)]");
@@ -239,6 +239,7 @@ namespace TableGenerate
             writer.WriteLineEx($"#[derive(Debug)]");
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
+            writer.WriteLineEx($"#[allow(non_camel_case_types)]");
             writer.WriteLineEx($"pub struct {sheetName}");
             writer.WriteLineEx("{");
             InnerSheetProcess(writer, columns);
