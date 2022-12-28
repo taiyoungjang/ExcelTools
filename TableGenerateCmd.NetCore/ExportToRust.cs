@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using StreamWrite.Extension;
 using System.CodeDom.Compiler;
-using System.Diagnostics;
 
 namespace TableGenerate
 {
@@ -72,23 +71,25 @@ namespace TableGenerate
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
                         writer.WriteEx($"pub fn read_stream(reader: &mut binary_reader::BinaryReader) {{");
                         writer.WriteLineEx($"reader.set_endian(binary_reader::Endian::Little);");
-                        writer.WriteLineEx($"let _streamLength = reader.length;");
-                        writer.WriteLineEx($"let _hashLength = reader.read_i8().unwrap() as usize;");
-                        writer.WriteLineEx($"let _ = reader.read(_hashLength);");
-                        writer.WriteLineEx($"let _decompressedSize = reader.read_u32().unwrap() as usize;");
-                        writer.WriteLineEx($"let mut _compressedSize = reader.read_u32().unwrap() as usize;");
-                        writer.WriteLineEx($"let mut compressed = reader.read(_compressedSize).unwrap();");
+                        writer.WriteLineEx($"let _stream_length = reader.length;");
+                        writer.WriteLineEx($"let _hash_length = reader.read_i8().unwrap() as usize;");
+                        writer.WriteLineEx($"let _ = reader.read(_hash_length);");
+                        writer.WriteLineEx($"let _decompressed_size = reader.read_u32().unwrap() as usize;");
+                        writer.WriteLineEx($"let mut _compressed_size = reader.read_u32().unwrap() as usize;");
+                        writer.WriteLineEx($"let mut compressed = reader.read(_compressed_size).unwrap();");
                         writer.WriteLineEx($"let mut decoder = flate2::read::ZlibDecoder::new(&mut compressed);");
                         writer.WriteLineEx($"let mut decompressed = Vec::new();");
                         writer.WriteLineEx($"let _ = std::io::Read::read_to_end( &mut decoder, &mut decompressed).unwrap();");
-                        writer.WriteLineEx($"let mut decompressReader = binary_reader::BinaryReader::from_vec(&mut decompressed);");
-                        writer.WriteLineEx($"decompressReader.set_endian(binary_reader::Endian::Little);");
+                        writer.WriteLineEx($"let mut decompress_reader = binary_reader::BinaryReader::from_vec(&mut decompressed);");
+                        writer.WriteLineEx($"decompress_reader.set_endian(binary_reader::Endian::Little);");
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
                             var rows = imp.GetSheetShortCut(sheetName, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                            writer.WriteLineEx($"let ({sheetName}_vec, {sheetName}_map) = {sheetName}::read_stream(&mut decompressReader);");
+                            var pascalSheetName = ExportBaseUtil.ToPascalCase(sheetName);
+                            var snakeSheetName = ExportBaseUtil.ToSnakeCase(sheetName);
+                            writer.WriteLineEx($"let ({snakeSheetName}_vec, {snakeSheetName}_map) = {pascalSheetName}::read_stream(&mut decompress_reader);");
                         }
                         writer.WriteLineEx( "let static_data = StaticData {");
                         foreach (string sheetName in sheets)
@@ -96,11 +97,13 @@ namespace TableGenerate
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
                             var rows = imp.GetSheetShortCut(sheetName, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
+                            var pascalSheetName = ExportBaseUtil.ToPascalCase(sheetName);
+                            var snakeSheetName = ExportBaseUtil.ToSnakeCase(sheetName);
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
-                            writer.WriteLineEx($"{sheetName}_vec,");
-                            writer.WriteLineEx($"{sheetName}_map,");
+                            writer.WriteLineEx($"{pascalSheetName}_vec: {snakeSheetName}_vec,");
+                            writer.WriteLineEx($"{pascalSheetName}_map :{snakeSheetName}_map,");
                         }
                         writer.WriteLineEx( "};");
                         writer.WriteLineEx(" STATIC_DATA.write().unwrap().push(static_data);");
@@ -109,53 +112,57 @@ namespace TableGenerate
                         foreach (string sheetName in sheets)
                         {
                             string trimSheetName = sheetName.Trim().Replace(" ", "_");
+                            string pascalSheetName = ExportBaseUtil.ToPascalCase(sheetName);
                             var rows = imp.GetSheetShortCut(sheetName, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                            writer.WriteLineEx($"impl {sheetName}");
+                            writer.WriteLineEx($"impl {pascalSheetName}");
                             writer.WriteLineEx("{");
-                            InnerSheetReadStreamProcess(sheetName, writer, columns);
+                            InnerSheetReadStreamProcess(pascalSheetName, writer, columns);
                             //SheetConstructorProcess(writer, sheetName, columns);
                             writer.WriteLineEx("}");
                         }
-                        writer.WriteLineEx($"lazy_static::lazy_static! {{");
-                        writer.WriteLineEx($"/// STATIC_DATA");
-                        writer.WriteLineEx($"static ref STATIC_DATA: std::sync::RwLock<Vec<StaticData>> = std::sync::RwLock::new(Vec::with_capacity(100));");
-                        writer.WriteLineEx($"}}");
-                        foreach (string sheetName in sheets)
+                        foreach (string sheet in sheets)
                         {
-                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            var rows = imp.GetSheetShortCut(sheetName, language);
+                            string trimSheetName = sheet.Trim().Replace(" ", "_");
+                            var rows = imp.GetSheetShortCut(sheet, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
+                            var sheetName = ExportBaseUtil.ToPascalCase(sheet);
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
                             writer.WriteLineEx($"/// get vec_clone {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone() -> Option<Vec<{sheetName}>> {{");
                             writer.WriteLineEx($"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(pred: F) -> Option<Vec<{sheetName}>> {{");
                             writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
                             writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_clone() -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
                             writer.WriteLineEx( $"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>>>(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
                             writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
                             writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
                             writer.WriteLineEx( "}");
@@ -166,23 +173,27 @@ namespace TableGenerate
                             writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map.get(&{firstColumnName}).cloned()");
                             writer.WriteLineEx( "}");
                         }
+                        writer.WriteLineEx($"lazy_static::lazy_static! {{");
+                        writer.WriteLineEx($"/// STATIC_DATA");
+                        writer.WriteLineEx($"static ref STATIC_DATA: std::sync::RwLock<Vec<StaticData>> = std::sync::RwLock::new(Vec::with_capacity(100));");
+                        writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
                         writer.WriteLineEx($"pub struct StaticData {{");
-                        foreach (string sheetName in sheets)
+                        foreach (string sheet in sheets)
                         {
-                            string trimSheetName = sheetName.Trim().Replace(" ", "_");
-                            var rows = imp.GetSheetShortCut(sheetName, language);
+                            string trimSheetName = sheet.Trim().Replace(" ", "_");
+                            var rows = imp.GetSheetShortCut(sheet, language);
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
+                            var sheetName = ExportBaseUtil.ToPascalCase(sheet);
                             writer.WriteLineEx($"{sheetName}_vec: Vec<{sheetName}>,");
                             writer.WriteLineEx($"{sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"/// read_from_file()");
-                        writer.WriteLineEx($"#[allow(non_snake_case)]");
                         writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: & str) {");
                         writer.WriteLineEx($"let file_name = r\"{filename}.bytes\";");
                         writer.WriteLineEx($"let mut file = std::fs::File::open( std::path::Path::new(output_path).join(language).join(file_name) ).unwrap();");
@@ -210,7 +221,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap());");
                         foreach (string sheetName in sheets)
                         {
-                            writer.WriteLineEx($"    println!(\"{{}} {sheetName}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().unwrap().len());");
+                            writer.WriteLineEx($"    println!(\"{{}} {ExportBaseUtil.ToSnakeCase(sheetName)}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().unwrap().len());");
                         }
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
@@ -219,7 +230,7 @@ namespace TableGenerate
                         
                         writer.Flush();
                     }
-                    ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{createFileName}", TableGenerateCmd.ProgramCmd.using_perforce);
+                    ExportBaseUtil.CheckReplaceFile(stream, $"{outputPath}/{ExportBaseUtil.ToSnakeCase(createFileName.Replace(".rs",""))}.rs", TableGenerateCmd.ProgramCmd.using_perforce);
                 }
             }
             catch (System.Exception ex)
@@ -237,10 +248,9 @@ namespace TableGenerate
             //InnerSheetDescProcess(writer,columns);
             writer.WriteLineEx($"#[derive(Clone)]");
             writer.WriteLineEx($"#[derive(Debug)]");
-            writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
             writer.WriteLineEx($"#[allow(non_camel_case_types)]");
-            writer.WriteLineEx($"pub struct {sheetName}");
+            writer.WriteLineEx($"pub struct {ExportBaseUtil.ToPascalCase(sheetName)}");
             writer.WriteLineEx("{");
             InnerSheetProcess(writer, columns);
             //SheetConstructorProcess(writer, sheetName, columns);
@@ -374,5 +384,6 @@ namespace TableGenerate
             writer.WriteLineEx($"(vec,map)");
             writer.WriteLineEx($"}}");
         }
+       
     }
 }
