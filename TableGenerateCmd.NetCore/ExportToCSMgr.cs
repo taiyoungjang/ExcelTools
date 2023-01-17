@@ -562,67 +562,46 @@ namespace TableGenerate
                 }
                 if (column.array_index >= 0)
                 {
-                    if (TableGenerateCmd.ProgramCmd.not_array_length_full)
+                    if (column.array_index == 0)
                     {
-                        if (column.array_index == 0)
-                        {
-                            int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
-                            writer.WriteLineEx($"var {column.var_name}_list__ = new System.Collections.Generic.List<{column.GenerateBaseType(_gen_type)}>();");
-                            writer.WriteLineEx($"bool not_empty_{column.var_name}__ = false;");
-                        }
-
-                        writer.WriteLineEx($"j = {column.data_column_index};");
-                        writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
-                        writer.WriteLineEx($"{{");
-                        if (column.array_index > 0)
-                        {
-                            writer.WriteLineEx($"if(not_empty_{column.var_name}__)");
-                            writer.WriteLineEx($"{{");
-                            writer.WriteLineEx($"    throw new System.Exception(string.Format(\"i:{{0}} j:{{1}} before is empty text\",i,j));");
-                            writer.WriteLineEx($"}}");
-                        }
-                        writer.WriteLineEx($"{column.var_name}_list__.Add({convert_function});");
-                        writer.WriteLineEx($"}}");
-                        writer.WriteLineEx($"else");
-                        writer.WriteLineEx($"{{");
-                        writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
-                        writer.WriteLineEx($"}}");
-                        if (column.is_last_array)
-                        {
-                            writer.WriteLineEx($"{column.var_name} = {column.var_name}_list__.ToArray();");
-                        }
+                        int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
+                        writer.WriteLineEx($"var {column.var_name}_list__ = new System.Collections.Generic.List<{column.GenerateBaseType(_gen_type)}>();");
+                        writer.WriteLineEx($"bool not_empty_{column.var_name}__ = false;");
                     }
-                    else
-                    {
-                        if (column.array_index == 0)
-                        {
-                            int arrayCount = columns.Count(compare => compare.var_name == column.var_name);
-                            writer.WriteLineEx($"{column.var_name} = new {column.GenerateBaseType(_gen_type)}[{arrayCount}];");
-                        }
 
-                        if (column.IsDateTime() == true)
-                        {
-                            writer.WriteLineEx($"j = {column.data_column_index};");
-                            writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = new System.DateTime(1970,1,1);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
-                        }
-                        else if (column.IsTimeSpan() == true)
-                        {
-                            writer.WriteLineEx($"j = {column.data_column_index};");
-                            writer.WriteLineEx($"j = {column.data_column_index}; if(string.IsNullOrEmpty({arg})){{{column.var_name}[{column.array_index}] = System.TimeSpan.FromTicks(0);}}else{{{column.var_name}[{column.array_index}] = {convert_function};}}");
-                        }
-                        else if (column.IsNumberType() == true)
-                        {
-                            writer.WriteLineEx($"j = {column.data_column_index};");
-                            writer.WriteLineEx("{");
-                            writer.WriteLineEx($"{column.GetPrimitiveType(_gen_type)} outValue = {column.GetInitValue(_gen_type)}; if(!string.IsNullOrEmpty({arg})) ");
-                            writer.WriteLineEx($"outValue = {convert_function}; {column.var_name}[{column.array_index}] = outValue;");
-                            writer.WriteLineEx("}");
-                        }
-                        else if (column.IsNumberType() == false)
-                        {
-                            writer.WriteLineEx($"j = {column.data_column_index};");
-                            writer.WriteLineEx($"{column.var_name}[{column.array_index}] = {convert_function};");
-                        }
+                    writer.WriteLineEx($"j = {column.data_column_index};");
+                    writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
+                    writer.WriteLineEx($"{{");
+                    if (column.array_index > 0)
+                    {
+                        writer.WriteLineEx($"if(not_empty_{column.var_name}__)");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} before is empty text\",ILoader.ColumnIndexToColumnLetter(j+1),i+1));");
+                        writer.WriteLineEx($"}}");
+                    }
+                    writer.WriteLineEx($"var v_ = {convert_function};");
+                    if (column.IsNumberType() && 
+                        !string.IsNullOrEmpty(column.min_value) &&
+                        !string.IsNullOrEmpty(column.max_value))
+                    {
+                        writer.WriteLineEx($"if( v_ < {column.min_value})");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} < min:{column.min_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                        writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"if( v_ > {column.max_value})");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} > max:{column.max_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                        writer.WriteLineEx($"}}");
+                    }
+                    writer.WriteLineEx($"{column.var_name}_list__.Add(v_);");
+                    writer.WriteLineEx($"}}");
+                    writer.WriteLineEx($"else");
+                    writer.WriteLineEx($"{{");
+                    writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
+                    writer.WriteLineEx($"}}");
+                    if (column.is_last_array)
+                    {
+                        writer.WriteLineEx($"{column.var_name} = {column.var_name}_list__.ToArray();");
                     }
                     continue;
                 }
@@ -647,6 +626,19 @@ namespace TableGenerate
                     writer.WriteLineEx($"if(string.IsNullOrEmpty({arg}))");
                     writer.WriteLineEx( "{");
                     writer.WriteLineEx($"{column.var_name} = {column.GetInitValue(_gen_type)};}}else {{{column.var_name} = {convert_function};");
+                    if (!string.IsNullOrEmpty(column.min_value) &&
+                        !string.IsNullOrEmpty(column.max_value))
+                    {
+                        writer.WriteLineEx($"if( {column.var_name} < {column.min_value})");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} {{2}} < min:{column.min_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,{column.var_name}));");
+                        writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"if({column.var_name} > {column.max_value})");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} {{2}} > max:{column.max_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,{column.var_name}));");
+                        writer.WriteLineEx($"}}");
+                    }
+                    
                     writer.WriteLineEx( "}");
                 }
                 else if (column.IsNumberType() == false)
@@ -656,7 +648,6 @@ namespace TableGenerate
                 }
             }
 
-            if(TableGenerateCmd.ProgramCmd.not_array_length_full)
             {
                 var query = columns
                     .Where(t => !string.IsNullOrEmpty(t.array_group_name) && t.array_index == 0)

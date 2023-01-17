@@ -316,7 +316,7 @@ namespace TableGenerate
                 {
                     if (!string.IsNullOrEmpty(column.desc))
                     {
-                        writer.WriteLineEx($"/// {column.desc}");
+                        writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent)}/// {column.desc}");
                     }
                     writer.WriteLineEx($"pub {name}: {type},");
                 }

@@ -110,7 +110,6 @@ namespace TableGenerate
             str.AppendLine("{");
             str.AppendLine("public class Script ");
             str.AppendLine("{");
-            str.AppendLine($"    public bool IsGenArrayFull={TableGenerateCmd.ProgramCmd.not_array_length_full.ToString().ToLower()};");
             str.AppendLine("    public int ExtractFromExcel(string inputPath, string outputPath)");
             str.AppendLine("    {");
             str.AppendLine("      string excel_name = string.Empty;");

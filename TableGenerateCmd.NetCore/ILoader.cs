@@ -16,6 +16,20 @@ namespace TBL
         void ReadStream(System.IO.Stream stream);
 #if !UNITY_5_3_OR_NEWER && !NO_EXCEL_LOADER
         void ExcelLoad(string path, string language, string dataStage);
+        public static string ColumnIndexToColumnLetter(int colIndex)
+        {
+            int div = colIndex;
+            string colLetter = string.Empty;
+            int mod = 0;
+ 
+            while (div > 0)
+            {
+                mod = (div - 1) % 26;
+                colLetter = (char)(65 + mod) + colLetter;
+                div = (int)((div - mod) / 26);
+            }
+            return colLetter;
+        }
 #endif
         string GetFileName();
         byte[] GetHash(System.IO.Stream stream);

@@ -39,7 +39,6 @@ namespace TableGenerateCmd
         public static string inifilename = string.Empty, source = string.Empty, version = string.Empty, lang = string.Empty, single_file = string.Empty, ext_path = string.Empty, async = string.Empty;
         public static int parallel = 1;
         public static string argstr = string.Empty;
-        public static bool not_array_length_full = false;
         public static bool using_perforce = false;
         public static string dataStage = String.Empty;
 
@@ -206,10 +205,6 @@ namespace TableGenerateCmd
                     {
                         string val = args[++i];
                         inifilename = val;
-                    }
-                    else if( args[i] == "-k")
-                    {
-                        not_array_length_full = bool.Parse(args[++i]);
                     }
                     else if (args[i] == "-c")
                     {

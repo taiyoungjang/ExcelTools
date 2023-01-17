@@ -5,62 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using TableGenerateCmd;
 using File = System.IO.File;
 
 namespace TableGenerate
 {
-    public enum eBaseType
-    {
-        Null,
-        String,
-        Boolean,
-        Int8,
-        Int16,
-        Int32,
-        Int64,
-        Float,
-        Double,
-        DateTime,
-        TimeSpan,
-        Enum,
-        Struct,
-        Vector3
-    };
 
-    public enum eGenType
-    {
-        cs,
-        cpp,
-        mssql,
-        mysql,
-        sqllite,
-        tf,
-        proto,
-        rust,
-    };
 
-    public class Column
-    {
-        public bool is_key;
-        public int data_column_index;
-        public string var_name;
-        public eBaseType base_type;
-        public int array_index;
-        public bool is_array;
-        public bool is_last_array;
-        public string array_group_name;
-        public bool is_generated;
-        public bool is_out_string;
-        public string type_name;
-        public eBaseType primitive_type;
-        public string min_value;
-        public string max_value;
-        public string desc;
-        public System.Reflection.TypeInfo TypeInfo;
-        public bool bit_flags;
-    };
 
     public abstract class ExportBase
     {
@@ -127,6 +80,7 @@ namespace TableGenerate
         public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
         {
             var columns = new List<Column>();
+            JsonSerializerSettings jsonSettings = new ();
             for (int i = 0; i < rows.GetLength(1); i++)
             {
                 string name = rows[0,i].Text.Trim().Replace(' ', '_');
@@ -136,8 +90,9 @@ namespace TableGenerate
                 if (name.Length == 0)
                     continue;
 
+                RangeValue range = desc.Contains('{') && desc.Contains('}') ? JsonConvert.DeserializeObject<RangeValue>(desc, jsonSettings ) : null;
 
-                Column column = new Column
+                var column = new Column
                 {
                     is_key = i == 0,
                     data_column_index = i,
@@ -148,10 +103,10 @@ namespace TableGenerate
                     array_index = -1,
                     is_array = false, 
                     desc = desc,
-                    bit_flags = false
+                    bit_flags = false,
                 };
 
-                GetBaseType(ref column, refAssem, mscorlibAssembly, type);
+                GetBaseType(ref column, range, refAssem, mscorlibAssembly, type);
 
                 if(column.is_array)
                 {
@@ -395,7 +350,7 @@ namespace TableGenerate
             return returnTypeName;
         }
 
-        private static void GetBaseType(ref Column column, System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
+        private static void GetBaseType(ref Column column, RangeValue rangeValue, System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
         {
             column.base_type = eBaseType.Null;
             string type_name = typename;
@@ -558,20 +513,28 @@ namespace TableGenerate
             {
                 column.type_name = type_name;
             }
+
+            void SetMinMax(Column column, RangeValue rangeValue)
+            {
+                if (rangeValue == null) return;
+                column.min_value = rangeValue.Min.ToString();
+                column.max_value = rangeValue.Max.ToString();
+            }
+
             switch (type_name)
             {
                 case "vector3": column.base_type = eBaseType.Vector3; break;
-                case "long": column.base_type = eBaseType.Int64; break;
-                case "int64": column.base_type = eBaseType.Int64; break;
-                case "int": column.base_type = eBaseType.Int32; break;
-                case "int32": column.base_type = eBaseType.Int32; break;
-                case "int16": column.base_type = eBaseType.Int16; break;
-                case "short": column.base_type = eBaseType.Int16; break;
+                case "long": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue);  break;
+                case "int64": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue); break;
+                case "int": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
+                case "int32": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
+                case "int16": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
+                case "short": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
                 case "string": column.base_type = eBaseType.String; break;
-                case "float": column.base_type = eBaseType.Float; break;
-                case "double": column.base_type = eBaseType.Double; break;
-                case "int8": column.base_type = eBaseType.Int8; break;
-                case "byte": column.base_type = eBaseType.Int8; break;
+                case "float": column.base_type = eBaseType.Float; SetMinMax(column,rangeValue); break;
+                case "double": column.base_type = eBaseType.Double; SetMinMax(column,rangeValue); break;
+                case "int8": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
+                case "byte": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
                 case "bool": column.base_type = eBaseType.Boolean; break;
                 case "datetime": column.base_type = eBaseType.DateTime; break;
                 case "timespan": column.base_type = eBaseType.TimeSpan; break;
@@ -580,17 +543,17 @@ namespace TableGenerate
                         switch (subtypename)
                         {
                             case "vector3": column.base_type = eBaseType.Vector3; break;
-                            case "long": column.base_type = eBaseType.Int64; break;
-                            case "int64": column.base_type = eBaseType.Int64; break;
-                            case "int": column.base_type = eBaseType.Int32; break;
-                            case "int32": column.base_type = eBaseType.Int32; break;
-                            case "short": column.base_type = eBaseType.Int16; break;
-                            case "int16": column.base_type = eBaseType.Int16; break;
-                            case "string": column.base_type = eBaseType.String; break;
-                            case "float": column.base_type = eBaseType.Float; break;
-                            case "double": column.base_type = eBaseType.Double; break;
-                            case "int8": column.base_type = eBaseType.Int8; break;
-                            case "byte": column.base_type = eBaseType.Int8; break;
+                            case "long": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue); break;
+                            case "int64": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue); break;
+                            case "int": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
+                            case "int32": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
+                            case "short": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
+                            case "int16": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
+                            case "string": column.base_type = eBaseType.String;SetMinMax(column,rangeValue); break;
+                            case "float": column.base_type = eBaseType.Float; SetMinMax(column,rangeValue); break;
+                            case "double": column.base_type = eBaseType.Double; SetMinMax(column,rangeValue); break;
+                            case "int8": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
+                            case "byte": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
                             case "bool": column.base_type = eBaseType.Boolean; break;
                             case "datetime": column.base_type = eBaseType.DateTime; break;
                             case "timespan": column.base_type = eBaseType.TimeSpan; break;

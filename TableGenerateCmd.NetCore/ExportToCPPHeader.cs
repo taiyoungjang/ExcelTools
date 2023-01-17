@@ -121,7 +121,7 @@ namespace TableGenerate
                     continue;
                 }
                 writer.WriteLineEx($"UPROPERTY( EditAnywhere{ (column.bit_flags? $", Meta = (BitMask, BitmaskEnum = E{column.type_name} )": $", BlueprintReadWrite, Category = {sn}")} )");
-                writer.WriteLineEx($"{type} {name};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
     }
