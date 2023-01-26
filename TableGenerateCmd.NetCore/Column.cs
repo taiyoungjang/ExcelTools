@@ -16,7 +16,8 @@ public class Column
     public eBaseType primitive_type;
     public string desc;
     public System.Reflection.TypeInfo TypeInfo;
-    public bool bit_flags;
+    public bool bit_flags => !string.IsNullOrEmpty(str_bit_flags);
+    public string str_bit_flags;
     public string min_value;
     public string max_value;
 };

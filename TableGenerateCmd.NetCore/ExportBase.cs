@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Google.Protobuf.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using TableGenerateCmd;
@@ -12,9 +13,6 @@ using File = System.IO.File;
 
 namespace TableGenerate
 {
-
-
-
     public abstract class ExportBase
     {
         public abstract bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except);
@@ -103,7 +101,7 @@ namespace TableGenerate
                     array_index = -1,
                     is_array = false, 
                     desc = desc,
-                    bit_flags = false,
+                    str_bit_flags = string.Empty,
                 };
 
                 GetBaseType(ref column, range, refAssem, mscorlibAssembly, type);
@@ -413,11 +411,18 @@ namespace TableGenerate
                                 var reflection = refAssembly.GetTypes().FirstOrDefault(t => t.Name == $"{type.Name}Reflection");
                                 if (reflection != null)
                                 {
-                                    var o = reflection.GetProperty("Descriptor");
-                                    var r = o.GetValue(null) as Google.Protobuf.Reflection.FileDescriptor;
-                                    foreach (var d in r.Dependencies.Select(t=>t.ToProto()))
+                                    var propertyInfo = reflection.GetProperty("Descriptor");
+                                    var fileDescriptor = propertyInfo.GetValue(null) as FileDescriptor;
+                                    foreach (var fileDescriptorProto in fileDescriptor.Dependencies.Select(t=>t.ToProto()))
                                     {
-                                        column.bit_flags = d.Extension.Any( t => t.Name.Equals("bit_flags"));
+                                        var flag = fileDescriptorProto.Extension.FirstOrDefault(t => t.Name.Equals("bit_flags"));
+                                        if (flag != null)
+                                        {
+                                            var enumDescriptor = fileDescriptor.FindTypeByName<EnumDescriptor>(type.Name);
+                                            var o = enumDescriptor.GetOptions();
+                                            var value = o.GetExtension(BitFlagsExtensions.BitFlags);
+                                            column.str_bit_flags = value;
+                                        }
                                         break;
                                     }
                                 }
@@ -1716,5 +1721,9 @@ namespace TableGenerate
 
             return string.Concat(pascalCase);
         }        
+    }
+    public static partial class BitFlagsExtensions {
+        public static readonly global::Google.Protobuf.Extension<global::Google.Protobuf.Reflection.EnumOptions, string> BitFlags =
+            new global::Google.Protobuf.Extension<global::Google.Protobuf.Reflection.EnumOptions, string>(50000, Google.Protobuf.FieldCodec.ForString(400002, ""));
     }
 }
