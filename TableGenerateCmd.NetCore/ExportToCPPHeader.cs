@@ -58,9 +58,7 @@ namespace TableGenerate
                         
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
-                        writer.WriteLineEx($"#include \"CoreMinimal.h\"");
-                        writer.WriteLineEx($"#include \"Math/UnrealMathUtility.h\"");
-                        writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
+                        writer.WriteLineEx($"#include \"TableRowExtension.h\"");
                         foreach (var (_,typeInfo) in enums)
                         {
                             writer.WriteLineEx($"#include \"{typeInfo.Name}.h\"");
@@ -94,7 +92,7 @@ namespace TableGenerate
         private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
             writer.WriteLineEx($"USTRUCT(BlueprintType)");
-            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName}TableRow : public FTableRowBase");
+            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName}TableRow : public FTableRowExtension");
             writer.WriteLineEx("{");
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type);
