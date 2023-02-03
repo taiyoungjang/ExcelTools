@@ -373,11 +373,11 @@ namespace TableGenerate
             var firstColumn = columns.FirstOrDefault(t => t.is_key);
             var firstColumnType = firstColumn.GenerateType(_gen_type);
             var firstColumnName = firstColumn.var_name;
-            writer.WriteLineEx($"pub fn column_count() -> usize {{ {columns.Count} }}");
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
             writer.WriteLineEx($"pub fn egui_header() -> fn(egui_extras::TableRow) {{");
             writer.WriteLineEx($"|mut header| {{");
+            int arrayCount = 0;
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -386,9 +386,11 @@ namespace TableGenerate
                     continue;
                 }
                 writer.WriteLineEx($"  let _ = header.col(|ui|{{let _ = ui.strong(\"{name}\");}});");
+                arrayCount++;
             }
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"}}");
+            writer.WriteLineEx($"  pub fn column_count() -> usize {{ {arrayCount} }}");
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
             writer.WriteLineEx($"pub fn egui_body(body: egui_extras::TableBody, items: Vec<&{sheetName}>) {{");
