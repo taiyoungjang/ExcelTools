@@ -92,6 +92,7 @@ namespace TableGenerate
 
                 var column = new Column
                 {
+                    array_one_cell = false,
                     is_key = i == 0,
                     data_column_index = i,
                     var_name = name,
@@ -355,17 +356,27 @@ namespace TableGenerate
             string subtypename = type_name;
             string sizeChecker = typename;
             int startIndex = sizeChecker.IndexOf('<');
-            if(startIndex >= 0)
+            if (type_name.EndsWith("[]"))
+            {
+                column.is_array = true;
+                column.array_one_cell = true;
+                column.array_index = 0;
+            }
+            if(startIndex >= 0 || column.is_array)
             {
                 int lastIndex = sizeChecker.LastIndexOf('>');
-                if (type_name.StartsWith("array"))
+                if (type_name.StartsWith("array") || column.is_array)
                 {
                     type_name = "array";
                     if (startIndex >= 0)
                     {
                         sizeChecker = sizeChecker.Substring(startIndex + 1, sizeChecker.Length - startIndex - 2);
-                        sizeChecker = sizeChecker.Replace("out_", string.Empty);
                         sizeChecker = sizeChecker.Replace("array", string.Empty);
+                        subtypename = sizeChecker;
+                    }
+                    else if (column.is_array)
+                    {
+                        sizeChecker = sizeChecker.Replace("[]", string.Empty);
                         subtypename = sizeChecker;
                     }
                     column.is_array = true;
@@ -495,19 +506,6 @@ namespace TableGenerate
                 else
                 {
                     subtypename = subtypename.ToLower();
-                }
-                if (subtypename.IndexOf("string") >= 0)
-                {
-                    type_name = "string";
-                    startIndex = sizeChecker.IndexOf('<');
-                    lastIndex = sizeChecker.LastIndexOf('>');
-                    if (startIndex >= 0)
-                    {
-                        sizeChecker = sizeChecker.Substring(startIndex + 1, sizeChecker.Length - startIndex - 2);
-                        sizeChecker = sizeChecker.Replace("out_", string.Empty);
-                        sizeChecker = sizeChecker.Replace("string", string.Empty);
-                        //size = Int32.Parse(sizeChecker);
-                    }
                 }
             }
             else
@@ -661,7 +659,7 @@ namespace TableGenerate
         {
             int array_count = column.array_index;
             string returnTypeName = string.Empty;
-            if (array_count != -1)
+            if (array_count != -1 || column.array_one_cell)
             {
                 switch (column.base_type)
                 {
@@ -1020,7 +1018,7 @@ namespace TableGenerate
         {
             int array_count = column.array_index;
             string returnTypeName = string.Empty;
-            if (array_count != -1)
+            if (array_count != -1 || column.array_one_cell)
             {
                 switch (column.base_type)
                 {

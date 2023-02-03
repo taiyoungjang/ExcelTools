@@ -560,9 +560,9 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                if (column.array_index >= 0)
+                if (column.is_array)
                 {
-                    if (column.array_index == 0)
+                    if (column.array_index == 0 || column.array_one_cell)
                     {
                         int array_count = columns.Where(compare => compare.var_name == column.var_name).Count();
                         writer.WriteLineEx($"var {column.var_name}_list__ = new System.Collections.Generic.List<{column.GenerateBaseType(_gen_type)}>();");
@@ -570,38 +570,79 @@ namespace TableGenerate
                     }
 
                     writer.WriteLineEx($"j = {column.data_column_index};");
-                    writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
-                    writer.WriteLineEx($"{{");
-                    if (column.array_index > 0)
+                    if (column.array_one_cell)
                     {
-                        writer.WriteLineEx($"if(not_empty_{column.var_name}__)");
+                        writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
                         writer.WriteLineEx($"{{");
-                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} before is empty text\",ILoader.ColumnIndexToColumnLetter(j+1),i+1));");
-                        writer.WriteLineEx($"}}");
-                    }
-                    writer.WriteLineEx($"var v_ = {convert_function};");
-                    if (column.IsNumberType() && 
-                        !string.IsNullOrEmpty(column.min_value) &&
-                        !string.IsNullOrEmpty(column.max_value))
-                    {
-                        writer.WriteLineEx($"if( v_ < {column.min_value})");
+                        writer.WriteLineEx($"var splits = {arg}.Split(',');");
+                        writer.WriteLineEx($"foreach(var split in splits)");
                         writer.WriteLineEx($"{{");
-                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} < min:{column.min_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                        writer.WriteLineEx($"var v_ = {column.GetConvertFunction("split",_gen_type)};");
+                        if (column.IsNumberType() &&
+                            !string.IsNullOrEmpty(column.min_value) &&
+                            !string.IsNullOrEmpty(column.max_value))
+                        {
+                            writer.WriteLineEx($"if( v_ < {column.min_value})");
+                            writer.WriteLineEx($"{{");
+                            writer.WriteLineEx(
+                                $"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} < min:{column.min_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                            writer.WriteLineEx($"}}");
+                            writer.WriteLineEx($"if( v_ > {column.max_value})");
+                            writer.WriteLineEx($"{{");
+                            writer.WriteLineEx(
+                                $"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} > max:{column.max_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                            writer.WriteLineEx($"}}");
+                        }
+
+                        writer.WriteLineEx($"{column.var_name}_list__.Add(v_);");
                         writer.WriteLineEx($"}}");
-                        writer.WriteLineEx($"if( v_ > {column.max_value})");
+                        writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"else");
                         writer.WriteLineEx($"{{");
-                        writer.WriteLineEx($"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} > max:{column.max_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                        writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
                         writer.WriteLineEx($"}}");
-                    }
-                    writer.WriteLineEx($"{column.var_name}_list__.Add(v_);");
-                    writer.WriteLineEx($"}}");
-                    writer.WriteLineEx($"else");
-                    writer.WriteLineEx($"{{");
-                    writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
-                    writer.WriteLineEx($"}}");
-                    if (column.is_last_array)
-                    {
                         writer.WriteLineEx($"{column.var_name} = {column.var_name}_list__.ToArray();");
+                    }
+                    else 
+                    {
+                        writer.WriteLineEx($"if(!string.IsNullOrEmpty({arg}))");
+                        writer.WriteLineEx($"{{");
+                        if (column.array_index > 0)
+                        {
+                            writer.WriteLineEx($"if(not_empty_{column.var_name}__)");
+                            writer.WriteLineEx($"{{");
+                            writer.WriteLineEx(
+                                $"    throw new System.Exception(string.Format(\"{{0}}{{1}} before is empty text\",ILoader.ColumnIndexToColumnLetter(j+1),i+1));");
+                            writer.WriteLineEx($"}}");
+                        }
+
+                        writer.WriteLineEx($"var v_ = {convert_function};");
+                        if (column.IsNumberType() &&
+                            !string.IsNullOrEmpty(column.min_value) &&
+                            !string.IsNullOrEmpty(column.max_value))
+                        {
+                            writer.WriteLineEx($"if( v_ < {column.min_value})");
+                            writer.WriteLineEx($"{{");
+                            writer.WriteLineEx(
+                                $"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} < min:{column.min_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                            writer.WriteLineEx($"}}");
+                            writer.WriteLineEx($"if( v_ > {column.max_value})");
+                            writer.WriteLineEx($"{{");
+                            writer.WriteLineEx(
+                                $"    throw new System.Exception(string.Format(\"{{0}}{{1}} value:{{2}} > max:{column.max_value} \",ILoader.ColumnIndexToColumnLetter(j+1),i+1,v_));");
+                            writer.WriteLineEx($"}}");
+                        }
+
+                        writer.WriteLineEx($"{column.var_name}_list__.Add(v_);");
+                        writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"else");
+                        writer.WriteLineEx($"{{");
+                        writer.WriteLineEx($"not_empty_{column.var_name}__ = true;");
+                        writer.WriteLineEx($"}}");
+                        if (column.is_last_array)
+                        {
+                            writer.WriteLineEx($"{column.var_name} = {column.var_name}_list__.ToArray();");
+                        }
                     }
                     continue;
                 }
@@ -840,7 +881,7 @@ namespace TableGenerate
                     continue;
                 }
 
-                if (column.array_index >= 0)
+                else if (column.is_array)
                 {
                     writer.WriteLineEx($"Encoder.Write7BitEncodedInt(__writer,__table.{column.var_name}.Length);");
                     writer.Write($"foreach(var t__ in __table.{column.var_name})");
@@ -915,7 +956,7 @@ namespace TableGenerate
                     continue;
                 }
 
-                if (column.array_index >= 0)
+                if (column.is_array)
                 {
                     writer.WriteLineEx($"{type} {column.var_name};");
                     writer.WriteLineEx("{");

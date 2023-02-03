@@ -2,6 +2,8 @@
 
 public class Column
 {
+    // 한셀에 여러개의 데이터가 들어가는 경우
+    public bool array_one_cell;
     public bool is_key;
     public int data_column_index;
     public string var_name;
