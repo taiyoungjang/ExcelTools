@@ -365,7 +365,7 @@ namespace TableGenerate
             if(startIndex >= 0 || column.is_array)
             {
                 int lastIndex = sizeChecker.LastIndexOf('>');
-                if (type_name.StartsWith("array") || column.is_array)
+                if (type_name.StartsWith("array"))
                 {
                     type_name = "array";
                     if (startIndex >= 0)
@@ -374,17 +374,18 @@ namespace TableGenerate
                         sizeChecker = sizeChecker.Replace("array", string.Empty);
                         subtypename = sizeChecker;
                     }
-                    else if (column.is_array)
-                    {
-                        sizeChecker = sizeChecker.Replace("[]", string.Empty);
-                        subtypename = sizeChecker;
-                    }
+                    column.is_array = true;
+                }
+                else if (column.is_array)
+                {
+                    sizeChecker = typename.Replace("[]", string.Empty);
+                    subtypename = sizeChecker;
+                    type_name = "array";
                     column.is_array = true;
                 }
                 if (subtypename.IndexOf("enum") >= 0)
                 {
                     startIndex = subtypename.IndexOf('<');
-                    lastIndex = subtypename.LastIndexOf('>');
                     if (startIndex >= 0)
                     {
                         sizeChecker = subtypename;

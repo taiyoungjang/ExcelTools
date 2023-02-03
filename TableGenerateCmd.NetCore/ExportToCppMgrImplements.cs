@@ -221,7 +221,7 @@ namespace TableGenerate
                     writer.WriteLineEx($"Reader >> {column.var_name};");
                     continue;
                 }
-                if (column.array_index == 0)
+                if (column.is_array)
                 {
                     writer.WriteLineEx("{");
                     writer.WriteLineEx($"const int32 ArrayCount = FBufferReader::Read7BitEncodedInt(Reader);");
