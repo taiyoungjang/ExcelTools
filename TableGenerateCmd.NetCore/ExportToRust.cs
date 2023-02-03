@@ -118,6 +118,19 @@ namespace TableGenerate
                             writer.WriteLineEx($"impl {pascalSheetName}");
                             writer.WriteLineEx("{");
                             InnerSheetReadStreamProcess(pascalSheetName, writer, columns);
+                            EGuiGen(pascalSheetName, writer, columns);
+                            var firstColumn = columns.FirstOrDefault(t => t.is_key);
+                            var firstColumnType = firstColumn.GenerateType(_gen_type);
+                            var firstColumnName = firstColumn.var_name;
+                            writer.WriteLineEx( $"pub fn key_string(&self) -> String {{");
+                            writer.WriteLineEx(GenToString(firstColumn));
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx( $"pub fn title() -> &'static str {{");
+                            writer.WriteLineEx($"\"{pascalSheetName}\"");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx( $"pub fn key_name() -> &'static str {{");
+                            writer.WriteLineEx($"\"{firstColumnName}\"");
+                            writer.WriteLineEx( "}");
                             //SheetConstructorProcess(writer, sheetName, columns);
                             writer.WriteLineEx("}");
                         }
@@ -193,9 +206,13 @@ namespace TableGenerate
                             writer.WriteLineEx($"{sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"/// file_name");
+                        writer.WriteLineEx( "pub fn file_name() -> &'static str {");
+                        writer.WriteLineEx($"r\"{filename}.bytes\"");
+                        writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"/// read_from_file()");
                         writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: & str) {");
-                        writer.WriteLineEx($"let file_name = r\"{filename}.bytes\";");
+                        writer.WriteLineEx($"let file_name = file_name();");
                         writer.WriteLineEx($"let mut file = std::fs::File::open( std::path::Path::new(output_path).join(language).join(file_name) ).unwrap();");
                         writer.WriteLineEx($"let mut reader = binary_reader::BinaryReader::from_file(&mut file);");
                         writer.WriteLineEx($"read_stream(&mut reader);");
@@ -203,7 +220,7 @@ namespace TableGenerate
 
                         writer.WriteLineEx($"#[test]");
                         writer.WriteLineEx( "fn read_tests() {");
-                        writer.WriteLineEx($"let file_name = r\"{filename}.bytes\";");
+                        writer.WriteLineEx($"let file_name = file_name();");
                         writer.WriteLineEx($"let output_path = r\"../../GameDesign/Output\";");
                         writer.WriteLineEx($"let folders = std::fs::read_dir(output_path)");
                         writer.WriteLineEx($"    .unwrap()");
@@ -253,39 +270,7 @@ namespace TableGenerate
             writer.WriteLineEx($"pub struct {ExportBaseUtil.ToPascalCase(sheetName)}");
             writer.WriteLineEx("{");
             InnerSheetProcess(writer, columns);
-            //SheetConstructorProcess(writer, sheetName, columns);
             writer.WriteLineEx("}");
-        }
-        private void InnerSheetDescProcess(IndentedTextWriter writer, List<Column> columns)
-        {
-            foreach (var column in columns)
-            {
-                string name = column.var_name;
-                string type = column.GenerateType(_gen_type);
-                if (column.is_generated == false)
-                {
-                    continue;
-                }
-                if (column.array_index > 0)
-                {
-                    continue;
-                }
-                if(column.is_key)
-                {
-                    // writer.WriteLineEx($"/// <summary>");
-                    // writer.WriteLineEx($"/// Key Column");
-                    // writer.WriteLineEx($"/// </summary>");
-                }
-                
-                //if (_async == "unity3d")
-                //{
-                //    _writer.WriteLineEx($"public abstract {type} {name} {{get;}}");
-                //}
-                //else
-                {
-                    writer.WriteLineNoTabs($"/// <param name=\"{name}\">{column.desc}</param> ");
-                }
-            }
         }
         
         private void InnerSheetProcess(IndentedTextWriter writer, List<Column> columns)
@@ -384,6 +369,103 @@ namespace TableGenerate
             writer.WriteLineEx($"(vec,map)");
             writer.WriteLineEx($"}}");
         }
-       
+        private void EGuiGen(string sheetName, IndentedTextWriter writer, List<Column> columns)
+        {
+            var firstColumn = columns.FirstOrDefault(t => t.is_key);
+            var firstColumnType = firstColumn.GenerateType(_gen_type);
+            var firstColumnName = firstColumn.var_name;
+            writer.WriteLineEx($"pub fn column_count() -> usize {{ {columns.Count} }}");
+            writer.WriteLineEx($"#[allow(dead_code)]");
+            writer.WriteLineEx($"#[allow(non_snake_case)]");
+            writer.WriteLineEx($"pub fn egui_header() -> fn(egui_extras::TableRow) {{");
+            writer.WriteLineEx($"|mut header| {{");
+            foreach (var column in columns)
+            {
+                string name = column.var_name;
+                if (column.is_generated == false || column.array_index > 0)
+                {
+                    continue;
+                }
+                writer.WriteLineEx($"  let _ = header.col(|ui|{{let _ = ui.strong(\"{name}\");}});");
+            }
+            writer.WriteLineEx($"}}");
+            writer.WriteLineEx($"}}");
+            writer.WriteLineEx($"#[allow(dead_code)]");
+            writer.WriteLineEx($"#[allow(non_snake_case)]");
+            writer.WriteLineEx($"pub fn egui_body(body: egui_extras::TableBody, items: Vec<&{sheetName}>) {{");
+            writer.WriteLineEx($"body.heterogeneous_rows((0..items.len()).into_iter().map(|_| 18f32), |row_index, mut row| {{");
+            writer.WriteLineEx($"let item = items.get(row_index).unwrap();");
+            foreach (var column in columns)
+            {
+                string name = column.var_name;
+                if (column.is_generated == false || column.array_index > 0)
+                {
+                    continue;
+                }
+                if (column.is_array)
+                {
+                    if (column.array_index == 0)
+                    {
+                        writer.WriteLineEx(GenEGuiBodyArray(column));
+                    }
+                }
+                else
+                {
+                    writer.WriteLineEx(GenEGuiBody(column));
+                }
+            }
+            writer.WriteLineEx($"}});");
+            writer.WriteLineEx($"}}");
+        }
+        private string GenEGuiBody(Column column)
+        {
+            string ret = "";
+            string name = column.var_name;
+            if (column.IsEnumType())
+            {
+                ret = $"    let _ = row.col(|ui|{{let _ = ui.label(format!(\"{{:?}}\",item.{name}));}});";
+            }
+            else if (column.IsNumberType() || column.base_type == eBaseType.Boolean)
+            {
+                ret = $"  let _ = row.col(|ui|{{let _ = ui.label(item.{name}.to_string());}});";
+            }
+            else if (column.base_type == eBaseType.String)
+            {
+                ret = $"  let _ = row.col(|ui|{{let _ = ui.label(&item.{name});}});";
+            }
+            else if (column.base_type == eBaseType.Vector3)
+            {
+                ret = $"  let _ = row.col(|ui|{{let _ = ui.label(item.{name});}});";
+            }
+            return ret;
+        }
+        private string GenEGuiBodyArray(Column column)
+        {
+            string name = column.var_name;
+            string ret = ret = $"    let _ = row.col(|ui|{{let _ = ui.label(format!(\"{{:?}}\",item.{name}));}});";
+            return ret;
+        }
+        private string GenToString(Column column)
+        {
+            string ret = "";
+            string name = column.var_name;
+            if (column.IsEnumType())
+            {
+                ret = $"format!(\"{{:?}}\",self.{name}))";
+            }
+            else if (column.IsNumberType() || column.base_type == eBaseType.Boolean)
+            {
+                ret = $"self.{name}.to_string()";
+            }
+            else if (column.base_type == eBaseType.String)
+            {
+                ret = $"self.{name}.clone()";
+            }
+            else if (column.base_type == eBaseType.Vector3)
+            {
+                ret = $"format!(\"{{:?}}\",self.{name}))";
+            }
+            return ret;
+        }
     }
 }
