@@ -22,4 +22,5 @@ public class Column
     public string str_bit_flags;
     public string min_value;
     public string max_value;
+    public string json;
 };

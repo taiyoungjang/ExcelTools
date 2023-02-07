@@ -353,33 +353,15 @@ namespace ClassUtil
         {
             StringWithDesc[,] rowList = new StringWithDesc[rowCount, cols];
 
+            var columnDescDict = GetColumnDescDict(sheetName, cols);
+
             var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(t => t.Name?.ToString() == sheetName);
             var workSheet = ((WorksheetPart)workbookPart
                     .GetPartById(sheet.Id)).Worksheet;
 
             var sheetData = workSheet.Elements<SheetData>().First();
             var rows = sheetData.Elements<Row>().ToList();
-            Dictionary<string,Comment> lstComments = null;
-            try
-            {
-                foreach (WorksheetPart sh in workbookPart.WorksheetParts.Where( t => t.Worksheet == workSheet))
-                {
-                    foreach (WorksheetCommentsPart commentsPart in sh.GetPartsOfType<WorksheetCommentsPart>())
-                    {
-                        foreach (Comment comment in commentsPart.Comments.CommentList)
-                        {
-                            lstComments ??= new Dictionary<string, Comment>();
-                            if(!lstComments.ContainsKey(comment.Reference.Value))
-                                lstComments.Add(comment.Reference.Value,comment);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            
+
             var i = 0;
             var j = 0;
             try
@@ -393,16 +375,14 @@ namespace ClassUtil
                         if (cellEnumerator.MoveNext() )
                         {
                             var cell = cellEnumerator.Current;
-                            var comment = s_emptyComment;
                             var text = ReadExcelCell(cell).Trim();
                             if (
                                 cell != null && 
-                                lstComments != null && 
                                 cell.CellReference != null &&
                                 !string.IsNullOrEmpty(cell.CellReference.Value) &&
-                                lstComments.TryGetValue(cell.CellReference.Value, out comment))
+                                columnDescDict.TryGetValue(cell.CellReference.Value, out var columnDesc))
                             {
-                                rowList[i, j] = new StringWithDesc(Text: text,Desc: comment.CommentText.InnerText.Replace("\n",string.Empty));
+                                rowList[i, j] = new StringWithDesc(Text: text,Desc: columnDesc.Desc);
                             }
                             else
                             {
@@ -424,7 +404,72 @@ namespace ClassUtil
             }
             return rowList;
         }
+        private Dictionary<string,ColumnDesc> GetColumnDescDict(string sheetName, int cols)
+        {
+            var descList = new ColumnDesc[cols];
 
+            var sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault(t => t.Name?.ToString() == sheetName);
+            var workSheet = ((WorksheetPart)workbookPart
+                    .GetPartById(sheet.Id)).Worksheet;
+
+            var sheetData = workSheet.Elements<SheetData>().First();
+            var rows = sheetData.Elements<Row>().ToList();
+
+            var i = 0;
+            var j = 0;
+            try
+            {
+                for (i = 0; i < 5; i++)
+                {
+                    var row = rows[i];
+                    var cellEnumerator = GetExcelCellEnumerator(row);
+                    for (j = 0; j < cols; j++)
+                    {
+                        descList[j] ??= new ColumnDesc();
+                        var columnDesc = descList[j];
+                        if (cellEnumerator.MoveNext() )
+                        {
+                            var cell = cellEnumerator.Current;
+                            var text = ReadExcelCell(cell).Trim();
+                            if (
+                                cell != null && 
+                                cell.CellReference != null &&
+                                !string.IsNullOrEmpty(cell.CellReference.Value) )
+                            {
+                                switch (i)
+                                {
+                                    case 0: columnDesc.Desc = text;
+                                        break;
+                                    case 1: columnDesc.Name = text;
+                                        break;
+                                    case 2: columnDesc.Json = text;
+                                        break;
+                                    case 3: columnDesc.IsGenerated = text;
+                                        break;
+                                    case 4: columnDesc.Type = text;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"{sheetName} i:{i} j:{j}");
+                return null;
+            }
+
+            Dictionary<string, ColumnDesc> ret = new ();
+            foreach (var columnDesc in descList)
+            {
+                if (!ret.ContainsKey(columnDesc.Name))
+                {
+                    ret.Add(columnDesc.Name, columnDesc);
+                }
+            }
+            return ret;
+        }
         public string[,] GetSheetFormula(string sheetName, int rowCount, int cols)
         {
             string[,] rowList = new string[rowCount, cols];

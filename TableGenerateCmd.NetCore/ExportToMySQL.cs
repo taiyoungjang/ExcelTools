@@ -117,7 +117,7 @@ namespace TableGenerate
 
         private void InnerExportDataProcess(List<Column> columns, StringWithDesc[,] rows, string filename, string sheetName, StreamWriter _writer)
         {
-            for (int i = 3; i < rows.GetLength(0); i++)
+            for (int i = 5; i < rows.GetLength(0); i++)
             {
                 if (rows[i, 0].Text.ToUpper() == "EOF" || rows[i, 0].Text.Length == 0)
                     break;

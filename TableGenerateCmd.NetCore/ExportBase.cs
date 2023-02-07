@@ -81,10 +81,11 @@ namespace TableGenerate
             JsonSerializerSettings jsonSettings = new ();
             for (int i = 0; i < rows.GetLength(1); i++)
             {
-                string name = rows[0,i].Text.Trim().Replace(' ', '_');
-                string desc = rows[0, i].Desc;
-                string generate = rows[1,i].Text.Trim().Replace(' ', '_').ToLower();
-                string type = rows[2,i].Text.Trim().Replace(' ', '_');
+                string desc = rows[0, i].Text;
+                string name = rows[1,i].Text.Trim().Replace(' ', '_');
+                string json = rows[2,i].Text;
+                string generate = rows[3,i].Text.Trim().Replace(' ', '_').ToLower();
+                string type = rows[4,i].Text.Trim().Replace(' ', '_');
                 if (name.Length == 0)
                     continue;
 
@@ -92,6 +93,7 @@ namespace TableGenerate
 
                 var column = new Column
                 {
+                    json = json,
                     array_one_cell = false,
                     is_key = i == 0,
                     data_column_index = i,

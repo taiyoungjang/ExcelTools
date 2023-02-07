@@ -541,11 +541,11 @@ namespace TableGenerate
             writer.WriteLineEx("try");
             writer.WriteLineEx("{");
             writer.WriteLineEx($"rows = imp.GetSheet(\"{sheetName}\", language);");
-            writer.WriteLineEx($"var list__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 3);");
-            writer.WriteLineEx("for (i = 3; i < rows.GetLength(0); i++)");
+            writer.WriteLineEx($"var list__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 5);");
+            writer.WriteLineEx("for (i = 5; i < rows.GetLength(0); i++)");
             writer.WriteLineEx("{");
             writer.WriteLineEx($"j=0;");
-            writer.WriteLineEx("if(rows[i,0].Text.Length == 0) break;");
+            writer.WriteLineEx("if(rows[i,1].Text.Length == 0) break;");
             if (dataStageColumn != null)
             {
                 writer.WriteLineEx($"var dataStageText = rows[i,{dataStageColumn.data_column_index}].Text.Trim();");
