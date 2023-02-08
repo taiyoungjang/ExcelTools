@@ -1205,7 +1205,7 @@ namespace TableGenerate
                 {
                     switch (gen_type)
                     {
-                        case eGenType.cpp: returnTypeName = "FVector::FVector()"; break;
+                        case eGenType.cpp: returnTypeName = "UE::Math::TVector<double>::TVector()"; break;
                         case eGenType.cs: returnTypeName = "default"; break;
                         case eGenType.proto: returnTypeName = "Vector3"; break;
                         case eGenType.mssql: returnTypeName = "Vector3"; break;
@@ -1261,7 +1261,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "TEXT(\"\")"; break;
+                            case eGenType.cpp: returnTypeName = "FString(TEXT(\"\"))"; break;
                             case eGenType.cs: returnTypeName = "string.Empty"; break;
                             case eGenType.proto: returnTypeName = "string"; break;
                             case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
