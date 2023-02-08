@@ -110,6 +110,7 @@ namespace TableGenerate
             {
                 string name = column.var_name;
                 string type = column.GenerateType(_gen_type);
+                string defaultValue = column.GenerateDefaultValue(_gen_type);
                 if (column.is_generated == false)
                 {
                     continue;
@@ -119,7 +120,7 @@ namespace TableGenerate
                     continue;
                 }
                 writer.WriteLineEx($"UPROPERTY( EditAnywhere{ (column.bit_flags? $", Meta = (BitMask, BitmaskEnum = \"{column.str_bit_flags}E{column.type_name}\" )": $", BlueprintReadWrite, Category = {sn}")} )");
-                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name}{{{defaultValue}}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
     }

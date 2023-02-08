@@ -81,7 +81,7 @@ namespace TableGenerate
             JsonSerializerSettings jsonSettings = new ();
             for (int i = 0; i < rows.GetLength(1); i++)
             {
-                string desc = rows[0, i].Text;
+                string desc = rows[0,i] != null ? rows[0,i].Text : string.Empty;
                 string name = rows[1,i].Text.Trim().Replace(' ', '_');
                 string json = rows[2,i].Text;
                 string generate = rows[3,i].Text.Trim().Replace(' ', '_').ToLower();
@@ -1029,7 +1029,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "TArray<FVector>::Empty()"; break;
+                            case eGenType.cpp: returnTypeName = "TArray<FVector>::TArray()"; break;
                             case eGenType.cs: returnTypeName = "System.Array.Empty<Vector3>()"; break;
                             case eGenType.proto: returnTypeName = "-"; break;
                             case eGenType.mssql: returnTypeName = "-"; break;
@@ -1043,7 +1043,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int64>::Empty()"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<int64>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<long>()"; break;
                                 case eGenType.proto: returnTypeName = "-"; break;
                                 case eGenType.mssql: returnTypeName = "-"; break;
@@ -1057,7 +1057,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int32>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<int32>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<int>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated int32"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1071,7 +1071,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int16>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<int16>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<short>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated int32"; break;
                                 case eGenType.mssql: returnTypeName = "smallint"; break;
@@ -1085,7 +1085,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<FString>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<FString>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<string>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated string"; break;
                                 case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
@@ -1099,7 +1099,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<float>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<float>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<float>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated float"; break;
                                 case eGenType.mssql: returnTypeName = "float"; break;
@@ -1114,7 +1114,7 @@ namespace TableGenerate
 
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<double>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<double>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<double>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated double"; break;
                                 case eGenType.mssql: returnTypeName = "double"; break;
@@ -1128,7 +1128,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int8>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<int8>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<byte>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated int8"; break;
                                 case eGenType.mssql: returnTypeName = "tinyint"; break;
@@ -1142,7 +1142,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<bool>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<bool>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<bool>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated bool"; break;
                                 case eGenType.mssql: returnTypeName = "bit"; break;
@@ -1156,7 +1156,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<FDateTime>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<FDateTime>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<System.DateTime>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated int64"; break;
                                 case eGenType.mssql: returnTypeName = "datetime"; break;
@@ -1170,7 +1170,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<Timespan>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<Timespan>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = "System.Array.Empty<System.TimeSpan>()"; break;
                                 case eGenType.proto: returnTypeName = "repeated int64"; break;
                                 case eGenType.mssql: returnTypeName = "varchar(300)"; break;
@@ -1185,7 +1185,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int32>"; break;
+                                case eGenType.cpp: returnTypeName = "TArray<int32>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = $"System.Array.Empty<{column.type_name}>()"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1205,7 +1205,7 @@ namespace TableGenerate
                 {
                     switch (gen_type)
                     {
-                        case eGenType.cpp: returnTypeName = "FVector"; break;
+                        case eGenType.cpp: returnTypeName = "FVector::FVector()"; break;
                         case eGenType.cs: returnTypeName = "default"; break;
                         case eGenType.proto: returnTypeName = "Vector3"; break;
                         case eGenType.mssql: returnTypeName = "Vector3"; break;
@@ -1219,7 +1219,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "int64"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "int64"; break;
                             case eGenType.mssql: returnTypeName = "bigint"; break;
@@ -1233,7 +1233,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "int32"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "int32"; break;
                             case eGenType.mssql: returnTypeName = "int"; break;
@@ -1247,7 +1247,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "int16"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "int32"; break;
                             case eGenType.mssql: returnTypeName = "smallint"; break;
@@ -1261,7 +1261,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "FString"; break;
+                            case eGenType.cpp: returnTypeName = "TEXT(\"\")"; break;
                             case eGenType.cs: returnTypeName = "string.Empty"; break;
                             case eGenType.proto: returnTypeName = "string"; break;
                             case eGenType.mssql: returnTypeName = "nvarchar(max)"; break;
@@ -1275,7 +1275,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "float"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "float"; break;
                             case eGenType.mssql: returnTypeName = "float"; break;
@@ -1289,7 +1289,7 @@ namespace TableGenerate
 
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "double"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "double"; break;
                             case eGenType.mssql: returnTypeName = "double"; break;
@@ -1303,7 +1303,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "uint8"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "byte"; break;
                             case eGenType.mssql: returnTypeName = "tinyint"; break;
@@ -1317,7 +1317,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "bool"; break;
+                            case eGenType.cpp: returnTypeName = "false"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = "bool"; break;
                             case eGenType.mssql: returnTypeName = "bit"; break;
@@ -1331,7 +1331,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "FDateTime"; break;
+                            case eGenType.cpp: returnTypeName = "FDateTime::FDateTime()"; break;
                             case eGenType.cs: returnTypeName = "System.DateTime.MinValue"; break;
                             case eGenType.proto: returnTypeName = "int64"; break;
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
@@ -1345,7 +1345,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "Timespan"; break;
+                            case eGenType.cpp: returnTypeName = "Timespan::Timespan()"; break;
                             case eGenType.cs: returnTypeName = "System.TimeSpan.MinValue"; break;
                             case eGenType.proto: returnTypeName = "int64"; break;
                             case eGenType.mssql: returnTypeName = "varchar(300)"; break;
@@ -1360,7 +1360,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "int32"; break;
+                            case eGenType.cpp: returnTypeName = "0"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;

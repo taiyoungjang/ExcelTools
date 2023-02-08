@@ -129,10 +129,11 @@ namespace ClassUtil
                 return null;
 
             int erase_col_count = 0;
+            const int nameRow = 1;
             {
                 for (int j = 0; j < sheet.GetLength(1); j++)
                 {
-                    string col_name = sheet[0, j].Text.Trim();
+                    string col_name = sheet[nameRow, j].Text.Trim();
                     if (col_name.IndexOf("<") >= 0 && col_name.IndexOf(">") >= 0)
                     {
                         if (col_name.IndexOf($"<{language}>") < 0)
@@ -149,9 +150,9 @@ namespace ClassUtil
                 int rows_col_index = 0;
                 for (int c = 0; c < colCount; c++)
                 {
-                    if (sheet[0, c] == null)
-                        throw new System.Exception($"sheet[0,{c}]");
-                    string col_name = sheet[0, c].Text.Trim();
+                    if (sheet[nameRow, c] == null)
+                        throw new System.Exception($"sheet[nameRow,{c}]");
+                    string col_name = sheet[nameRow, c].Text.Trim();
                     if (col_name.IndexOf("<") >= 0 && col_name.IndexOf(">") >= 0)
                     {
                         if (col_name.IndexOf($"<{language}>") < 0)
@@ -159,22 +160,22 @@ namespace ClassUtil
                         }
                         else
                         {
-                            rows[0, rows_col_index] = new StringWithDesc(Text: col_name.Substring(0, col_name.IndexOf("<")), Desc: sheet[0, c].Desc);
+                            rows[nameRow, rows_col_index] = new StringWithDesc(Text: col_name.Substring(0, col_name.IndexOf("<")), Desc: sheet[nameRow, c].Desc);
                             rows_col_index++;
                         }
                     }
                     else
                     {
-                        rows[0, rows_col_index] = new StringWithDesc(Text: col_name,Desc:sheet[0, c].Desc);
+                        rows[nameRow, rows_col_index] = new StringWithDesc(Text: col_name,Desc:sheet[nameRow, c].Desc);
                         rows_col_index++;
                     }
                 }
                 rows_col_index = 0;
                 for (int c = 0; c < colCount; c++)
                 {
-                    if (sheet[0, c] == null)
-                        throw new System.Exception($"sheet[0,{c}]");
-                    string col_name = sheet[0, c].Text.Trim();
+                    if (sheet[nameRow, c] == null)
+                        throw new System.Exception($"sheet[nameRow,{c}]");
+                    string col_name = sheet[nameRow, c].Text.Trim();
                     if (col_name.IndexOf("<") >= 0 && col_name.IndexOf(">") >= 0)
                     {
                         if (col_name.IndexOf($"<{language}>") < 0)
@@ -182,7 +183,7 @@ namespace ClassUtil
                         }
                         else
                         {
-                            for (int r = 1; r < rowCount; r++)
+                            for (int r = 2; r < rowCount; r++)
                             {
                                 if (sheet[r, c] == null)
                                     throw new System.Exception($"sheet[r:{r},{c}]");
@@ -195,7 +196,7 @@ namespace ClassUtil
                     }
                     else
                     {
-                        for (int r = 1; r < rowCount; r++)
+                        for (int r = 2; r < rowCount; r++)
                         {
                             if (sheet[r, c] == null)
                                 continue;

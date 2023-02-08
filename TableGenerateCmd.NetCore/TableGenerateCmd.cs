@@ -683,7 +683,7 @@ namespace TableGenerateCmd
             catch (Exception e)
             {
                 ProgramCmd.exit_code = 1;
-                System.Console.Write("Export Error: {0}", e.Message);
+                System.Console.Write("Export Error: {0}", e.StackTrace);
             }
         }
     }
