@@ -129,6 +129,7 @@ namespace ClassUtil
                 return null;
 
             int erase_col_count = 0;
+            const int descRow = 0;
             const int nameRow = 1;
             {
                 for (int j = 0; j < sheet.GetLength(1); j++)
@@ -161,12 +162,14 @@ namespace ClassUtil
                         else
                         {
                             rows[nameRow, rows_col_index] = new StringWithDesc(Text: col_name.Substring(0, col_name.IndexOf("<")), Desc: sheet[nameRow, c].Desc);
+                            rows[descRow, rows_col_index] = new StringWithDesc(Text: sheet[descRow, rows_col_index].Text, Desc: string.Empty);
                             rows_col_index++;
                         }
                     }
                     else
                     {
                         rows[nameRow, rows_col_index] = new StringWithDesc(Text: col_name,Desc:sheet[nameRow, c].Desc);
+                        rows[descRow, rows_col_index] = new StringWithDesc(Text: sheet[descRow, c].Text, Desc: string.Empty);
                         rows_col_index++;
                     }
                 }

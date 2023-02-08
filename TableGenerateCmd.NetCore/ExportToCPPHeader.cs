@@ -119,7 +119,30 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"UPROPERTY( EditAnywhere{ (column.bit_flags? $", Meta = (BitMask, BitmaskEnum = \"{column.str_bit_flags}E{column.type_name}\" )": $", BlueprintReadWrite, Category = {sn}")} )");
+
+                StringBuilder sb = new ();
+                sb.Append($"UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = {sn}");
+                if (column.bit_flags || column.desc.Any())
+                {
+                    sb.Append($", Meta = (");
+                    bool bFirst = true;
+                    if (column.bit_flags)
+                    {
+                        sb.Append($"BitMask, BitmaskEnum = \"{column.str_bit_flags}E{column.type_name}\"");
+                        bFirst = false;
+                    }
+                    if (column.desc.Any())
+                    {
+                        if (!bFirst)
+                        {
+                            sb.Append(',');
+                        }
+                        sb.Append($"Tooltip = \"{column.desc}\"");
+                    }
+                    sb.Append($")");
+                }
+                sb.Append(")");
+                writer.WriteLineEx(sb.ToString());
                 writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name}{{{defaultValue}}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }

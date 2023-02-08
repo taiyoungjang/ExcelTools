@@ -173,9 +173,9 @@ namespace TableGenerate
                 //{
                 //    _writer.WriteLineEx($"public abstract {type} {name} {{get;}}");
                 //}
-                //if(column.desc.Any())
+                if(column.desc.Any())
                 {
-                    writer.WriteLineEx($"/// {column.desc} array_index:{column.array_index} array_one_cell:{column.array_one_cell}");
+                    writer.WriteLineEx($"/// {column.desc}");
                 }
                 {
                     writer.WriteLineEx($"  public {type} {name} {{get; private set;}} = {defaultValue};");
