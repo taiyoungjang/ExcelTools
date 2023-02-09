@@ -837,8 +837,7 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp when !column.bit_flags: returnTypeName = $"TArray<int32>"; break;
-                                case eGenType.cpp when column.bit_flags: returnTypeName = $"TArray<{(column.IsEnumType()?"E":"F")}{column.type_name}>"; break;
+                                case eGenType.cpp: returnTypeName = $"TArray<{(column.IsEnumType()?"E":"F")}{column.type_name}>"; break;
                                 case eGenType.cs: returnTypeName = $"{column.type_name}[]"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1196,7 +1195,8 @@ namespace TableGenerate
                         {
                             switch (gen_type)
                             {
-                                case eGenType.cpp: returnTypeName = "TArray<int32>::TArray()"; break;
+                                case eGenType.cpp when !column.bit_flags: returnTypeName = $"TArray<{(column.IsEnumType()?"E":"F")}{column.type_name}>::TArray()"; break;
+                                case eGenType.cpp when column.bit_flags: returnTypeName = "TArray<int32>::TArray()"; break;
                                 case eGenType.cs: returnTypeName = $"System.Array.Empty<{column.type_name}>()"; break;
                                 case eGenType.proto: returnTypeName = $"repeated {column.type_name.Split('.').Last()}"; break;
                                 case eGenType.mssql: returnTypeName = "int"; break;
@@ -1371,7 +1371,9 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = column.bit_flags? "0": $"E{column.type_name}::{column.min_value.Split(".").Last()}"; break;
+                            case eGenType.cpp when !column.bit_flags: returnTypeName = $"E{column.type_name}::{column.min_value.Split(".").Last()}"; break;
+                            case eGenType.cpp when column.bit_flags: returnTypeName = $"0"; break;
+                            case eGenType.cpp: returnTypeName = $"E{column.type_name}::{column.min_value.Split(".").Last()}"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;
