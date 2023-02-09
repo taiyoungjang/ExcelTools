@@ -143,7 +143,7 @@ namespace TableGenerate
                 }
                 sb.Append(")");
                 writer.WriteLineEx(sb.ToString());
-                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name}{{{defaultValue}}};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name}={defaultValue};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
     }

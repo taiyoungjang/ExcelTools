@@ -78,7 +78,14 @@ namespace TableGenerate
         public static List<Column> GetColumnInfo(System.Reflection.Assembly refAssem, System.Reflection.Assembly mscorlibAssembly, string sheetName, StringWithDesc[,] rows, List<string> except)
         {
             var columns = new List<Column>();
-            JsonSerializerSettings jsonSettings = new ();
+            JsonSerializerSettings jsonSettings = new ()
+            {
+                Error =     (_, args) =>
+                {
+                    //Console.WriteLine($"Error:{args.ErrorContext.Error.Message}");
+                    args.ErrorContext.Handled = true;
+                }
+            };
             for (int i = 0; i < rows.GetLength(1); i++)
             {
                 string desc = rows[0,i] != null ? rows[0,i].Text : string.Empty;
@@ -88,8 +95,11 @@ namespace TableGenerate
                 string type = rows[4,i].Text.Trim().Replace(' ', '_');
                 if (name.Length == 0)
                     continue;
-
-                RangeValue range = desc.Contains('{') && desc.Contains('}') ? JsonConvert.DeserializeObject<RangeValue>(desc, jsonSettings ) : null;
+                RangeValue range = null;
+                if (!string.IsNullOrEmpty(json) && json.StartsWith('{') && json.EndsWith('}'))
+                {
+                    range = JsonConvert.DeserializeObject<RangeValue>(json, jsonSettings);
+                }
 
                 var column = new Column
                 {
