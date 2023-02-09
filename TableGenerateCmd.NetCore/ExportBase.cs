@@ -96,7 +96,8 @@ namespace TableGenerate
                 if (name.Length == 0)
                     continue;
                 RangeValue range = null;
-                if (!string.IsNullOrEmpty(json) && json.StartsWith('{') && json.EndsWith('}'))
+                if (!string.IsNullOrEmpty(json) && 
+                    json.StartsWith('{') && json.EndsWith('}'))
                 {
                     range = JsonConvert.DeserializeObject<RangeValue>(json, jsonSettings);
                 }
@@ -209,7 +210,7 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             if(column.IsEnumType())
             {
-                returnTypeName = $" System.Enum.Parse<{column.GetPrimitiveType(genType)}>( {arg}, ignoreCase: true)";
+                returnTypeName = $" System.Enum.Parse<{column.GetPrimitiveType(genType)}>( {arg}.Split('_').Last(), ignoreCase: true)";
             }
             else if(column.IsStructType())
             {
@@ -533,8 +534,8 @@ namespace TableGenerate
             void SetMinMax(Column column, RangeValue rangeValue)
             {
                 if (rangeValue == null) return;
-                column.min_value = rangeValue.Min.ToString();
-                column.max_value = rangeValue.Max.ToString();
+                if(rangeValue.Min.HasValue) column.min_value = rangeValue.Min.Value.ToString();
+                if(rangeValue.Max.HasValue) column.max_value = rangeValue.Max.Value.ToString();
             }
 
             switch (type_name)
@@ -1370,7 +1371,7 @@ namespace TableGenerate
                     {
                         switch (gen_type)
                         {
-                            case eGenType.cpp: returnTypeName = "0"; break;
+                            case eGenType.cpp: returnTypeName = column.bit_flags? "0": $"E{column.type_name}::{column.min_value.Split(".").Last()}"; break;
                             case eGenType.cs: returnTypeName = "default"; break;
                             case eGenType.proto: returnTypeName = column.type_name.Split('.').Last(); break;
                             case eGenType.mssql: returnTypeName = "int"; break;

@@ -52,14 +52,14 @@ namespace TableGenerate
                             sheetsColumns.Add(trimSheetName,columns);
                         }
 
-                        var enums = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType()).Select(t => (t,t.TypeInfo)).Distinct();
+                        var enums = sheetsColumns.Values.SelectMany(t => t).Where(t => t.IsEnumType() && !t.bit_flags).Select(t => t.TypeInfo).Distinct();
                         
                         writer.WriteLineEx($"// generate {filename}");
                         
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"TableRowExtension.h\"");
-                        foreach (var (_,typeInfo) in enums)
+                        foreach (var typeInfo in enums)
                         {
                             writer.WriteLineEx($"#include \"{typeInfo.Name}.h\"");
                         }
