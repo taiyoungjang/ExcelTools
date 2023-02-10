@@ -58,7 +58,7 @@ namespace TableGenerate
                         
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
-                        writer.WriteLineEx($"#include \"TableRowExtension.h\"");
+                        writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
                         foreach (var typeInfo in enums)
                         {
                             writer.WriteLineEx($"#include \"{typeInfo.Name}.h\"");
@@ -92,7 +92,7 @@ namespace TableGenerate
         private void SheetProcess(IndentedTextWriter writer, string sheetName, List<Column> columns)
         {
             writer.WriteLineEx($"USTRUCT(BlueprintType)");
-            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName}TableRow : public FTableRowExtension");
+            writer.WriteLineEx($"struct {CPPClassPredefine} {sheetName}TableRow : public FTableRowBase");
             writer.WriteLineEx("{");
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key == true);
             string keyType = keyColumn.GenerateType(_gen_type);
@@ -144,7 +144,7 @@ namespace TableGenerate
                 sb.Append(")");
                 writer.WriteLineEx("");
                 writer.WriteLineEx(sb.ToString());
-                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name}={defaultValue};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name} = {defaultValue};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
     }
