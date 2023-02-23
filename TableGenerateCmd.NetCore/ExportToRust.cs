@@ -211,11 +211,18 @@ namespace TableGenerate
                         writer.WriteLineEx($"r\"{filename}.bytes\"");
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"/// read_from_file()");
-                        writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: & str) {");
+                        writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: & str) -> Result<(),std::io::Error> {");
                         writer.WriteLineEx($"let file_name = file_name();");
-                        writer.WriteLineEx($"let mut file = std::fs::File::open( std::path::Path::new(output_path).join(language).join(file_name) ).unwrap();");
+                        writer.WriteLineEx($"match std::fs::File::open( std::path::Path::new(output_path).join(language).join(file_name)) {{");
+                        writer.WriteLineEx($"Ok(mut file) => {{");
                         writer.WriteLineEx($"let mut reader = binary_reader::BinaryReader::from_file(&mut file);");
                         writer.WriteLineEx($"read_stream(&mut reader);");
+                        writer.WriteLineEx($"Ok(())");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "Err(e) => {");
+                        writer.WriteLineEx( "Err(e)");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
 
                         writer.WriteLineEx($"#[test]");
@@ -235,11 +242,12 @@ namespace TableGenerate
                         writer.WriteLineEx($"    .unwrap();");
                         writer.WriteLineEx( "for file  in files.iter().filter(|f|f.is_file()) {");
                         writer.WriteLineEx( "if file.file_name().unwrap().eq(file_name) {");
-                        writer.WriteLineEx($"read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap());");
+                        writer.WriteLineEx($"if let Ok(()) = read_from_file(output_path, folder.file_name().unwrap().to_str().unwrap()){{");
                         foreach (string sheetName in sheets)
                         {
                             writer.WriteLineEx($"    println!(\"{{}} {ExportBaseUtil.ToSnakeCase(sheetName)}:{{}}\", folder.file_name().unwrap().to_str().unwrap(), {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().unwrap().len());");
                         }
+                        writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
