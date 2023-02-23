@@ -183,6 +183,7 @@ namespace TableGenerate
             writer.WriteLineEx($"const bool bRtn = UPackage::SavePackage(Package, nullptr, *FileName, SavePackageArgs);");
             writer.WriteLineEx($"if( bRtn )");
             writer.WriteLineEx( "{");
+            writer.WriteLineEx($"USourceControlHelpers::MarkFileForAdd(FileName,true);");
             writer.WriteLineEx($"UE_LOG(LogLevel, Log, TEXT(\"{sheetName}.uasset SavePackage Success\"));");
             writer.WriteLineEx( "}");
             writer.WriteLineEx($"else");
