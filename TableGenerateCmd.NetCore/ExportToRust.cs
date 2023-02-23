@@ -192,6 +192,7 @@ namespace TableGenerate
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
+                        writer.WriteLineEx($"#[derive(bevy_ecs::prelude::Resource)]");
                         writer.WriteLineEx($"pub struct StaticData {{");
                         foreach (string sheet in sheets)
                         {
@@ -202,14 +203,34 @@ namespace TableGenerate
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
                             var sheetName = ExportBaseUtil.ToPascalCase(sheet);
-                            writer.WriteLineEx($"{sheetName}_vec: Vec<{sheetName}>,");
-                            writer.WriteLineEx($"{sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
+                            writer.WriteLineEx($"pub {sheetName}_vec: Vec<{sheetName}>,");
+                            writer.WriteLineEx($"pub {sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"/// file_name");
                         writer.WriteLineEx( "pub fn file_name() -> &'static str {");
                         writer.WriteLineEx($"r\"{filename}.bytes\"");
                         writer.WriteLineEx($"}}");
+                        writer.WriteLineEx($"#[allow(dead_code)]");
+                        writer.WriteLineEx( "pub fn insert_resource_from_file(world: &mut bevy_ecs::prelude::World, output_path: &str, language: & str) -> Result<(),std::io::Error> {");
+                        writer.WriteLineEx( "match read_from_file(output_path, language) {");
+                        writer.WriteLineEx( "Ok(_) => {");
+                        writer.WriteLineEx( "let static_data = StaticData {");
+                        foreach (string sheetName in sheets)
+                        {
+                            var sheet = ExportBaseUtil.ToPascalCase(sheetName);
+                            writer.WriteLineEx( $"{sheet}_vec: vec_clone().unwrap(),");
+                            writer.WriteLineEx( $"{sheet}_map: map_clone().unwrap(),");
+                        }
+                        writer.WriteLineEx( "};");
+                        writer.WriteLineEx( "world.insert_resource(static_data);");
+                        writer.WriteLineEx( "Ok(())");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "Err(e) => {");
+                        writer.WriteLineEx( "Err(e)");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx( "}");
                         writer.WriteLineEx($"/// read_from_file()");
                         writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: & str) -> Result<(),std::io::Error> {");
                         writer.WriteLineEx($"let file_name = file_name();");
