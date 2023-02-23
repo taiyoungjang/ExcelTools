@@ -1216,7 +1216,7 @@ namespace TableGenerate
                 {
                     switch (gen_type)
                     {
-                        case eGenType.cpp: returnTypeName = "UE::Math::TVector<double>::TVector()"; break;
+                        case eGenType.cpp: returnTypeName = "FVector::ZeroVector"; break;
                         case eGenType.cs: returnTypeName = "default"; break;
                         case eGenType.proto: returnTypeName = "Vector3"; break;
                         case eGenType.mssql: returnTypeName = "Vector3"; break;
