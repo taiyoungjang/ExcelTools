@@ -212,6 +212,20 @@ namespace TableGenerate
                         writer.WriteLineEx($"r\"{filename}.bytes\"");
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"#[allow(dead_code)]");
+                        writer.WriteLineEx( "pub fn insert_resource_from_stream(world: &mut bevy_ecs::prelude::World, reader: &mut binary_reader::BinaryReader) -> Result<(),std::io::Error> {");
+                        writer.WriteLineEx( "read_stream(reader);");
+                        writer.WriteLineEx( "let static_data = StaticData {");
+                        foreach (string sheetName in sheets)
+                        {
+                            var sheet = ExportBaseUtil.ToPascalCase(sheetName);
+                            writer.WriteLineEx( $"{sheet}_vec: vec_clone().unwrap(),");
+                            writer.WriteLineEx( $"{sheet}_map: map_clone().unwrap(),");
+                        }
+                        writer.WriteLineEx( "};");
+                        writer.WriteLineEx( "world.insert_resource(static_data);");
+                        writer.WriteLineEx( "Ok(())");
+                        writer.WriteLineEx( "}");
+                        writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx( "pub fn insert_resource_from_file(world: &mut bevy_ecs::prelude::World, output_path: &str, language: & str) -> Result<(),std::io::Error> {");
                         writer.WriteLineEx( "match read_from_file(output_path, language) {");
                         writer.WriteLineEx( "Ok(_) => {");
