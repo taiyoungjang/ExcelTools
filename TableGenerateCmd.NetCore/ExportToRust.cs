@@ -38,7 +38,7 @@ namespace TableGenerate
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
 
-                        writer.WriteLineEx("include!(\"_.rs\");");
+                        writer.WriteLineEx("use super::super::proto::*;");
                         string[] sheets = imp.GetSheetList();
 
                         filename = filename.Replace(".rs", string.Empty);
