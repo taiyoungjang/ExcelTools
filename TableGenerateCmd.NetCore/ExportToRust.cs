@@ -87,6 +87,12 @@ namespace TableGenerate
                             writer.WriteLineEx( $"fn file_name() -> &'static str {{");
                             writer.WriteLineEx("file_name()");
                             writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"fn read_from_file(output_path: &str, language: &str) -> Result<(), std::io::Error> {{");
+                            writer.WriteLineEx( "read_from_file(output_path, language)");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"fn read_stream(reader: &mut binary_reader::BinaryReader) {{");
+                            writer.WriteLineEx( "read_stream(reader)");
+                            writer.WriteLineEx( "}");
                             writer.WriteLineEx( $"fn key_string(&self) -> String {{");
                             writer.WriteLineEx(GenToString(firstColumn));
                             writer.WriteLineEx( "}");
