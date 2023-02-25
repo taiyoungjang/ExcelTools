@@ -77,20 +77,40 @@ namespace TableGenerate
                             writer.WriteLineEx($"impl {pascalSheetName}");
                             writer.WriteLineEx("{");
                             InnerSheetReadStreamProcess(pascalSheetName, writer, columns);
+                            writer.WriteLineEx("}");
+                            writer.WriteLineEx($"impl super::EguiTable for {pascalSheetName}");
+                            writer.WriteLineEx("{");
                             EGuiGen(pascalSheetName, writer, columns);
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
-                            writer.WriteLineEx( $"pub fn key_string(&self) -> String {{");
+                            writer.WriteLineEx( $"fn file_name() -> &'static str {{");
+                            writer.WriteLineEx("file_name()");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx( $"fn key_string(&self) -> String {{");
                             writer.WriteLineEx(GenToString(firstColumn));
                             writer.WriteLineEx( "}");
-                            writer.WriteLineEx( $"pub fn title() -> &'static str {{");
+                            writer.WriteLineEx( $"fn title() -> &'static str {{");
                             writer.WriteLineEx($"\"{pascalSheetName}\"");
                             writer.WriteLineEx( "}");
-                            writer.WriteLineEx( $"pub fn key_name() -> &'static str {{");
+                            writer.WriteLineEx( $"fn key_name() -> &'static str {{");
                             writer.WriteLineEx($"\"{firstColumnName}\"");
                             writer.WriteLineEx( "}");
                             //SheetConstructorProcess(writer, sheetName, columns);
+                            writer.WriteLineEx($"/// get vec_clone {sheetName}");
+                            writer.WriteLineEx( $"fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone() -> Option<Vec<Self>> {{");
+                            writer.WriteLineEx($"{(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone()");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"/// get vec {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx( $"fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<Self>) -> Option<Vec<Self>>>(pred: F) -> Option<Vec<Self>> {{");
+                            writer.WriteLineEx($"vec(pred)");
+                            writer.WriteLineEx( "}");
+                            writer.WriteLineEx($"/// get vec_one {sheetName}");
+                            writer.WriteLineEx($"#[allow(dead_code)]");
+                            writer.WriteLineEx( $"fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<Self>) -> Option<Self>>(pred: F) -> Option<Self> {{");
+                            writer.WriteLineEx($"vec_one(pred)");
+                            writer.WriteLineEx( "}");
                             writer.WriteLineEx("}");
                         }
                         foreach (string sheet in sheets)
@@ -103,20 +123,14 @@ namespace TableGenerate
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
                             writer.WriteLineEx($"/// get vec_clone {sheetName}");
-                            writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone() -> Option<Vec<{sheetName}>> {{");
                             writer.WriteLineEx($"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec {sheetName}");
-                            writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(pred: F) -> Option<Vec<{sheetName}>> {{");
                             writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
-                            writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
                             writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
                             writer.WriteLineEx( "}");
@@ -439,7 +453,7 @@ namespace TableGenerate
             var firstColumnName = firstColumn.var_name;
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
-            writer.WriteLineEx($"pub fn egui_header() -> fn(egui_extras::TableRow) {{");
+            writer.WriteLineEx($"fn egui_header() -> fn(egui_extras::TableRow) {{");
             writer.WriteLineEx($"|mut header| {{");
             int arrayCount = 0;
             foreach (var column in columns)
@@ -454,10 +468,10 @@ namespace TableGenerate
             }
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"}}");
-            writer.WriteLineEx($"  pub fn column_count() -> usize {{ {arrayCount} }}");
+            writer.WriteLineEx($"  fn column_count() -> usize {{ {arrayCount} }}");
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
-            writer.WriteLineEx($"pub fn egui_body(body: egui_extras::TableBody, items: Vec<&{sheetName}>) {{");
+            writer.WriteLineEx($"fn egui_body(body: egui_extras::TableBody, items: Vec<&Self>) {{");
             writer.WriteLineEx($"body.heterogeneous_rows((0..items.len()).into_iter().map(|_| 18f32), |row_index, mut row| {{");
             writer.WriteLineEx($"let item = items.get(row_index).unwrap();");
             foreach (var column in columns)
