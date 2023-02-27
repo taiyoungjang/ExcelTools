@@ -204,13 +204,13 @@ namespace TableGenerate
                         continue;
                     }
 
-                    if (column.base_type == eBaseType.String || column.IsDateTime() || column.IsTimeSpan())
+                    if (column.base_type == BaseType.String || column.IsDateTime() || column.IsTimeSpan())
                     {
                         _writer.Write("'");
                     }
                     if(column.IsNumberType() == true )
                     {
-                        if (column.base_type == eBaseType.Boolean)
+                        if (column.base_type == BaseType.Boolean)
                         {
                             if( data.Trim() == string.Empty || data.Trim() == "FALSE" )
                                 _writer.Write(0);
@@ -230,7 +230,7 @@ namespace TableGenerate
                     else
                         _writer.Write(data);
 
-                    if (column.base_type == eBaseType.String || column.IsDateTime() || column.IsTimeSpan() )
+                    if (column.base_type == BaseType.String || column.IsDateTime() || column.IsTimeSpan() )
                     {
                         _writer.Write("'");
                     }

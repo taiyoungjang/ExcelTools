@@ -231,17 +231,17 @@ namespace TableGenerate
                     writer.WriteLineEx("{");
                     switch (column.base_type)
                     {
-                        case eBaseType.Boolean:
+                        case BaseType.Boolean:
                             writer.WriteLineEx($"  {{ {column.base_type.GenerateBaseType(this._gen_type)} element__; Reader >> element__; Item.{column.var_name}[ArrayIndex] = element__; }}");
                             break;
-                        case eBaseType.TimeSpan:
+                        case BaseType.TimeSpan:
                             writer.WriteLineEx($"  {{ int64 element__; Reader >> element__; Item.{column.var_name}[ArrayIndex] = ({column.base_type.GenerateBaseType(this._gen_type)}) element__ / 10000000; }}");
                             break;
-                        case eBaseType.DateTime:
+                        case BaseType.DateTime:
                             writer.WriteLineEx($"  {{ int64 element__; Reader >> element__; Item.{column.var_name}[ArrayIndex] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
-                        case eBaseType.Struct:
-                        case eBaseType.Enum:
+                        case BaseType.Struct:
+                        case BaseType.Enum:
                             writer.WriteLineEx($"Reader >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) Item.{column.var_name}[ArrayIndex];");
                             break;
                         default:
@@ -255,14 +255,14 @@ namespace TableGenerate
                 {
                     switch (column.base_type)
                     {
-                        case eBaseType.TimeSpan:
+                        case BaseType.TimeSpan:
                             writer.WriteLineEx($"  {{int64 element__; Reader >> element__; Item.{column.var_name} = ({column.GenerateType(this._gen_type)}) element__ / 10000000; }}");
                             break;
-                        case eBaseType.DateTime:
+                        case BaseType.DateTime:
                             writer.WriteLineEx($"  {{int64 element__; Reader >> element__; Item.{column.var_name} = ({column.GenerateType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
-                        case eBaseType.Struct:
-                        case eBaseType.Enum when !column.bit_flags:
+                        case BaseType.Struct:
+                        case BaseType.Enum when !column.bit_flags:
                             writer.WriteLineEx($"Reader >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item.{column.var_name});");
                             break;
                         default:
@@ -274,10 +274,10 @@ namespace TableGenerate
 
             switch (keyColumn.base_type)
             {
-                case eBaseType.String:
+                case BaseType.String:
                     writer.WriteLineEx($"const FName Key = {primaryName};");
                     break;
-                case eBaseType.Int32:
+                case BaseType.Int32:
                 default:
                     writer.WriteLineEx($"const FName Key = *FString::FromInt({primaryName});");
                     break;

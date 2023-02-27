@@ -1,6 +1,6 @@
 ﻿namespace TableGenerate;
 
-public enum eBaseType
+public enum BaseType
 {
     Null,
     String,
@@ -15,5 +15,6 @@ public enum eBaseType
     TimeSpan,
     Enum,
     Struct,
-    Vector3
+    Vector3,
+    Vector2,
 };

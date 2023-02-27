@@ -896,6 +896,11 @@ namespace TableGenerate
                         writer.Write($"__writer.Write(t__.Y);");
                         writer.Write($"__writer.Write(t__.Z);");
                     }   
+                    else if (column.IsVector2())
+                    {
+                        writer.Write($"__writer.Write(t__.X);");
+                        writer.Write($"__writer.Write(t__.Y);");
+                    }   
                     else if (column.IsEnumType() || column.IsStructType())
                     {
                         string primitiveType = column.primitive_type.GenerateBaseType(_gen_type);
@@ -918,6 +923,8 @@ namespace TableGenerate
                         writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.ToBinary());");
                     else if (column.IsVector3())
                         writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.X);__writer.Write(__table.{column.var_name}.Y);__writer.Write(__table.{column.var_name}.Z);");
+                    else if (column.IsVector2())
+                        writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.X);__writer.Write(__table.{column.var_name}.Y);");
                     else if (column.IsTimeSpan())
                         writer.WriteLineEx($"__writer.Write(__table.{column.var_name}.Ticks);");
                     else if (column.IsEnumType() || column.IsStructType())
@@ -1006,11 +1013,11 @@ namespace TableGenerate
                 {
                     writer.WriteLineEx($"private {type} {column.var_name}__prop;");
                     if (
-                        column.base_type != eBaseType.Int32 &&
-                        column.base_type != eBaseType.Int16 &&
-                        column.base_type != eBaseType.Int8 &&
-                        column.base_type != eBaseType.Int64 &&
-                        column.base_type != eBaseType.String)
+                        column.base_type != BaseType.Int32 &&
+                        column.base_type != BaseType.Int16 &&
+                        column.base_type != BaseType.Int8 &&
+                        column.base_type != BaseType.Int64 &&
+                        column.base_type != BaseType.String)
                     {
                         writer.WriteLineEx($"public override {type} {column.var_name}");
                         writer.WriteLineEx("{");

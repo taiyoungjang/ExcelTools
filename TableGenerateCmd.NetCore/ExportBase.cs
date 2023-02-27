@@ -223,21 +223,22 @@ namespace TableGenerate
             return returnTypeName;
         }
 
-        private static string GetConvertFunction(this eBaseType baseType, string arg, eGenType genType)
+        private static string GetConvertFunction(this BaseType baseType, string arg, eGenType genType)
         {
             string returnTypeName = baseType switch
             {
-                eBaseType.Vector3 => $"Vector3.Parse({arg})",
-                eBaseType.Int64 => $"System.Convert.ToInt64(System.Math.Round(double.Parse({arg})))",
-                eBaseType.Int32 => $"System.Convert.ToInt32(System.Math.Round(double.Parse({arg})))",
-                eBaseType.Int16 => $"System.Convert.ToInt16(System.Math.Round(double.Parse({arg})))",
-                eBaseType.String => $"{arg}",
-                eBaseType.Float => $"System.Convert.ToSingle({arg})",
-                eBaseType.Double => $"System.Convert.ToDouble({arg})",
-                eBaseType.Int8 => $"System.Convert.ToByte({arg})",
-                eBaseType.Boolean => $"({arg}.Trim()==\"1\"||{arg}.Trim().ToUpper()==\"TRUE\")",
-                eBaseType.DateTime => $"System.DateTime.Parse({arg})",
-                eBaseType.TimeSpan => $"System.TimeSpan.Parse({arg})",
+                BaseType.Vector3 => $"Vector3.Parse({arg})",
+                BaseType.Vector2 => $"Vector2.Parse({arg})",
+                BaseType.Int64 => $"System.Convert.ToInt64(System.Math.Round(double.Parse({arg})))",
+                BaseType.Int32 => $"System.Convert.ToInt32(System.Math.Round(double.Parse({arg})))",
+                BaseType.Int16 => $"System.Convert.ToInt16(System.Math.Round(double.Parse({arg})))",
+                BaseType.String => $"{arg}",
+                BaseType.Float => $"System.Convert.ToSingle({arg})",
+                BaseType.Double => $"System.Convert.ToDouble({arg})",
+                BaseType.Int8 => $"System.Convert.ToByte({arg})",
+                BaseType.Boolean => $"({arg}.Trim()==\"1\"||{arg}.Trim().ToUpper()==\"TRUE\")",
+                BaseType.DateTime => $"System.DateTime.Parse({arg})",
+                BaseType.TimeSpan => $"System.TimeSpan.Parse({arg})",
                 _ => string.Empty
             };
             return returnTypeName;
@@ -248,16 +249,16 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             switch (column.base_type)
             {
-                case eBaseType.Int64: returnTypeName    = long.Parse(data).ToString(); break;
-                case eBaseType.Int32: returnTypeName    = int.Parse(data).ToString(); break;
-                case eBaseType.Int16: returnTypeName    = short.Parse(data).ToString(); break;
-                case eBaseType.String: returnTypeName   = data; break;
-                case eBaseType.Float: returnTypeName    = float.Parse(data).ToString(); break;
-                case eBaseType.Double: returnTypeName   = double.Parse(data).ToString(); break;
-                case eBaseType.Int8: returnTypeName     = byte.Parse(data).ToString(); break;
-                case eBaseType.Boolean: returnTypeName  = (data.Trim()=="1"||data.Trim().ToUpper()=="TRUE")?"true":"false"; break;
-                case eBaseType.DateTime: returnTypeName = "/"; break;
-                case eBaseType.TimeSpan: returnTypeName = "/"; break;
+                case BaseType.Int64: returnTypeName    = long.Parse(data).ToString(); break;
+                case BaseType.Int32: returnTypeName    = int.Parse(data).ToString(); break;
+                case BaseType.Int16: returnTypeName    = short.Parse(data).ToString(); break;
+                case BaseType.String: returnTypeName   = data; break;
+                case BaseType.Float: returnTypeName    = float.Parse(data).ToString(); break;
+                case BaseType.Double: returnTypeName   = double.Parse(data).ToString(); break;
+                case BaseType.Int8: returnTypeName     = byte.Parse(data).ToString(); break;
+                case BaseType.Boolean: returnTypeName  = (data.Trim()=="1"||data.Trim().ToUpper()=="TRUE")?"true":"false"; break;
+                case BaseType.DateTime: returnTypeName = "/"; break;
+                case BaseType.TimeSpan: returnTypeName = "/"; break;
             }
             return returnTypeName;
         }
@@ -270,18 +271,19 @@ namespace TableGenerate
         {
             switch (column.base_type)
             {
-                case eBaseType.String: return false;
-                case eBaseType.DateTime: return false;
-                case eBaseType.TimeSpan: return false;
+                case BaseType.String: return false;
+                case BaseType.DateTime: return false;
+                case BaseType.TimeSpan: return false;
             }
             return true;
         }
-        public static bool IsDateTime(this Column column) => column.base_type == eBaseType.DateTime;
-        public static bool IsTimeSpan(this Column column) => column.base_type == eBaseType.TimeSpan;
-        public static bool IsEnumType(this Column column) => column.base_type == eBaseType.Enum;
-        public static bool IsStructType(this Column column) => column.base_type == eBaseType.Struct;
-        public static bool IsString(this Column column) => column.base_type == eBaseType.String;
-        public static bool IsVector3(this Column column) => column.base_type == eBaseType.Vector3;
+        public static bool IsDateTime(this Column column) => column.base_type == BaseType.DateTime;
+        public static bool IsTimeSpan(this Column column) => column.base_type == BaseType.TimeSpan;
+        public static bool IsEnumType(this Column column) => column.base_type == BaseType.Enum;
+        public static bool IsStructType(this Column column) => column.base_type == BaseType.Struct;
+        public static bool IsString(this Column column) => column.base_type == BaseType.String;
+        public static bool IsVector3(this Column column) => column.base_type == BaseType.Vector3;
+        public static bool IsVector2(this Column column) => column.base_type == BaseType.Vector2;
 
         public static string GetSqlitekitFunction(this Column column)
         {
@@ -291,16 +293,16 @@ namespace TableGenerate
                 string var_name = column.var_name + column.array_index;
                 switch (column.base_type)
                 {
-                    case eBaseType.Int64: returnTypeName    = $"qr__.GetLong(\"{var_name}\")"; break;
-                    case eBaseType.Int32: returnTypeName    = $"qr__.GetInteger(\"{var_name}\")"; break;
-                    case eBaseType.Int16: returnTypeName    = $"(short) qr__.GetInteger(\"{var_name}\")"; break;
-                    case eBaseType.String: returnTypeName   = $"qr__.GetString(\"{var_name}\")"; break;
-                    case eBaseType.Float: returnTypeName    = $"(float) qr__.GetDouble(\"{var_name}\")"; break;
-                    case eBaseType.Double: returnTypeName   = $"qr__.GetDouble(\"{var_name}\")"; break;
-                    case eBaseType.Int8: returnTypeName     = $"(byte) qr__.GetInteger(\"{var_name}\")"; break;
-                    case eBaseType.Boolean: returnTypeName  = $"qr__.GetInteger(\"{var_name}\")>0?true:false"; break;
-                    case eBaseType.DateTime: returnTypeName = $"System.DateTime.Parse(qr__.GetString(\"{var_name}\"))"; break;
-                    case eBaseType.TimeSpan: returnTypeName = $"System.TimeSpan.Parse(qr__.GetString(\"{var_name}\"))"; break;
+                    case BaseType.Int64: returnTypeName    = $"qr__.GetLong(\"{var_name}\")"; break;
+                    case BaseType.Int32: returnTypeName    = $"qr__.GetInteger(\"{var_name}\")"; break;
+                    case BaseType.Int16: returnTypeName    = $"(short) qr__.GetInteger(\"{var_name}\")"; break;
+                    case BaseType.String: returnTypeName   = $"qr__.GetString(\"{var_name}\")"; break;
+                    case BaseType.Float: returnTypeName    = $"(float) qr__.GetDouble(\"{var_name}\")"; break;
+                    case BaseType.Double: returnTypeName   = $"qr__.GetDouble(\"{var_name}\")"; break;
+                    case BaseType.Int8: returnTypeName     = $"(byte) qr__.GetInteger(\"{var_name}\")"; break;
+                    case BaseType.Boolean: returnTypeName  = $"qr__.GetInteger(\"{var_name}\")>0?true:false"; break;
+                    case BaseType.DateTime: returnTypeName = $"System.DateTime.Parse(qr__.GetString(\"{var_name}\"))"; break;
+                    case BaseType.TimeSpan: returnTypeName = $"System.TimeSpan.Parse(qr__.GetString(\"{var_name}\"))"; break;
                 }
             }
             else
@@ -308,16 +310,16 @@ namespace TableGenerate
                 string var_name = column.var_name;
                 switch (column.base_type)
                 {
-                    case eBaseType.Int64: returnTypeName    = $"qr__.GetLong(\"{var_name}\")"; break;
-                    case eBaseType.Int32: returnTypeName    = $"qr__.GetInteger(\"{var_name}\")"; break;
-                    case eBaseType.Int16: returnTypeName    = $"(short) qr__.GetInteger(\"{var_name}\")"; break;
-                    case eBaseType.String: returnTypeName   = $"qr__.GetString(\"{var_name}\")"; break;
-                    case eBaseType.Float: returnTypeName    = $"(float) qr__.GetDouble(\"{var_name}\")"; break;
-                    case eBaseType.Double: returnTypeName   = $"qr__.GetDouble(\"{var_name}\")"; break;
-                    case eBaseType.Int8: returnTypeName     = $"(byte) qr__.GetInteger(\"{var_name}\")"; break;
-                    case eBaseType.Boolean: returnTypeName  = $"qr__.GetInteger(\"{var_name}\")>0?true:false"; break;
-                    case eBaseType.DateTime: returnTypeName = $"System.DateTime.Parse(qr__.GetString(\"{var_name}\"))"; break;
-                    case eBaseType.TimeSpan: returnTypeName = $"System.TimeSpan.Parse(qr__.GetString(\"{var_name}\"))"; break;
+                    case BaseType.Int64: returnTypeName    = $"qr__.GetLong(\"{var_name}\")"; break;
+                    case BaseType.Int32: returnTypeName    = $"qr__.GetInteger(\"{var_name}\")"; break;
+                    case BaseType.Int16: returnTypeName    = $"(short) qr__.GetInteger(\"{var_name}\")"; break;
+                    case BaseType.String: returnTypeName   = $"qr__.GetString(\"{var_name}\")"; break;
+                    case BaseType.Float: returnTypeName    = $"(float) qr__.GetDouble(\"{var_name}\")"; break;
+                    case BaseType.Double: returnTypeName   = $"qr__.GetDouble(\"{var_name}\")"; break;
+                    case BaseType.Int8: returnTypeName     = $"(byte) qr__.GetInteger(\"{var_name}\")"; break;
+                    case BaseType.Boolean: returnTypeName  = $"qr__.GetInteger(\"{var_name}\")>0?true:false"; break;
+                    case BaseType.DateTime: returnTypeName = $"System.DateTime.Parse(qr__.GetString(\"{var_name}\"))"; break;
+                    case BaseType.TimeSpan: returnTypeName = $"System.TimeSpan.Parse(qr__.GetString(\"{var_name}\"))"; break;
                 }
             }
             return returnTypeName;
@@ -342,21 +344,22 @@ namespace TableGenerate
             return returnTypeName;
         }
 
-        private static string GetReadStreamFunction(this eBaseType baseType)
+        private static string GetReadStreamFunction(this BaseType baseType)
         {
             string returnTypeName = baseType switch
             {
-                eBaseType.Vector3 => $"  new Vector3(){{ X = __reader.ReadDouble(), Y = __reader.ReadDouble(), Z = __reader.ReadDouble() }}",
-                eBaseType.Int64 => $"__reader.ReadInt64()",
-                eBaseType.Int32 => $"__reader.ReadInt32()",
-                eBaseType.Int16 => $"__reader.ReadInt16()",
-                eBaseType.String => $"Encoder.ReadString(ref __reader)",
-                eBaseType.Float => $"__reader.ReadSingle()",
-                eBaseType.Double => $"__reader.ReadDouble()",
-                eBaseType.Int8 => $"__reader.ReadByte()",
-                eBaseType.Boolean => $"__reader.ReadBoolean()",
-                eBaseType.DateTime => $"System.DateTime.FromBinary(__reader.ReadInt64())",
-                eBaseType.TimeSpan => $"System.TimeSpan.FromTicks(__reader.ReadInt64())",
+                BaseType.Vector3 => $"  new Vector3(){{ X = __reader.ReadDouble(), Y = __reader.ReadDouble(), Z = __reader.ReadDouble() }}",
+                BaseType.Vector2 => $"  new Vector2(){{ X = __reader.ReadDouble(), Y = __reader.ReadDouble() }}",
+                BaseType.Int64 => $"__reader.ReadInt64()",
+                BaseType.Int32 => $"__reader.ReadInt32()",
+                BaseType.Int16 => $"__reader.ReadInt16()",
+                BaseType.String => $"Encoder.ReadString(ref __reader)",
+                BaseType.Float => $"__reader.ReadSingle()",
+                BaseType.Double => $"__reader.ReadDouble()",
+                BaseType.Int8 => $"__reader.ReadByte()",
+                BaseType.Boolean => $"__reader.ReadBoolean()",
+                BaseType.DateTime => $"System.DateTime.FromBinary(__reader.ReadInt64())",
+                BaseType.TimeSpan => $"System.TimeSpan.FromTicks(__reader.ReadInt64())",
                 _ => string.Empty
             };
             return returnTypeName;
@@ -364,7 +367,7 @@ namespace TableGenerate
 
         private static void GetBaseType(ref Column column, RangeValue rangeValue, System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, string typename)
         {
-            column.base_type = eBaseType.Null;
+            column.base_type = BaseType.Null;
             string type_name = typename;
             string subtypename = type_name;
             string sizeChecker = typename;
@@ -404,7 +407,7 @@ namespace TableGenerate
                         sizeChecker = subtypename;
                         sizeChecker = sizeChecker.Substring(startIndex + 1, sizeChecker.Length - startIndex - 2);
                         column.type_name = sizeChecker;
-                        column.base_type = eBaseType.Enum;
+                        column.base_type = BaseType.Enum;
                         if (refAssembly != null)
                         {
                             System.Reflection.TypeInfo type = refAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
@@ -455,19 +458,19 @@ namespace TableGenerate
                                 switch ("")
                                 {
                                     case string anyName when DeclaredField.FieldType == typeof(System.SByte):
-                                        column.primitive_type = eBaseType.Int8;
+                                        column.primitive_type = BaseType.Int8;
                                         break;
                                     case string anyName when DeclaredField.FieldType == typeof(System.Byte):
-                                        column.primitive_type = eBaseType.Int8;
+                                        column.primitive_type = BaseType.Int8;
                                         break;
                                     case string anyName when DeclaredField.FieldType == typeof(System.Int16):
-                                        column.primitive_type = eBaseType.Int16;
+                                        column.primitive_type = BaseType.Int16;
                                         break;
                                     case string anyName when DeclaredField.FieldType == typeof(System.Int32):
-                                        column.primitive_type = eBaseType.Int32;
+                                        column.primitive_type = BaseType.Int32;
                                         break;
                                     case string anyName when DeclaredField.FieldType == typeof(System.Int64):
-                                        column.primitive_type = eBaseType.Int64;
+                                        column.primitive_type = BaseType.Int64;
                                         break;
                                 }
                             }
@@ -483,7 +486,7 @@ namespace TableGenerate
                         sizeChecker = subtypename;
                         sizeChecker = sizeChecker.Substring(startIndex + 1, sizeChecker.Length - startIndex - 2);
                         column.type_name = sizeChecker;
-                        column.base_type = eBaseType.Struct;
+                        column.base_type = BaseType.Struct;
                         if (refAssembly != null)
                         {
                             System.Reflection.TypeInfo type = refAssembly.DefinedTypes.FirstOrDefault(t => t.FullName.Equals(sizeChecker));
@@ -498,19 +501,19 @@ namespace TableGenerate
                                 switch (Value.FieldType.Name)
                                 {
                                     case "Byte":
-                                        column.primitive_type = eBaseType.Int8;
+                                        column.primitive_type = BaseType.Int8;
                                         break;
                                     case "SByte":
-                                        column.primitive_type = eBaseType.Int8;
+                                        column.primitive_type = BaseType.Int8;
                                         break;
                                     case "Int16":
-                                        column.primitive_type = eBaseType.Int16;
+                                        column.primitive_type = BaseType.Int16;
                                         break;
                                     case "Int32":
-                                        column.primitive_type = eBaseType.Int32;
+                                        column.primitive_type = BaseType.Int32;
                                         break;
                                     case "Int64":
-                                        column.primitive_type = eBaseType.Int64;
+                                        column.primitive_type = BaseType.Int64;
                                         break;
                                 }
                             }
@@ -540,40 +543,42 @@ namespace TableGenerate
 
             switch (type_name)
             {
-                case "vector3": column.base_type = eBaseType.Vector3; break;
-                case "long": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue);  break;
-                case "int64": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue); break;
-                case "int": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
-                case "int32": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
-                case "int16": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
-                case "short": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
-                case "string": column.base_type = eBaseType.String; break;
-                case "float": column.base_type = eBaseType.Float; SetMinMax(column,rangeValue); break;
-                case "double": column.base_type = eBaseType.Double; SetMinMax(column,rangeValue); break;
-                case "int8": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
-                case "byte": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
-                case "bool": column.base_type = eBaseType.Boolean; break;
-                case "datetime": column.base_type = eBaseType.DateTime; break;
-                case "timespan": column.base_type = eBaseType.TimeSpan; break;
+                case "vector3": column.base_type = BaseType.Vector3; break;
+                case "vector2": column.base_type = BaseType.Vector2; break;
+                case "long": column.base_type = BaseType.Int64; SetMinMax(column,rangeValue);  break;
+                case "int64": column.base_type = BaseType.Int64; SetMinMax(column,rangeValue); break;
+                case "int": column.base_type = BaseType.Int32; SetMinMax(column,rangeValue); break;
+                case "int32": column.base_type = BaseType.Int32; SetMinMax(column,rangeValue); break;
+                case "int16": column.base_type = BaseType.Int16; SetMinMax(column,rangeValue); break;
+                case "short": column.base_type = BaseType.Int16; SetMinMax(column,rangeValue); break;
+                case "string": column.base_type = BaseType.String; break;
+                case "float": column.base_type = BaseType.Float; SetMinMax(column,rangeValue); break;
+                case "double": column.base_type = BaseType.Double; SetMinMax(column,rangeValue); break;
+                case "int8": column.base_type = BaseType.Int8; SetMinMax(column,rangeValue); break;
+                case "byte": column.base_type = BaseType.Int8; SetMinMax(column,rangeValue); break;
+                case "bool": column.base_type = BaseType.Boolean; break;
+                case "datetime": column.base_type = BaseType.DateTime; break;
+                case "timespan": column.base_type = BaseType.TimeSpan; break;
                 case "array":
                     {
                         switch (subtypename)
                         {
-                            case "vector3": column.base_type = eBaseType.Vector3; break;
-                            case "long": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue); break;
-                            case "int64": column.base_type = eBaseType.Int64; SetMinMax(column,rangeValue); break;
-                            case "int": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
-                            case "int32": column.base_type = eBaseType.Int32; SetMinMax(column,rangeValue); break;
-                            case "short": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
-                            case "int16": column.base_type = eBaseType.Int16; SetMinMax(column,rangeValue); break;
-                            case "string": column.base_type = eBaseType.String;SetMinMax(column,rangeValue); break;
-                            case "float": column.base_type = eBaseType.Float; SetMinMax(column,rangeValue); break;
-                            case "double": column.base_type = eBaseType.Double; SetMinMax(column,rangeValue); break;
-                            case "int8": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
-                            case "byte": column.base_type = eBaseType.Int8; SetMinMax(column,rangeValue); break;
-                            case "bool": column.base_type = eBaseType.Boolean; break;
-                            case "datetime": column.base_type = eBaseType.DateTime; break;
-                            case "timespan": column.base_type = eBaseType.TimeSpan; break;
+                            case "vector3": column.base_type = BaseType.Vector3; break;
+                            case "vector2": column.base_type = BaseType.Vector2; break;
+                            case "long": column.base_type = BaseType.Int64; SetMinMax(column,rangeValue); break;
+                            case "int64": column.base_type = BaseType.Int64; SetMinMax(column,rangeValue); break;
+                            case "int": column.base_type = BaseType.Int32; SetMinMax(column,rangeValue); break;
+                            case "int32": column.base_type = BaseType.Int32; SetMinMax(column,rangeValue); break;
+                            case "short": column.base_type = BaseType.Int16; SetMinMax(column,rangeValue); break;
+                            case "int16": column.base_type = BaseType.Int16; SetMinMax(column,rangeValue); break;
+                            case "string": column.base_type = BaseType.String;SetMinMax(column,rangeValue); break;
+                            case "float": column.base_type = BaseType.Float; SetMinMax(column,rangeValue); break;
+                            case "double": column.base_type = BaseType.Double; SetMinMax(column,rangeValue); break;
+                            case "int8": column.base_type = BaseType.Int8; SetMinMax(column,rangeValue); break;
+                            case "byte": column.base_type = BaseType.Int8; SetMinMax(column,rangeValue); break;
+                            case "bool": column.base_type = BaseType.Boolean; break;
+                            case "datetime": column.base_type = BaseType.DateTime; break;
+                            case "timespan": column.base_type = BaseType.TimeSpan; break;
                         }
                     }
                     break;
@@ -585,19 +590,20 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             switch (column.base_type)
             {
-               case eBaseType.Vector3:    returnTypeName = "Vector3"; break;
-               case eBaseType.Int64:    returnTypeName = "long"; break;
-               case eBaseType.Int32:    returnTypeName = "int"; break;
-               case eBaseType.Int16:    returnTypeName = "short"; break;
-               case eBaseType.String:   returnTypeName = "string"; break;
-               case eBaseType.Float:    returnTypeName = "float"; break;
-               case eBaseType.Double:   returnTypeName = "double"; break;
-               case eBaseType.Int8:     returnTypeName = "byte"; break;
-               case eBaseType.Boolean:  returnTypeName = "bool"; break;
-               case eBaseType.DateTime: returnTypeName = "datetime"; break;
-               case eBaseType.TimeSpan: returnTypeName = "timespan"; break;
-               case eBaseType.Enum: returnTypeName = column.type_name; break;
-               case eBaseType.Struct: returnTypeName = column.type_name; break;
+               case BaseType.Vector3:    returnTypeName = "Vector3"; break;
+               case BaseType.Vector2:    returnTypeName = "Vector2"; break;
+               case BaseType.Int64:    returnTypeName = "long"; break;
+               case BaseType.Int32:    returnTypeName = "int"; break;
+               case BaseType.Int16:    returnTypeName = "short"; break;
+               case BaseType.String:   returnTypeName = "string"; break;
+               case BaseType.Float:    returnTypeName = "float"; break;
+               case BaseType.Double:   returnTypeName = "double"; break;
+               case BaseType.Int8:     returnTypeName = "byte"; break;
+               case BaseType.Boolean:  returnTypeName = "bool"; break;
+               case BaseType.DateTime: returnTypeName = "datetime"; break;
+               case BaseType.TimeSpan: returnTypeName = "timespan"; break;
+               case BaseType.Enum: returnTypeName = column.type_name; break;
+               case BaseType.Struct: returnTypeName = column.type_name; break;
             }
             return returnTypeName;
         }
@@ -609,38 +615,40 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
-                    case eBaseType.Vector3: returnTypeName = "default"; break;
-                    case eBaseType.Int64: returnTypeName = "0"; break;
-                    case eBaseType.Int32: returnTypeName = "0"; break;
-                    case eBaseType.Int16: returnTypeName = "0"; break;
-                    case eBaseType.String: returnTypeName = "string.Empty"; break;
-                    case eBaseType.Float: returnTypeName = "0"; break;
-                    case eBaseType.Double: returnTypeName = "0"; break;
-                    case eBaseType.Int8: returnTypeName = "0"; break;
-                    case eBaseType.Boolean: returnTypeName = "false"; break;
-                    case eBaseType.DateTime: returnTypeName = "datetime"; break;
-                    case eBaseType.TimeSpan: returnTypeName = "TimeSpan"; break;
-                    case eBaseType.Enum: returnTypeName = column.min_value; break;
-                    case eBaseType.Struct: returnTypeName = column.min_value; break;
+                    case BaseType.Vector3: returnTypeName = "default"; break;
+                    case BaseType.Vector2: returnTypeName = "default"; break;
+                    case BaseType.Int64: returnTypeName = "0"; break;
+                    case BaseType.Int32: returnTypeName = "0"; break;
+                    case BaseType.Int16: returnTypeName = "0"; break;
+                    case BaseType.String: returnTypeName = "string.Empty"; break;
+                    case BaseType.Float: returnTypeName = "0"; break;
+                    case BaseType.Double: returnTypeName = "0"; break;
+                    case BaseType.Int8: returnTypeName = "0"; break;
+                    case BaseType.Boolean: returnTypeName = "false"; break;
+                    case BaseType.DateTime: returnTypeName = "datetime"; break;
+                    case BaseType.TimeSpan: returnTypeName = "TimeSpan"; break;
+                    case BaseType.Enum: returnTypeName = column.min_value; break;
+                    case BaseType.Struct: returnTypeName = column.min_value; break;
                 }
             }
-            else if (gen_type == eGenType.sqllite || gen_type == eGenType.mssql || gen_type == eGenType.mysql) 
+            else if (gen_type is eGenType.sqllite or eGenType.mssql or eGenType.mysql) 
             {
                 switch (column.base_type)
                 {
-                    case eBaseType.Vector3:       returnTypeName = "[0,0,0]"; break;
-                    case eBaseType.Int64:       returnTypeName = "0"; break;
-                    case eBaseType.Int32:       returnTypeName = "0"; break;
-                    case eBaseType.Int16:       returnTypeName = "0"; break;
-                    case eBaseType.String:      returnTypeName = "''"; break;
-                    case eBaseType.Float:       returnTypeName = "0"; break;
-                    case eBaseType.Double:      returnTypeName = "0"; break;
-                    case eBaseType.Int8:        returnTypeName = "0"; break;
-                    case eBaseType.Boolean:     returnTypeName = "0"; break;
-                    case eBaseType.DateTime:    returnTypeName = "''"; break;
-                    case eBaseType.TimeSpan:    returnTypeName = "''"; break;
-                    case eBaseType.Enum:    returnTypeName = "0"; break;
-                    case eBaseType.Struct: returnTypeName = "0"; break;
+                    case BaseType.Vector3:       returnTypeName = "[0,0,0]"; break;
+                    case BaseType.Vector2:       returnTypeName = "[0,0]"; break;
+                    case BaseType.Int64:       returnTypeName = "0"; break;
+                    case BaseType.Int32:       returnTypeName = "0"; break;
+                    case BaseType.Int16:       returnTypeName = "0"; break;
+                    case BaseType.String:      returnTypeName = "''"; break;
+                    case BaseType.Float:       returnTypeName = "0"; break;
+                    case BaseType.Double:      returnTypeName = "0"; break;
+                    case BaseType.Int8:        returnTypeName = "0"; break;
+                    case BaseType.Boolean:     returnTypeName = "0"; break;
+                    case BaseType.DateTime:    returnTypeName = "''"; break;
+                    case BaseType.TimeSpan:    returnTypeName = "''"; break;
+                    case BaseType.Enum:    returnTypeName = "0"; break;
+                    case BaseType.Struct: returnTypeName = "0"; break;
                 }
             }
             return returnTypeName;
@@ -652,18 +660,18 @@ namespace TableGenerate
             {
                 returnTypeName = column.base_type switch
                 {
-                    eBaseType.Int64 => "default(LongEqualityComparer)",
-                    eBaseType.Int32 => "default(IntEqualityComparer)",
-                    eBaseType.Int16 => "default(ShortEqualityComparer)",
-                    eBaseType.String => "default(StringEqualityComparer)",
-                    eBaseType.Float => "",
-                    eBaseType.Double => "",
-                    eBaseType.Int8 => "",
-                    eBaseType.Boolean => "",
-                    eBaseType.DateTime => "",
-                    eBaseType.TimeSpan => "",
-                    eBaseType.Enum => $"",
-                    eBaseType.Struct => $"",
+                    BaseType.Int64 => "default(LongEqualityComparer)",
+                    BaseType.Int32 => "default(IntEqualityComparer)",
+                    BaseType.Int16 => "default(ShortEqualityComparer)",
+                    BaseType.String => "default(StringEqualityComparer)",
+                    BaseType.Float => "",
+                    BaseType.Double => "",
+                    BaseType.Int8 => "",
+                    BaseType.Boolean => "",
+                    BaseType.DateTime => "",
+                    BaseType.TimeSpan => "",
+                    BaseType.Enum => $"",
+                    BaseType.Struct => $"",
                     _ => returnTypeName
                 };
             }
@@ -677,7 +685,7 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
-                    case eBaseType.Vector3:
+                    case BaseType.Vector3:
                     {
                         switch (gen_type)
                         {
@@ -690,8 +698,22 @@ namespace TableGenerate
                             case eGenType.rust: returnTypeName = "Vec<glam::f64::DVec3>"; break;
                         }
                     }
-                    break;                    
-                    case eBaseType.Int64:
+                    break;
+                    case BaseType.Vector2:
+                    {
+                        switch (gen_type)
+                        {
+                            case eGenType.cpp: returnTypeName = "TArray<FVector2D>"; break;
+                            case eGenType.cs: returnTypeName = "Vector2[]"; break;
+                            case eGenType.proto: returnTypeName = "repeated Vector2"; break;
+                            case eGenType.mssql: returnTypeName = "Vector2"; break;
+                            case eGenType.mysql: returnTypeName = "Vector2"; break;
+                            case eGenType.sqllite: returnTypeName = "Vector2"; break;
+                            case eGenType.rust: returnTypeName = "Vec<glam::f64::DVec2>"; break;
+                        }
+                    }
+                    break;  
+                    case BaseType.Int64:
                         {
                             switch (gen_type)
                             {
@@ -705,7 +727,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Int32:
+                    case BaseType.Int32:
                         {
                             switch (gen_type)
                             {
@@ -719,7 +741,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Int16:
+                    case BaseType.Int16:
                         {
                             switch (gen_type)
                             {
@@ -733,7 +755,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.String:
+                    case BaseType.String:
                         {
                             switch (gen_type)
                             {
@@ -747,7 +769,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Float:
+                    case BaseType.Float:
                         {
                             switch (gen_type)
                             {
@@ -761,7 +783,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Double:
+                    case BaseType.Double:
                         {
 
                             switch (gen_type)
@@ -776,7 +798,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Int8:
+                    case BaseType.Int8:
                         {
                             switch (gen_type)
                             {
@@ -790,7 +812,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Boolean:
+                    case BaseType.Boolean:
                         {
                             switch (gen_type)
                             {
@@ -804,7 +826,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.DateTime:
+                    case BaseType.DateTime:
                         {
                             switch (gen_type)
                             {
@@ -818,7 +840,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.TimeSpan:
+                    case BaseType.TimeSpan:
                         {
                             switch (gen_type)
                             {
@@ -832,8 +854,8 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Enum:
-                    case eBaseType.Struct:
+                    case BaseType.Enum:
+                    case BaseType.Struct:
                         {
                             switch (gen_type)
                             {
@@ -853,7 +875,7 @@ namespace TableGenerate
 
             switch (column.base_type)
             {
-                case eBaseType.Vector3:
+                case BaseType.Vector3:
                 {
                     switch (gen_type)
                     {
@@ -867,7 +889,21 @@ namespace TableGenerate
                     }
                 }
                 break;
-                case eBaseType.Int64:
+                case BaseType.Vector2:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector2D"; break;
+                        case eGenType.cs: returnTypeName = "Vector2"; break;
+                        case eGenType.proto: returnTypeName = "Vector2"; break;
+                        case eGenType.mssql: returnTypeName = "Vector2"; break;
+                        case eGenType.mysql: returnTypeName = "Vector2"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector2"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec2"; break;
+                    }
+                }
+                break;                
+                case BaseType.Int64:
                     {
                         switch (gen_type)
                         {
@@ -881,7 +917,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int32: 
+                case BaseType.Int32: 
                     {
                         switch (gen_type)
                         {
@@ -895,7 +931,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int16:
+                case BaseType.Int16:
                     {
                         switch (gen_type)
                         {
@@ -909,7 +945,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.String:
+                case BaseType.String:
                     {
                         switch (gen_type)
                         {
@@ -923,7 +959,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Float:
+                case BaseType.Float:
                     {
                         switch (gen_type)
                         {
@@ -936,7 +972,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Double:
+                case BaseType.Double:
                     {
 
                         switch (gen_type)
@@ -951,7 +987,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int8:
+                case BaseType.Int8:
                     {
                         switch (gen_type)
                         {
@@ -965,7 +1001,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Boolean:
+                case BaseType.Boolean:
                     {
                         switch (gen_type)
                         {
@@ -979,7 +1015,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.DateTime:
+                case BaseType.DateTime:
                     {
                         switch (gen_type)
                         {
@@ -993,7 +1029,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.TimeSpan:
+                case BaseType.TimeSpan:
                     {
                         switch (gen_type)
                         {
@@ -1007,8 +1043,8 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Enum:
-                case eBaseType.Struct:
+                case BaseType.Enum:
+                case BaseType.Struct:
                     {
                         switch (gen_type)
                         {
@@ -1035,7 +1071,7 @@ namespace TableGenerate
             {
                 switch (column.base_type)
                 {
-                    case eBaseType.Vector3:
+                    case BaseType.Vector3:
                     {
                         switch (gen_type)
                         {
@@ -1048,8 +1084,22 @@ namespace TableGenerate
                             case eGenType.rust: returnTypeName = "Vec::Empty<glam::f64::DVec3>()"; break;
                         }
                     }
-                    break;                    
-                    case eBaseType.Int64:
+                    break;
+                    case BaseType.Vector2:
+                    {
+                        switch (gen_type)
+                        {
+                            case eGenType.cpp: returnTypeName = "TArray<FVector2D>::TArray()"; break;
+                            case eGenType.cs: returnTypeName = "System.Array.Empty<Vector2D>()"; break;
+                            case eGenType.proto: returnTypeName = "-"; break;
+                            case eGenType.mssql: returnTypeName = "-"; break;
+                            case eGenType.mysql: returnTypeName = "-"; break;
+                            case eGenType.sqllite: returnTypeName = "-"; break;
+                            case eGenType.rust: returnTypeName = "Vec::Empty<glam::f64::DVec2>()"; break;
+                        }
+                    }
+                        break;
+                    case BaseType.Int64:
                         {
                             switch (gen_type)
                             {
@@ -1063,7 +1113,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Int32:
+                    case BaseType.Int32:
                         {
                             switch (gen_type)
                             {
@@ -1077,7 +1127,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Int16:
+                    case BaseType.Int16:
                         {
                             switch (gen_type)
                             {
@@ -1091,7 +1141,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.String:
+                    case BaseType.String:
                         {
                             switch (gen_type)
                             {
@@ -1105,7 +1155,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Float:
+                    case BaseType.Float:
                         {
                             switch (gen_type)
                             {
@@ -1119,7 +1169,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Double:
+                    case BaseType.Double:
                         {
 
                             switch (gen_type)
@@ -1134,7 +1184,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Int8:
+                    case BaseType.Int8:
                         {
                             switch (gen_type)
                             {
@@ -1148,7 +1198,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Boolean:
+                    case BaseType.Boolean:
                         {
                             switch (gen_type)
                             {
@@ -1162,7 +1212,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.DateTime:
+                    case BaseType.DateTime:
                         {
                             switch (gen_type)
                             {
@@ -1176,7 +1226,7 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.TimeSpan:
+                    case BaseType.TimeSpan:
                         {
                             switch (gen_type)
                             {
@@ -1190,8 +1240,8 @@ namespace TableGenerate
                             }
                         }
                         break;
-                    case eBaseType.Enum:
-                    case eBaseType.Struct:
+                    case BaseType.Enum:
+                    case BaseType.Struct:
                         {
                             switch (gen_type)
                             {
@@ -1212,7 +1262,7 @@ namespace TableGenerate
 
             switch (column.base_type)
             {
-                case eBaseType.Vector3:
+                case BaseType.Vector3:
                 {
                     switch (gen_type)
                     {
@@ -1225,8 +1275,22 @@ namespace TableGenerate
                         case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
                     }
                 }
-                break;                
-                case eBaseType.Int64:
+                break;           
+                case BaseType.Vector2:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector2D::ZeroVector"; break;
+                        case eGenType.cs: returnTypeName = "default"; break;
+                        case eGenType.proto: returnTypeName = "Vector3"; break;
+                        case eGenType.mssql: returnTypeName = "Vector3"; break;
+                        case eGenType.mysql: returnTypeName = "Vector3"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector3"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
+                    }
+                }
+                break;   
+                case BaseType.Int64:
                     {
                         switch (gen_type)
                         {
@@ -1240,7 +1304,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int32: 
+                case BaseType.Int32: 
                     {
                         switch (gen_type)
                         {
@@ -1254,7 +1318,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int16:
+                case BaseType.Int16:
                     {
                         switch (gen_type)
                         {
@@ -1268,7 +1332,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.String:
+                case BaseType.String:
                     {
                         switch (gen_type)
                         {
@@ -1282,7 +1346,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Float:
+                case BaseType.Float:
                     {
                         switch (gen_type)
                         {
@@ -1295,7 +1359,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Double:
+                case BaseType.Double:
                     {
 
                         switch (gen_type)
@@ -1310,7 +1374,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int8:
+                case BaseType.Int8:
                     {
                         switch (gen_type)
                         {
@@ -1324,7 +1388,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Boolean:
+                case BaseType.Boolean:
                     {
                         switch (gen_type)
                         {
@@ -1338,7 +1402,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.DateTime:
+                case BaseType.DateTime:
                     {
                         switch (gen_type)
                         {
@@ -1352,7 +1416,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.TimeSpan:
+                case BaseType.TimeSpan:
                     {
                         switch (gen_type)
                         {
@@ -1366,8 +1430,8 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Enum:
-                case eBaseType.Struct:
+                case BaseType.Enum:
+                case BaseType.Struct:
                     {
                         switch (gen_type)
                         {
@@ -1392,7 +1456,7 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             switch (column.base_type)
             {
-                case eBaseType.Vector3:
+                case BaseType.Vector3:
                 {
                     switch (gen_type)
                     {
@@ -1404,8 +1468,21 @@ namespace TableGenerate
                         case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
                     }
                 }
-                break;                
-                case eBaseType.Int64:
+                break;       
+                case BaseType.Vector2:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector2D"; break;
+                        case eGenType.cs: returnTypeName = "Vector2"; break;
+                        case eGenType.mssql: returnTypeName = "Vector2"; break;
+                        case eGenType.mysql: returnTypeName = "Vector2"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector2"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec2"; break;
+                    }
+                }
+                break;   
+                case BaseType.Int64:
                     {
                         switch (gen_type)
                         {
@@ -1418,7 +1495,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int32:
+                case BaseType.Int32:
                     {
                         switch (gen_type)
                         {
@@ -1431,7 +1508,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int16:
+                case BaseType.Int16:
                     {
                         switch (gen_type)
                         {
@@ -1444,7 +1521,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.String:
+                case BaseType.String:
                     {
                         switch (gen_type)
                         {
@@ -1457,7 +1534,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Float:
+                case BaseType.Float:
                     {
                         switch (gen_type)
                         {
@@ -1469,7 +1546,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Double:
+                case BaseType.Double:
                     {
 
                         switch (gen_type)
@@ -1483,7 +1560,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int8:
+                case BaseType.Int8:
                     {
                         switch (gen_type)
                         {
@@ -1496,7 +1573,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Boolean:
+                case BaseType.Boolean:
                     {
                         switch (gen_type)
                         {
@@ -1510,7 +1587,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.DateTime:
+                case BaseType.DateTime:
                     {
                         switch (gen_type)
                         {
@@ -1523,7 +1600,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.TimeSpan:
+                case BaseType.TimeSpan:
                     {
                         switch (gen_type)
                         {
@@ -1536,8 +1613,8 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Enum:
-                case eBaseType.Struct:
+                case BaseType.Enum:
+                case BaseType.Struct:
                     {
                         //returnTypeName = column.primitive_type.GenerateBaseType(gen_type);
                         
@@ -1556,12 +1633,12 @@ namespace TableGenerate
             return returnTypeName;
         }
 
-        public static string GenerateBaseType(this eBaseType base_type, eGenType gen_type)
+        public static string GenerateBaseType(this BaseType base_type, eGenType gen_type)
         {
             string returnTypeName = string.Empty;
             switch (base_type)
             {
-                case eBaseType.Vector3:
+                case BaseType.Vector3:
                 {
                     switch (gen_type)
                     {
@@ -1573,8 +1650,21 @@ namespace TableGenerate
                         case eGenType.rust: returnTypeName = "glam::f64::DVec3"; break;
                     }
                 }
-                break;                
-                case eBaseType.Int64:
+                break;   
+                case BaseType.Vector2:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "FVector2D"; break;
+                        case eGenType.cs: returnTypeName = "Vector2"; break;
+                        case eGenType.mssql: returnTypeName = "Vector2"; break;
+                        case eGenType.mysql: returnTypeName = "Vector2"; break;
+                        case eGenType.sqllite: returnTypeName = "Vector2"; break;
+                        case eGenType.rust: returnTypeName = "glam::f64::DVec2"; break;
+                    }
+                }
+                break;        
+                case BaseType.Int64:
                     {
                         switch (gen_type)
                         {
@@ -1587,7 +1677,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int32:
+                case BaseType.Int32:
                     {
                         switch (gen_type)
                         {
@@ -1600,7 +1690,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int16:
+                case BaseType.Int16:
                     {
                         switch (gen_type)
                         {
@@ -1613,7 +1703,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.String:
+                case BaseType.String:
                     {
                         switch (gen_type)
                         {
@@ -1626,7 +1716,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Float:
+                case BaseType.Float:
                     {
                         switch (gen_type)
                         {
@@ -1638,7 +1728,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Double:
+                case BaseType.Double:
                     {
 
                         switch (gen_type)
@@ -1652,7 +1742,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Int8:
+                case BaseType.Int8:
                     {
                         switch (gen_type)
                         {
@@ -1665,7 +1755,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.Boolean:
+                case BaseType.Boolean:
                     {
                         switch (gen_type)
                         {
@@ -1679,7 +1769,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.DateTime:
+                case BaseType.DateTime:
                     {
                         switch (gen_type)
                         {
@@ -1692,7 +1782,7 @@ namespace TableGenerate
                         }
                     }
                     break;
-                case eBaseType.TimeSpan:
+                case BaseType.TimeSpan:
                     {
                         switch (gen_type)
                         {

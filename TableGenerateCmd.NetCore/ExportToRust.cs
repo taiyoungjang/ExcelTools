@@ -413,16 +413,17 @@ namespace TableGenerate
                 {
                     string readStream = column.base_type switch 
                     {
-                        eBaseType.Boolean => "reader.read_bool().unwrap()",
-                        eBaseType.Int8 => "reader.read_i8().unwrap()",
-                        eBaseType.Int16 => "reader.read_i16().unwrap()",
-                        eBaseType.Enum => $"{column.type_name}::from_i32(reader.read_i32().unwrap_or_default()).unwrap()",
-                        eBaseType.Int32 => "reader.read_i32().unwrap()",
-                        eBaseType.Int64 => "reader.read_i64().unwrap()",
-                        eBaseType.Float => "reader.read_f32().unwrap()",
-                        eBaseType.Double => "reader.read_f64().unwrap()",
-                        eBaseType.String => "super::read_string(reader).unwrap()",
-                        eBaseType.Vector3 => "glam::f64::DVec3::new(reader.read_f64()?,reader.read_f64()?,reader.read_f64()?)",
+                        BaseType.Boolean => "reader.read_bool().unwrap()",
+                        BaseType.Int8 => "reader.read_i8().unwrap()",
+                        BaseType.Int16 => "reader.read_i16().unwrap()",
+                        BaseType.Enum => $"{column.type_name}::from_i32(reader.read_i32().unwrap_or_default()).unwrap()",
+                        BaseType.Int32 => "reader.read_i32().unwrap()",
+                        BaseType.Int64 => "reader.read_i64().unwrap()",
+                        BaseType.Float => "reader.read_f32().unwrap()",
+                        BaseType.Double => "reader.read_f64().unwrap()",
+                        BaseType.String => "super::read_string(reader).unwrap()",
+                        BaseType.Vector3 => "glam::f64::DVec3::new(reader.read_f64()?,reader.read_f64()?,reader.read_f64()?)",
+                        BaseType.Vector2 => "glam::f64::DVec2::new(reader.read_f64()?,reader.read_f64()?)",
                         _ => "util::reader.read_i32()"
                     };
                     writer.WriteLineEx($"  {name}: {{let size = reader.read_i32()? as usize; std::iter::repeat_with(||{readStream}).take(size).collect()}},");
@@ -431,16 +432,17 @@ namespace TableGenerate
                 {
                     string readStream = column.base_type switch 
                     {
-                        eBaseType.Boolean => "reader.read_bool()?",
-                        eBaseType.Int8 => "reader.read_i8()?",
-                        eBaseType.Int16 => "reader.read_i16()?",
-                        eBaseType.Enum => $"{{ let v = {column.type_name}::from_i32(reader.read_i32().unwrap_or_default()); if v.is_none() {{ return Err(anyhow::anyhow!(\"{column.type_name} is none\")); }} v.unwrap() }}",
-                        eBaseType.Int32 => "reader.read_i32()?",
-                        eBaseType.Int64 => "reader.read_i64()?",
-                        eBaseType.Float => "reader.read_f32()?",
-                        eBaseType.Double => "reader.read_f64()?",
-                        eBaseType.String => "super::read_string(reader)?",
-                        eBaseType.Vector3 => "glam::f64::DVec3::new(reader.read_f64()?,reader.read_f64()?,reader.read_f64()?)",
+                        BaseType.Boolean => "reader.read_bool()?",
+                        BaseType.Int8 => "reader.read_i8()?",
+                        BaseType.Int16 => "reader.read_i16()?",
+                        BaseType.Enum => $"{{ let v = {column.type_name}::from_i32(reader.read_i32().unwrap_or_default()); if v.is_none() {{ return Err(anyhow::anyhow!(\"{column.type_name} is none\")); }} v.unwrap() }}",
+                        BaseType.Int32 => "reader.read_i32()?",
+                        BaseType.Int64 => "reader.read_i64()?",
+                        BaseType.Float => "reader.read_f32()?",
+                        BaseType.Double => "reader.read_f64()?",
+                        BaseType.String => "super::read_string(reader)?",
+                        BaseType.Vector3 => "glam::f64::DVec3::new(reader.read_f64()?,reader.read_f64()?,reader.read_f64()?)",
+                        BaseType.Vector2 => "glam::f64::DVec2::new(reader.read_f64()?,reader.read_f64()?)",
                         _ => "util::reader.read_i32()?"
                     };
                     writer.WriteLineEx($"{(readStream.Contains('{')? $"  {name}":name)}: {readStream},");
@@ -511,15 +513,15 @@ namespace TableGenerate
             {
                 ret = $"    let _ = row.col(|ui|{{let _ = ui.label(format!(\"{{:?}}\",item.{name}));}});";
             }
-            else if (column.IsNumberType() || column.base_type == eBaseType.Boolean)
+            else if (column.IsNumberType() || column.base_type == BaseType.Boolean)
             {
                 ret = $"  let _ = row.col(|ui|{{let _ = ui.label(item.{name}.to_string());}});";
             }
-            else if (column.base_type == eBaseType.String)
+            else if (column.base_type == BaseType.String)
             {
                 ret = $"  let _ = row.col(|ui|{{let _ = ui.label(&item.{name});}});";
             }
-            else if (column.base_type == eBaseType.Vector3)
+            else if (column.base_type is BaseType.Vector3 or BaseType.Vector2)
             {
                 ret = $"  let _ = row.col(|ui|{{let _ = ui.label(item.{name});}});";
             }
@@ -539,15 +541,15 @@ namespace TableGenerate
             {
                 ret = $"format!(\"{{:?}}\",self.{name}))";
             }
-            else if (column.IsNumberType() || column.base_type == eBaseType.Boolean)
+            else if (column.IsNumberType() || column.base_type == BaseType.Boolean)
             {
                 ret = $"self.{name}.to_string()";
             }
-            else if (column.base_type == eBaseType.String)
+            else if (column.base_type == BaseType.String)
             {
                 ret = $"self.{name}.clone()";
             }
-            else if (column.base_type == eBaseType.Vector3)
+            else if (column.base_type is BaseType.Vector3 or BaseType.Vector2)
             {
                 ret = $"format!(\"{{:?}}\",self.{name}))";
             }

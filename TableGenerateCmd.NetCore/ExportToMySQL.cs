@@ -107,7 +107,7 @@ namespace TableGenerate
                     _writer.Write($" `{column.var_name}` {type} ");
                 }
 
-                if (column.base_type == eBaseType.String)
+                if (column.base_type == BaseType.String)
                 {
                     _writer.Write(" character set `UTF8` ");
                 }
@@ -160,7 +160,7 @@ namespace TableGenerate
                     {
                         _writer.Write(",");
                     }
-                    if (column.base_type == eBaseType.String || column.IsDateTime())
+                    if (column.base_type == BaseType.String || column.IsDateTime())
                     {
                         _writer.Write("'");
                     }
@@ -177,7 +177,7 @@ namespace TableGenerate
                             _writer.Write(column.GetParseString(data)); 
                         }
                     }
-                    if (column.base_type == eBaseType.String || column.IsDateTime())
+                    if (column.base_type == BaseType.String || column.IsDateTime())
                     {
                         _writer.Write("'");
                     }
