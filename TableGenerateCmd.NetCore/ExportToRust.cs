@@ -472,7 +472,7 @@ namespace TableGenerate
                 {
                     continue;
                 }
-                writer.WriteLineEx($"  let _ = header.col(|ui|{{let _ = ui.strong(\"{name}\");}});");
+                writer.WriteLineEx($"  let _ = header.col(|ui|{{let _ = ui.strong(\"{name}\").on_hover_text(\"{column.desc}\");}});");
                 arrayCount++;
             }
             writer.WriteLineEx($"}}");
