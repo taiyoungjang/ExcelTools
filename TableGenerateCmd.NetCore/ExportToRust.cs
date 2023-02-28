@@ -278,7 +278,7 @@ namespace TableGenerate
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
-                            if (pascalSheetName.Equals(snakeSheetName))
+                            if (!_multi_sheet)
                             {
                                 writer.WriteLineEx($"vec,");
                                 writer.WriteLineEx($"map,");
