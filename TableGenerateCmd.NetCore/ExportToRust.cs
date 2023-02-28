@@ -21,11 +21,13 @@ namespace TableGenerate
         public int m_current = 0;
         public eGenType _gen_type = eGenType.rust;
         private bool _useInterface;
+        private bool _multi_sheet;
         public ExportToRust(bool useInterface)
         {
             _useInterface = useInterface;
         }
-
+        private string GetVecName(string sheetName) => _multi_sheet? $"{sheetName}_vec" : "vec";
+        private string GetMapName(string sheetName) => _multi_sheet? $"{sheetName}_map" : "map";
         public override bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
             try
@@ -41,6 +43,7 @@ namespace TableGenerate
                         writer.WriteLineEx("use anyhow::{anyhow,Result};");
                         writer.WriteLineEx("use super::super::proto::*;");
                         string[] sheets = imp.GetSheetList();
+                        _multi_sheet = sheets.Length > 1;
 
                         filename = filename.Replace(".rs", string.Empty);
 
@@ -92,17 +95,17 @@ namespace TableGenerate
                             writer.WriteLineEx( "}");
                             //SheetConstructorProcess(writer, sheetName, columns);
                             writer.WriteLineEx($"/// get vec_clone {sheetName}");
-                            writer.WriteLineEx( $"fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone() -> Option<Vec<Self>> {{");
-                            writer.WriteLineEx($"{(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone()");
+                            writer.WriteLineEx( $"fn {GetVecName(sheetName)}_clone() -> Option<Vec<Self>> {{");
+                            writer.WriteLineEx($"{GetVecName(sheetName)}_clone()");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<Self>) -> Option<Vec<Self>>>(pred: F) -> Option<Vec<Self>> {{");
+                            writer.WriteLineEx( $"fn {GetVecName(sheetName)}<F: Fn (&Vec<Self>) -> Option<Vec<Self>>>(pred: F) -> Option<Vec<Self>> {{");
                             writer.WriteLineEx($"vec(pred)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<Self>) -> Option<Self>>(pred: F) -> Option<Self> {{");
+                            writer.WriteLineEx( $"fn {GetVecName(sheetName)}_one<F: Fn (&Vec<Self>) -> Option<Self>>(pred: F) -> Option<Self> {{");
                             writer.WriteLineEx($"vec_one(pred)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx("}");
@@ -117,40 +120,40 @@ namespace TableGenerate
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
                             writer.WriteLineEx($"/// get vec_clone {sheetName}");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone() -> Option<Vec<{sheetName}>> {{");
-                            writer.WriteLineEx($"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec.clone())");
+                            writer.WriteLineEx( $"pub fn {GetVecName(sheetName)}_clone() -> Option<Vec<{sheetName}>> {{");
+                            writer.WriteLineEx($"Some(STATIC_DATA.read().unwrap().last().unwrap().{GetVecName(sheetName)}.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec {sheetName}");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(pred: F) -> Option<Vec<{sheetName}>> {{");
-                            writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
+                            writer.WriteLineEx( $"pub fn {GetVecName(sheetName)}<F: Fn (&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(pred: F) -> Option<Vec<{sheetName}>> {{");
+                            writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{GetVecName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
-                            writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_vec)");
+                            writer.WriteLineEx( $"pub fn {GetVecName(sheetName)}_one<F: Fn (&Vec<{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last().unwrap().{GetVecName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx($"#[allow(non_snake_case)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_clone() -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
-                            writer.WriteLineEx( $"Some(STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map.clone())");
+                            writer.WriteLineEx( $"pub fn {GetMapName(sheetName)}_clone() -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
+                            writer.WriteLineEx( $"Some(STATIC_DATA.read().unwrap().last().unwrap().{GetMapName(sheetName)}.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx($"#[allow(non_snake_case)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>>>(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
-                            writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
+                            writer.WriteLineEx( $"pub fn {GetMapName(sheetName)}<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>>>(pred: F) -> Option<std::collections::HashMap<{firstColumnType},{sheetName}>> {{");
+                            writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{GetMapName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx($"#[allow(non_snake_case)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}map_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
-                            writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map)");
+                            writer.WriteLineEx( $"pub fn {GetMapName(sheetName)}_one<F: Fn (&std::collections::HashMap<{firstColumnType},{sheetName}>) -> Option<{sheetName}>>(pred: F) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last().unwrap().{GetMapName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}get({firstColumnName}: &{firstColumnType}) -> Option<{sheetName}> {{");
-                            writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last().unwrap().{sheetName}_map.get(&{firstColumnName}).cloned()");
+                            writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last().unwrap().{GetMapName(sheetName)}.get(&{firstColumnName}).cloned()");
                             writer.WriteLineEx( "}");
                         }
                         writer.WriteLineEx($"lazy_static::lazy_static! {{");
@@ -170,8 +173,8 @@ namespace TableGenerate
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
                             var sheetName = ExportBaseUtil.ToPascalCase(sheet);
-                            writer.WriteLineEx($"pub {sheetName}_vec: Vec<{sheetName}>,");
-                            writer.WriteLineEx($"pub {sheetName}_map: std::collections::HashMap<{firstColumnType},{sheetName}>,");
+                            writer.WriteLineEx($"pub {GetVecName(sheetName)}: Vec<{sheetName}>,");
+                            writer.WriteLineEx($"pub {GetMapName(sheetName)}: std::collections::HashMap<{firstColumnType},{sheetName}>,");
                         }
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx( "pub fn file_name() -> &'static str {");
@@ -184,7 +187,7 @@ namespace TableGenerate
                         foreach (string sheetName in sheets)
                         {
                             var sheet = ExportBaseUtil.ToPascalCase(sheetName);
-                            writer.WriteLineEx( $"len += STATIC_DATA.read().unwrap().last().unwrap().{sheet}_vec.len();");
+                            writer.WriteLineEx( $"len += STATIC_DATA.read().unwrap().last().unwrap().{GetVecName(sheetName)}.len();");
                         }
                         writer.WriteLineEx("len");
                         writer.WriteLineEx("}");
@@ -198,8 +201,8 @@ namespace TableGenerate
                         foreach (string sheetName in sheets)
                         {
                             var sheet = ExportBaseUtil.ToPascalCase(sheetName);
-                            writer.WriteLineEx( $"{sheet}_vec: vec_clone().unwrap(),");
-                            writer.WriteLineEx( $"{sheet}_map: map_clone().unwrap(),");
+                            writer.WriteLineEx( $"{GetVecName(sheetName)}: vec_clone().unwrap(),");
+                            writer.WriteLineEx( $"{GetMapName(sheetName)}: map_clone().unwrap(),");
                         }
                         writer.WriteLineEx( "};");
                         writer.WriteLineEx( "world.insert_resource(static_data);");
@@ -212,8 +215,8 @@ namespace TableGenerate
                         foreach (string sheetName in sheets)
                         {
                             var sheet = ExportBaseUtil.ToPascalCase(sheetName);
-                            writer.WriteLineEx( $"{sheet}_vec: vec_clone().unwrap(),");
-                            writer.WriteLineEx( $"{sheet}_map: map_clone().unwrap(),");
+                            writer.WriteLineEx( $"{GetVecName(sheetName)}: vec_clone().unwrap(),");
+                            writer.WriteLineEx( $"{GetMapName(sheetName)}: map_clone().unwrap(),");
                         }
                         writer.WriteLineEx( "};");
                         writer.WriteLineEx( "world.insert_resource(static_data);");
@@ -262,7 +265,7 @@ namespace TableGenerate
                             var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
                             var pascalSheetName = ExportBaseUtil.ToPascalCase(sheetName);
                             var snakeSheetName = ExportBaseUtil.ToSnakeCase(sheetName);
-                            writer.WriteLineEx($"let ({snakeSheetName}_vec, {snakeSheetName}_map) = {pascalSheetName}::read_stream(&mut decompress_reader)?;");
+                            writer.WriteLineEx($"let ({GetVecName(snakeSheetName)}, {GetMapName(snakeSheetName)}) = {pascalSheetName}::read_stream(&mut decompress_reader)?;");
                         }
                         writer.WriteLineEx( "let static_data = StaticData {");
                         foreach (string sheetName in sheets)
@@ -275,8 +278,16 @@ namespace TableGenerate
                             var firstColumn = columns.FirstOrDefault(t => t.is_key);
                             var firstColumnType = firstColumn.GenerateType(_gen_type);
                             var firstColumnName = firstColumn.var_name;
-                            writer.WriteLineEx($"{pascalSheetName}_vec: {snakeSheetName}_vec,");
-                            writer.WriteLineEx($"{pascalSheetName}_map :{snakeSheetName}_map,");
+                            if (pascalSheetName.Equals(snakeSheetName))
+                            {
+                                writer.WriteLineEx($"vec,");
+                                writer.WriteLineEx($"map,");
+                            }
+                            else
+                            {
+                                writer.WriteLineEx($"{GetVecName(pascalSheetName)}: {GetVecName(snakeSheetName)},");
+                                writer.WriteLineEx($"{GetMapName(pascalSheetName)} :{GetMapName(snakeSheetName)},");
+                            }
                         }
                         writer.WriteLineEx( "};");
                         writer.WriteLineEx(" STATIC_DATA.write().unwrap().push(static_data);");
