@@ -471,8 +471,7 @@ namespace TableGenerate
             var firstColumn = columns.FirstOrDefault(t => t.is_key);
             var firstColumnType = firstColumn.GenerateType(_gen_type);
             var firstColumnName = firstColumn.var_name;
-            writer.WriteLineEx($"#[allow(dead_code)]");
-            writer.WriteLineEx($"#[allow(non_snake_case)]");
+            writer.WriteLineEx($"#[cfg(feature = \"egui\")]");
             writer.WriteLineEx($"fn egui_header() -> fn(egui_extras::TableRow) {{");
             writer.WriteLineEx($"|mut header| {{");
             int arrayCount = 0;
@@ -489,8 +488,7 @@ namespace TableGenerate
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"}}");
             writer.WriteLineEx($"  fn column_count() -> usize {{ {arrayCount} }}");
-            writer.WriteLineEx($"#[allow(dead_code)]");
-            writer.WriteLineEx($"#[allow(non_snake_case)]");
+            writer.WriteLineEx($"#[cfg(feature = \"egui\")]");
             writer.WriteLineEx($"fn egui_body(body: egui_extras::TableBody, items: Vec<&Self>) {{");
             writer.WriteLineEx($"body.heterogeneous_rows((0..items.len()).into_iter().map(|_| 18f32), |row_index, mut row| {{");
             writer.WriteLineEx($"let item = items.get(row_index).unwrap();");
