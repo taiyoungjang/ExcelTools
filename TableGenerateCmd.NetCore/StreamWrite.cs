@@ -12,34 +12,42 @@ namespace StreamWrite
     {
         public static class Util
         {
-            static int indent = 0;
+            private static int s_indent;
+            private static int s_indentSize = 2;
+            public static void SetIndentSize(int size)
+            {
+                s_indentSize = size;
+            }
+
+            private static int UnIndentCount(string str) => Math.Max(str.Count(t => t == '}') - str.Count(t => t == '{'), 0);
+            private static int IndentCount(string str) => Math.Max(str.Count(t => t == '{') - str.Count(t => t == '}'), 0);
             public static void WriteEx(this StreamWriter self, string str)
             {
-                indent -= str.Count(t => t == '}') * 2;
-                self.Write($"{string.Empty.PadLeft(indent)}{str}");
-                indent += str.Count(t => t == '{') * 2;
+                s_indent -= UnIndentCount(str) * s_indentSize;
+                self.Write($"{string.Empty.PadLeft(s_indent)}{str}");
+                s_indent += IndentCount(str) * s_indentSize;
             }
             public static void WriteLineEx(this StreamWriter self, string str)
             {
-                indent -= str.Count(t => t == '}') * 2;
-                self.Write($"{string.Empty.PadLeft(indent)}{str}\r\n");
-                indent += str.Count(t => t == '{') * 2;
+                s_indent -= UnIndentCount(str) * s_indentSize;
+                self.Write($"{string.Empty.PadLeft(s_indent)}{str}\r\n");
+                s_indent += IndentCount(str) * s_indentSize;
             }
             public static void WriteLineEx(this StreamWriter self)
             {
-                self.Write("\r\n");
+                self.Write(Environment.NewLine);
             }
             public static void WriteEx(this IndentedTextWriter self, string str)
             {
-                self.Indent -= str.Count(t => t == '}') * 2;
+                self.Indent -= UnIndentCount(str) * s_indentSize;
                 self.WriteLineNoTabs($"{str}");
-                self.Indent += str.Count(t => t == '{') * 2;
+                self.Indent += IndentCount(str) * s_indentSize;
             }
             public static void WriteLineEx(this IndentedTextWriter self, string str)
             {
-                self.Indent -= str.Count(t => t == '}') * 2;
+                self.Indent -= UnIndentCount(str) * s_indentSize;
                 self.WriteLine($"{str}");
-                self.Indent += str.Count(t => t == '{') * 2;
+                self.Indent += IndentCount(str) * s_indentSize;
             }
             public static void WriteLineEx(this IndentedTextWriter self)
             {
