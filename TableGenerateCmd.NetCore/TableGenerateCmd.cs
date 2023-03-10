@@ -683,7 +683,11 @@ namespace TableGenerateCmd
             catch (Exception e)
             {
                 ProgramCmd.exit_code = 1;
-                System.Console.Write("Export Error: {0}", e.StackTrace);
+                var backupColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($"Export Error: {xlsFileName} {e.Message}");
+                Console.ForegroundColor = backupColor;
+                Console.Write($"Stack {e.StackTrace}");
             }
         }
     }

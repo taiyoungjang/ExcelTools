@@ -427,6 +427,11 @@ namespace TableGenerate
                                 {
                                     type = typeof(System.TimeSpan).GetTypeInfo();
                                 }
+
+                                if (type is null)
+                                {
+                                    throw new Exception($"no exist enum {column.type_name}{Environment.NewLine}");
+                                }
                             }
                             if (type != null)
                             {
