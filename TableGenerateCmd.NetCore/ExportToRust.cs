@@ -163,7 +163,9 @@ namespace TableGenerate
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}get({firstColumnName}: &{firstColumnType}) -> Option<{sheetName}> {{");
+                            writer.WriteLineEx($"#[allow(non_snake_case)]");
+                            writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}get({firstColumnName}: &{firstColumnType})");
+                            writer.WriteLineEx( $"  -> Option<{sheetName}> {{");
                             writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last()?.{GetMapName(sheetName)}.get(&{firstColumnName}).cloned()");
                             writer.WriteLineEx( "}");
                         }
