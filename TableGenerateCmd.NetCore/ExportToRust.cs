@@ -38,12 +38,12 @@ namespace TableGenerate
                 {
                     using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
                     {
-                        Util.SetIndentSize(4);
+                        Util.SetIndentSize(2);
                         string filename = System.IO.Path.GetFileName(createFileName);
 
                         writer.WriteLineEx("use super::super::proto::*;");
                         writer.WriteLineEx("use anyhow::{anyhow, Result};");
-                        writer.WriteLineEx("use std::collections::HashMap;");
+                        writer.WriteLineEx("use std::{collections::HashMap, sync::RwLock};");
                         string[] sheets = imp.GetSheetList();
                         _multi_sheet = sheets.Length > 1;
 
@@ -78,10 +78,12 @@ namespace TableGenerate
                             writer.WriteLineEx( $"fn file_name() -> &'static str {{");
                             writer.WriteLineEx("file_name()");
                             writer.WriteLineEx( "}");
-                            writer.WriteLineEx($"fn read_from_file(output_path: &str, language: &str) -> Result<(), anyhow::Error> {{");
+                            writer.WriteLineEx($"fn read_from_file(output_path: &str, language: &str)");
+                            writer.WriteLineEx($"  -> Result<(), anyhow::Error> {{");
                             writer.WriteLineEx( "read_from_file(output_path, language)");
                             writer.WriteLineEx( "}");
-                            writer.WriteLineEx($"fn read_stream(reader: &mut binary_reader::BinaryReader) -> Result<(), anyhow::Error> {{");
+                            writer.WriteLineEx($"fn read_stream(reader: &mut binary_reader::BinaryReader)");
+                            writer.WriteLineEx($"  -> Result<(), anyhow::Error> {{");
                             writer.WriteLineEx( "read_stream(reader)");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx( $"fn key_string(&self) -> String {{");
@@ -101,7 +103,7 @@ namespace TableGenerate
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx( $"fn {GetVecName(sheetName)}<F: Fn(&Vec<Self>) -> Option<Vec<Self>>>(");
-                            writer.WriteLineEx( $"    pred: F");
+                            writer.WriteLineEx( $"  pred: F");
                             writer.WriteLineEx( $") -> Option<Vec<Self>> {{");
                             
                             writer.WriteLineEx($"vec(pred)");
@@ -109,7 +111,7 @@ namespace TableGenerate
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
                             writer.WriteLineEx( $"fn {GetVecName(sheetName)}_one<F: Fn(&Vec<Self>) -> Option<Self>>(");
-                            writer.WriteLineEx( $"    pred: F");
+                            writer.WriteLineEx( $"  pred: F");
                             writer.WriteLineEx( $") -> Option<Self> {{");
                             writer.WriteLineEx($"vec_one(pred)");
                             writer.WriteLineEx( "}");
@@ -130,48 +132,44 @@ namespace TableGenerate
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec {sheetName}");
                             writer.WriteLineEx( $"pub fn {GetVecName(sheetName)}<F: Fn(&Vec<{sheetName}>) -> Option<Vec<{sheetName}>>>(");
-                            writer.WriteLineEx( $"    pred: F");
+                            writer.WriteLineEx( $"  pred: F");
                             writer.WriteLineEx( $") -> Option<Vec<{sheetName}>> {{");
                             writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last()?.{GetVecName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get vec_one {sheetName}");
                             writer.WriteLineEx( $"pub fn {GetVecName(sheetName)}_one<F: Fn(&Vec<{sheetName}>) -> Option<{sheetName}>>(");
-                            writer.WriteLineEx( $"    pred: F");
+                            writer.WriteLineEx( $"  pred: F");
                             writer.WriteLineEx( $") -> Option<{sheetName}> {{");
                             writer.WriteLineEx($"pred(&STATIC_DATA.read().unwrap().last()?.{GetVecName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {GetMapName(sheetName)}_clone() -> Option<HashMap<{firstColumnType}, {sheetName}>> {{");
                             writer.WriteLineEx( $"Some(STATIC_DATA.read().unwrap().last()?.{GetMapName(sheetName)}.clone())");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {GetMapName(sheetName)}<F: Fn(&HashMap<{firstColumnType}, {sheetName}>) -> Option<HashMap<{firstColumnType}, {sheetName}>>>(");
-                            writer.WriteLineEx( $"    pred: F");
+                            writer.WriteLineEx( $"  pred: F");
                             writer.WriteLineEx( $") -> Option<HashMap<{firstColumnType}, {sheetName}>> {{");
                             writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last()?.{GetMapName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get map_one {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {GetMapName(sheetName)}_one<F: Fn(&HashMap<{firstColumnType}, {sheetName}>) -> Option<{sheetName}>>(");
-                            writer.WriteLineEx( $"    pred: F");
+                            writer.WriteLineEx( $"  pred: F");
                             writer.WriteLineEx( $") -> Option<{sheetName}> {{");
                             writer.WriteLineEx( $"pred(&STATIC_DATA.read().unwrap().last()?.{GetMapName(sheetName)})");
                             writer.WriteLineEx( "}");
                             writer.WriteLineEx($"/// get {sheetName}");
                             writer.WriteLineEx($"#[allow(dead_code)]");
-                            writer.WriteLineEx($"#[allow(non_snake_case)]");
                             writer.WriteLineEx( $"pub fn {(sheets.Length>1?$"{sheetName}_":string.Empty)}get({firstColumnName}: &{firstColumnType}) -> Option<{sheetName}> {{");
                             writer.WriteLineEx( $"STATIC_DATA.read().unwrap().last()?.{GetMapName(sheetName)}.get(&{firstColumnName}).cloned()");
                             writer.WriteLineEx( "}");
                         }
                         writer.WriteLineEx($"lazy_static::lazy_static! {{");
                         writer.WriteLineEx($"/// STATIC_DATA");
-                        writer.WriteLineEx($"static ref STATIC_DATA: std::sync::RwLock<Vec<StaticData>> = std::sync::RwLock::new(Vec::with_capacity(100));");
+                        writer.WriteLineEx($"static ref STATIC_DATA: RwLock<Vec<StaticData>> = RwLock::new(Vec::with_capacity(100));");
                         writer.WriteLineEx($"}}");
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx($"#[allow(non_snake_case)]");
@@ -209,8 +207,8 @@ namespace TableGenerate
                         writer.WriteLineEx("}");
                         writer.WriteLineEx($"#[allow(dead_code)]");
                         writer.WriteLineEx( "fn insert_resource_from_stream(");
-                        writer.WriteLineEx( "world: &mut bevy_ecs::prelude::World,");
-                        writer.WriteLineEx( "reader: &mut binary_reader::BinaryReader,");
+                        writer.WriteLineEx( "  world: &mut bevy_ecs::prelude::World,");
+                        writer.WriteLineEx( "  reader: &mut binary_reader::BinaryReader,");
                         writer.WriteLineEx( ") -> Result<(), anyhow::Error> {");
                         writer.WriteLineEx( "read_stream(reader)?;");
                         writer.WriteLineEx( "let static_data = Self {");
@@ -243,20 +241,23 @@ namespace TableGenerate
                         writer.WriteLineEx( "Ok(())");
                         writer.WriteLineEx( "}");
 
-                        writer.WriteLineEx($"fn read_from_file(output_path: &str, language: &str) -> Result<(), anyhow::Error> {{");
+                        writer.WriteLineEx($"fn read_from_file(output_path: &str, language: &str)");
+                        writer.WriteLineEx($"  -> Result<(), anyhow::Error> {{");
                         writer.WriteLineEx( "read_from_file(output_path, language)");
                         writer.WriteLineEx( "}");
-                        writer.WriteLineEx($"fn read_stream(reader: &mut binary_reader::BinaryReader) -> Result<(), anyhow::Error> {{");
+                        writer.WriteLineEx($"fn read_stream(reader: &mut binary_reader::BinaryReader)");
+                        writer.WriteLineEx($"  -> Result<(), anyhow::Error> {{");
                         writer.WriteLineEx( "read_stream(reader)");
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx($"/// read_from_file()");
-                        writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: &str) -> Result<(), anyhow::Error> {");
+                        writer.WriteLineEx( "pub fn read_from_file(output_path: &str, language: &str)");
+                        writer.WriteLineEx( "  -> Result<(), anyhow::Error> {");
                         writer.WriteLineEx($"let file_name = file_name();");
                         writer.WriteLineEx($"match std::fs::File::open(");
-                        writer.WriteLineEx($"    std::path::Path::new(output_path)");
-                        writer.WriteLineEx($"        .join(language)");
-                        writer.WriteLineEx($"        .join(file_name),");
+                        writer.WriteLineEx($"  std::path::Path::new(output_path)");
+                        writer.WriteLineEx($"    .join(language)");
+                        writer.WriteLineEx($"    .join(file_name),");
                         writer.WriteLineEx($") {{");
                         writer.WriteLineEx($"Ok(mut file) => {{");
                         writer.WriteLineEx($"let mut reader = binary_reader::BinaryReader::from_file(&mut file);");
@@ -266,8 +267,8 @@ namespace TableGenerate
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx( "}");
                         writer.WriteLineEx($"#[allow(dead_code)]");
-                        writer.WriteLineEx($"#[allow(non_snake_case)]");
-                        writer.WriteLineEx($"pub fn read_stream(reader: &mut binary_reader::BinaryReader) -> Result<(), anyhow::Error> {{");
+                        writer.WriteLineEx($"pub fn read_stream(reader: &mut binary_reader::BinaryReader)");
+                        writer.WriteLineEx($"  -> Result<(), anyhow::Error> {{");
                         writer.WriteLineEx($"reader.set_endian(binary_reader::Endian::Little);");
                         writer.WriteLineEx($"let _stream_length = reader.length;");
                         writer.WriteLineEx($"let _hash_length = reader.read_i8()? as usize;");
@@ -319,16 +320,16 @@ namespace TableGenerate
                         writer.WriteLineEx($"let file_name = file_name();");
                         writer.WriteLineEx($"let output_path = r\"../../GameDesign/Output\";");
                         writer.WriteLineEx($"let folders = std::fs::read_dir(output_path)");
-                        writer.WriteLineEx($"    .unwrap()");
-                        writer.WriteLineEx($"    .map(|r| r.map(|e| e.path()))");
-                        writer.WriteLineEx($"    .collect::<Result<Vec<std::path::PathBuf>, _>>()");
-                        writer.WriteLineEx($"    .unwrap();");
+                        writer.WriteLineEx($"  .unwrap()");
+                        writer.WriteLineEx($"  .map(|r| r.map(|e| e.path()))");
+                        writer.WriteLineEx($"  .collect::<Result<Vec<std::path::PathBuf>, _>>()");
+                        writer.WriteLineEx($"  .unwrap();");
                         writer.WriteLineEx( "for folder in folders.iter().filter(|f| f.is_dir()) {");
                         writer.WriteLineEx($"let files = std::fs::read_dir(folder)");
-                        writer.WriteLineEx($"    .unwrap()");
-                        writer.WriteLineEx($"    .map(|r| r.map(|e| e.path()))");
-                        writer.WriteLineEx($"    .collect::<Result<Vec<std::path::PathBuf>, _>>()");
-                        writer.WriteLineEx($"    .unwrap();");
+                        writer.WriteLineEx($"  .unwrap()");
+                        writer.WriteLineEx($"  .map(|r| r.map(|e| e.path()))");
+                        writer.WriteLineEx($"  .collect::<Result<Vec<std::path::PathBuf>, _>>()");
+                        writer.WriteLineEx($"  .unwrap();");
                         writer.WriteLineEx( "for file in files.iter().filter(|f| f.is_file()) {");
                         writer.WriteLineEx( "if file.file_name().unwrap().eq(file_name) {");
                         writer.WriteLineEx($"if let Ok(()) = ");
@@ -337,9 +338,9 @@ namespace TableGenerate
                         foreach (string sheetName in sheets)
                         {
                             writer.WriteLineEx($"println!(");
-                            writer.WriteLineEx($"    \"{{}} {ExportBaseUtil.ToSnakeCase(sheetName)}:{{}}\",");
-                            writer.WriteLineEx($"    folder.file_name().unwrap().to_str().unwrap(),");
-                            writer.WriteLineEx($"    {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().unwrap().len()");
+                            writer.WriteLineEx($"  \"{{}} {ExportBaseUtil.ToSnakeCase(sheetName)}:{{}}\",");
+                            writer.WriteLineEx($"  folder.file_name().unwrap().to_str().unwrap(),");
+                            writer.WriteLineEx($"  {(sheets.Length>1?$"{sheetName}_":string.Empty)}vec_clone().unwrap().len()");
                             writer.WriteLineEx($");");
                         }
                         writer.WriteLineEx( "}");
@@ -417,7 +418,7 @@ namespace TableGenerate
             writer.WriteLineEx($"#[allow(dead_code)]");
             writer.WriteLineEx($"#[allow(non_snake_case)]");
             writer.WriteLineEx($"pub fn read_stream(");
-            writer.WriteLineEx($"    reader: &mut binary_reader::BinaryReader,");
+            writer.WriteLineEx($"  reader: &mut binary_reader::BinaryReader,");
             writer.WriteLineEx($") -> Result<(Vec<Self>, HashMap<{firstColumnType}, Self>), anyhow::Error> {{");
             writer.WriteLineEx($"let size = reader.read_u32()? as usize;");
             writer.WriteLineEx($"let mut vec: Vec<{sheetName}> = Vec::with_capacity(size);");
@@ -554,8 +555,8 @@ namespace TableGenerate
 
                 writer.WriteLineEx($"let _ = header.col(|ui| {{");
                 writer.WriteLineEx($"let _ = ui");
-                writer.WriteLineEx($"    .strong(\"{name}\")");
-                writer.WriteLineEx($"    .on_hover_text(\"{column.desc}\");");
+                writer.WriteLineEx($"  .strong(\"{name}\")");
+                writer.WriteLineEx($"  .on_hover_text(\"{column.desc}\");");
                 writer.WriteLineEx($"}});");
                 arrayCount++;
             }
