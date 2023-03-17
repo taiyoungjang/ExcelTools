@@ -210,7 +210,8 @@ namespace TableGenerate
             string returnTypeName = string.Empty;
             if(column.IsEnumType())
             {
-                returnTypeName = $" System.Enum.Parse<{column.GetPrimitiveType(genType)}>( {arg}.Split('_').Last(), ignoreCase: true)";
+                
+                returnTypeName = $" System.Enum.Parse<{column.GetPrimitiveType(genType)}>( {arg}.StartsWith(\"{column.type_name}_\")? {arg}.Substring(\"{column.type_name}_\".Length):{arg}, ignoreCase: true)";
             }
             else if(column.IsStructType())
             {
@@ -1682,8 +1683,22 @@ namespace TableGenerate
                         }
                     }
                     break;
+                case BaseType.Enum:
+                {
+                    switch (gen_type)
+                    {
+                        case eGenType.cpp: returnTypeName = "int32"; break;
+                        case eGenType.cs: returnTypeName = "int"; break;
+                        case eGenType.mssql: returnTypeName = "int"; break;
+                        case eGenType.mysql: returnTypeName = "int"; break;
+                        case eGenType.sqllite: returnTypeName = "integer"; break;
+                        case eGenType.rust: returnTypeName = "i32"; break;
+                    }
+                }
+                break;                
                 case BaseType.Int32:
                     {
+                        
                         switch (gen_type)
                         {
                             case eGenType.cpp: returnTypeName = "int32"; break;
