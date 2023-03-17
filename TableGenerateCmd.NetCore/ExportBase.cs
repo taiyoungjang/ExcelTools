@@ -211,7 +211,7 @@ namespace TableGenerate
             if(column.IsEnumType())
             {
                 
-                returnTypeName = $" System.Enum.Parse<{column.GetPrimitiveType(genType)}>( {arg}.StartsWith(\"{column.type_name}_\")? {arg}.Substring(\"{column.type_name}_\".Length):{arg}, ignoreCase: true)";
+                returnTypeName = $" System.Enum.Parse<{column.GetPrimitiveType(genType)}>( ({arg}.StartsWith(\"{column.type_name}_\")? {arg}.Substring(\"{column.type_name}_\".Length):{arg}).Replace(\"_\",\"\"), ignoreCase: true)";
             }
             else if(column.IsStructType())
             {
