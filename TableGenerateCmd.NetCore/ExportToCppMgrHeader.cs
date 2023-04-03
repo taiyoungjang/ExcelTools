@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -22,9 +23,9 @@ namespace TableGenerate
         {
             string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableManager.h");
 
-            using MemoryStream stream = new(32767);
+            using var stream = new MemoryStream();
             {
-                StreamWriter writer = new (stream, Encoding.UTF8);
+                using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
                 {
                     string filename = System.IO.Path.GetFileName(createFileName);
                     filename = filename.Replace("TableManager.h", string.Empty);

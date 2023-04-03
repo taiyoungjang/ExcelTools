@@ -37,7 +37,7 @@ namespace TableGenerate
 
                 using var stream = new MemoryStream();
                 {
-                    var writer = new IndentedTextWriter(new StreamWriter(stream, Encoding.UTF8), "  ");
+                    using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
                     {
                         string filename = System.IO.Path.GetFileName(createFileName);
                         string[] sheets = imp.GetSheetList();
@@ -144,7 +144,7 @@ namespace TableGenerate
                 sb.Append(")");
                 writer.WriteLineEx("");
                 writer.WriteLineEx(sb.ToString());
-                writer.WriteLineNoTabs($"{string.Empty.PadLeft(writer.Indent*2)}{type} {name} = {defaultValue};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
+                writer.WriteLineEx($"{type} {name} = {defaultValue};{(column.desc.Any()?$" /// {column.desc}":string.Empty)}");
             }
         }
     }

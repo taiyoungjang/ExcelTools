@@ -52,7 +52,7 @@ namespace TableGenerate
                         }
                             
                         using var stream = new MemoryStream();
-                        var writer = new IndentedTextWriter(new StreamWriter(stream, Encoding.UTF8), "  ");
+                        using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
 
                         writer.WriteLineEx($"// generate E{typeInfo.Name}");
                 
@@ -88,6 +88,10 @@ namespace TableGenerate
                                 #nullable disable                                
                                 writer.WriteLineEx(
                                     $"{types[i].Name.PadRight(namePadding)} = {underlyingValue.ToString().PadLeft(valuePadding)}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)}");
+                            }
+                            if( !bit_flags )
+                            {
+                                writer.WriteLineEx($"{("Max".PadRight(namePadding))} UMETA(Hidden)");
                             }
                         }
                         writer.WriteLineEx($"}};");

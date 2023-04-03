@@ -17,9 +17,9 @@ namespace TableGenerate
         {
             string createFileName = System.Text.RegularExpressions.Regex.Replace(sFileName, @"\.[x][l][s]?\w", "TableManager.cpp");
 
-            using MemoryStream stream = new();
+            using var stream = new MemoryStream();
             {
-                StreamWriter writer = new (stream, Encoding.UTF8);
+                using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
                 {
 
                     string filename = System.IO.Path.GetFileName(createFileName);
@@ -101,7 +101,7 @@ namespace TableGenerate
             return true;
         }
 
-        private void SheetProcess(string filename, string sheetName, List<Column> columns, StreamWriter writer)
+        private void SheetProcess(string filename, string sheetName, List<Column> columns, IndentedTextWriter writer)
         {
             writer.WriteLineEx($"class U{sheetName}TableManager final");
             writer.WriteLineEx("{");
@@ -195,7 +195,7 @@ namespace TableGenerate
             writer.WriteLineEx("};");
         }
 
-        private void InnerSheetProcess(string fileName, string sheetName, List<Column> columns, StreamWriter writer)
+        private void InnerSheetProcess(string fileName, string sheetName, List<Column> columns, IndentedTextWriter writer)
         {
             var keyColumn = columns.FirstOrDefault(compare => compare.is_key);
             string primaryName = keyColumn.var_name;
