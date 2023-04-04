@@ -39,9 +39,8 @@ namespace TableGenerate
                     writer.WriteLineEx($"#include \"ISourceControlProvider.h\"");
                     writer.WriteLineEx($"#include \"ISourceControlModule.h\"");
                     writer.WriteLineEx($"#include \"SourceControlHelpers.h\"");
-                    writer.WriteLineEx($"#include \"SourceControlOperations.h\"");
-
-                    string fn = filename.Replace("TableManager", string.Empty);
+                    writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
+                    writer.WriteLineEx($"#include \"{filename.Replace("TableManager",string.Empty)}TableRow.h\"");
                     
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
@@ -61,14 +60,14 @@ namespace TableGenerate
                     }
 
                     //ManagerProcess(filename, sheets);
-                    writer.WriteLineEx("UTableManager* StaticRegister()");
+                    writer.WriteLineEx("FTableManager* StaticRegister()");
                     writer.WriteLineEx("{");
-                    writer.WriteLineEx("UTableManager* TableManager = new UTableManager;");
+                    writer.WriteLineEx("auto* TableManager = new FTableManager;");
                     writer.WriteLineEx("ITableManager::Map.Emplace(TableManager->GetTableName(),TableManager);");
                     writer.WriteLineEx("return TableManager;");
                     writer.WriteLineEx("}");
-                    writer.WriteLineEx($"UTableManager* UTableManager::Register = StaticRegister();");
-                    writer.WriteLineEx($"bool UTableManager::ConvertToUAsset(FBufferReader& Reader, const FString& Language)");
+                    writer.WriteLineEx($"FTableManager* FTableManager::Register = StaticRegister();");
+                    writer.WriteLineEx($"bool FTableManager::ConvertToUAsset(FBufferReader& Reader, const FString& Language)");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx($"auto bRtn = true;");
                     writer.WriteLineEx($"TArray<uint8> Bytes;");
@@ -79,7 +78,7 @@ namespace TableGenerate
                         string trimSheetName = sheetName.Trim().Replace(" ", "_");
                         var rows = imp.GetSheetShortCut(sheetName, language);
                         var columns = ExportBaseUtil.GetColumnInfo(refAssembly, mscorlibAssembly, trimSheetName, rows, except);
-                        writer.WriteLineEx($"const U{trimSheetName}TableManager {trimSheetName}TableManager;");
+                        writer.WriteLineEx($"const F{trimSheetName}TableManager {trimSheetName}TableManager;");
                     }
                     writer.WriteLineEx($"");
                     foreach (string sheetName in sheets)
@@ -103,15 +102,19 @@ namespace TableGenerate
 
         private void SheetProcess(string filename, string sheetName, List<Column> columns, IndentedTextWriter writer)
         {
-            writer.WriteLineEx($"class U{sheetName}TableManager final");
+            writer.WriteLineEx($"class F{sheetName}TableManager final");
             writer.WriteLineEx("{");
             writer.WriteLineEx("public:");
-            writer.WriteLineEx($"U{sheetName}TableManager(void) = default;");
-            writer.WriteLineEx($"virtual ~U{sheetName}TableManager(void) = default;");
-            writer.WriteLineEx($"static bool Equals(const F{sheetName}TableRow& Left, const F{sheetName}TableRow& Right)");
+            writer.WriteLineEx($"F{sheetName}TableManager() = default;");
+            writer.WriteLineEx($"~F{sheetName}TableManager() = default;");
+            writer.WriteLineEx($"static bool Equals(const F{sheetName}TableRow& InLeft, const F{sheetName}TableRow& InRight)");
             writer.WriteLineEx("{");
             writer.WriteLineEx($"return ");
-            writer.Write(string.Join($" &&{Environment.NewLine}", columns.Where(t => !t.is_key && t.is_generated && t.array_index <= 0).Select(t => $"      Left.{t.var_name} == Right.{t.var_name}")));
+            var cols = columns.Where(t => !t.is_key && t.is_generated && t.array_index <= 0).ToArray();
+            for (var i = 0; i < cols.Count(); ++i)
+            {
+                writer.WriteLineEx($"{(i==0?"   ":"&& ")}InLeft.{cols[i].var_name} == InRight.{cols[i].var_name}");
+            }
             writer.WriteLineEx($"");
             writer.WriteLineEx(";}");
             writer.WriteLineEx($"bool ConvertToUAsset(FBufferReader& Reader, const FString& Language) const");

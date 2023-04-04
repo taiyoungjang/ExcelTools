@@ -35,8 +35,7 @@ namespace TableGenerate
 
                     writer.WriteLineEx($"#pragma once");
                     writer.WriteLineEx($"#ifdef WITH_EDITOR");
-                    writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
-                    writer.WriteLineEx($"#include \"{filename}TableRow.h\"");
+                    writer.WriteLineEx($"#include \"TableManager.h\"");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
                     
                     writer.WriteLineEx(string.Empty);
@@ -59,10 +58,10 @@ namespace TableGenerate
                     writer.WriteLineEx($"namespace {ExportToCSMgr.NameSpace}::{filename.Replace(" ", "_").Replace("TableManager", string.Empty)}");
                     writer.WriteLineEx($"{{");
 
-                    writer.WriteLineEx($"class UTableManager : public ITableManager");
+                    writer.WriteLineEx($"class FTableManager final : public ITableManager");
                     writer.WriteLineEx($"{{");
                     writer.WriteLineEx("public:");
-                    writer.WriteLineEx("static UTableManager* Register;");
+                    writer.WriteLineEx("static FTableManager* Register;");
                     writer.WriteLineEx($"virtual bool ConvertToUAsset(FBufferReader& Reader, const FString& Language) override;");
                     writer.WriteLineEx($"virtual FString GetTableName() override");
                     writer.WriteLineEx( "{");
