@@ -23,4 +23,5 @@ public class Column
     public string min_value;
     public string max_value;
     public string json;
+    public bool blue_print_type = false;
 };

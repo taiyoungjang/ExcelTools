@@ -449,13 +449,21 @@ namespace TableGenerate
                                     var fileDescriptor = propertyInfo.GetValue(null) as FileDescriptor;
                                     foreach (var fileDescriptorProto in fileDescriptor.Dependencies.Select(t=>t.ToProto()))
                                     {
-                                        var flag = fileDescriptorProto.Extension.FirstOrDefault(t => t.Name.Equals("bit_flags"));
-                                        if (flag != null)
+                                        var bitFlags = fileDescriptorProto.Extension.FirstOrDefault(t => t.Name.Equals("bit_flags"));
+                                        if (bitFlags != null)
                                         {
                                             var enumDescriptor = fileDescriptor.FindTypeByName<EnumDescriptor>(type.Name);
                                             var o = enumDescriptor.GetOptions();
                                             var value = o.GetExtension(BitFlagsExtensions.BitFlags);
                                             column.str_bit_flags = value;
+                                        }
+                                        var bluePrintType = fileDescriptorProto.Extension.FirstOrDefault(t => t.Name.Equals("blue_print_type"));
+                                        if (bluePrintType != null)
+                                        {
+                                            var enumDescriptor = fileDescriptor.FindTypeByName<EnumDescriptor>(type.Name);
+                                            var o = enumDescriptor.GetOptions();
+                                            var value = o.GetExtension(BitFlagsExtensions.BluePrintType);
+                                            column.blue_print_type = value;
                                         }
                                         break;
                                     }
@@ -1849,5 +1857,7 @@ namespace TableGenerate
     public static partial class BitFlagsExtensions {
         public static readonly global::Google.Protobuf.Extension<global::Google.Protobuf.Reflection.EnumOptions, string> BitFlags =
             new global::Google.Protobuf.Extension<global::Google.Protobuf.Reflection.EnumOptions, string>(50000, Google.Protobuf.FieldCodec.ForString(400002, ""));
+        public static readonly Google.Protobuf.Extension<global::Google.Protobuf.Reflection.EnumOptions, bool> BluePrintType =
+            new Google.Protobuf.Extension<global::Google.Protobuf.Reflection.EnumOptions, bool>(49999, Google.Protobuf.FieldCodec.ForBool(399992, false));
     }
 }

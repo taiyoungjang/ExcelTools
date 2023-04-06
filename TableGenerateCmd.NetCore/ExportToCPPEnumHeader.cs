@@ -39,6 +39,8 @@ namespace TableGenerate
                     foreach (var typeInfo in enums)
                     {
                         bool bit_flags = false;
+                        string str_blue_print_type = string.Empty;
+                        string enum_size_type = "int32";
                         var reflection = refAssembly.GetTypes().FirstOrDefault(t => t.Name == $"{typeInfo.Name}Reflection");
                         if (reflection != null)
                         {
@@ -47,6 +49,11 @@ namespace TableGenerate
                             foreach (var d in r.Dependencies.Select(t=>t.ToProto()))
                             {
                                 bit_flags = d.Extension.Any( t => t.Name.Equals("bit_flags"));
+                                if (d.Extension.Any(t => t.Name.Equals("blue_print_type")))
+                                {
+                                    str_blue_print_type = ", BlueprintType";
+                                    enum_size_type = "uint8";
+                                }
                                 break;
                             }
                         }
@@ -59,12 +66,12 @@ namespace TableGenerate
                         writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
                         writer.WriteLineEx($"#pragma once");
                         writer.WriteLineEx($"#include \"CoreMinimal.h\"");
-                        writer.WriteLineEx($"UENUM(Meta = ({(bit_flags?"Bitflags, UseEnumValuesAsMaskValuesInEditor = \"true\"":typeInfo.Name)}))");
-                        writer.WriteLineEx($"enum class E{typeInfo.Name} : int32 {{");
+                        writer.WriteLineEx($"UENUM(Meta = ({(bit_flags?"Bitflags, UseEnumValuesAsMaskValuesInEditor = \"true\"":typeInfo.Name)}){str_blue_print_type})");
+                        writer.WriteLineEx($"enum class E{typeInfo.Name} : {enum_size_type} {{");
                         {
                             var types = typeInfo.DeclaredFields.Where(t => t.IsStatic).ToArray();
-                            System.Type enumUnderlyingType = System.Enum.GetUnderlyingType(typeInfo);
-                            System.Array enumValues = System.Enum.GetValues(typeInfo);
+                            Type enumUnderlyingType = Enum.GetUnderlyingType(typeInfo);
+                            Array enumValues = System.Enum.GetValues(typeInfo);
                             int namePadding = 0;
                             int valuePadding = 0;
                             for (int i = 0; i < enumValues.Length; i++)
@@ -73,7 +80,7 @@ namespace TableGenerate
                                 // Retrieve the value of the ith enum item.
                                 object? value = enumValues.GetValue(i);
                                 // Convert the value to its underlying type (int, byte, long, ...)
-                                object? underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
+                                object? underlyingValue = Convert.ChangeType(value, enumUnderlyingType);
 #nullable disable
                                 namePadding = Math.Max(types[i].Name.Length,namePadding);
                                 valuePadding = Math.Max(underlyingValue.ToString().Length,valuePadding);

@@ -244,8 +244,10 @@ namespace TableGenerate
                             writer.WriteLineEx($"  {{ int64 element__; Reader >> element__; Item.{column.var_name}[ArrayIndex] = ({column.base_type.GenerateBaseType(this._gen_type)}) (element__ - 621355968000000000) / 10000000; }}");
                             break;
                         case BaseType.Struct:
-                        case BaseType.Enum:
                             writer.WriteLineEx($"Reader >> ({column.primitive_type.GenerateBaseType(this._gen_type)}&) Item.{column.var_name}[ArrayIndex];");
+                            break;
+                        case BaseType.Enum:
+                            writer.WriteLineEx($"int32 Temp{column.var_name} = 0; Reader >> Temp{column.var_name}; Item.{column.var_name}[ArrayIndex] = static_cast<E{column.GenerateBaseType(this._gen_type)}>(Temp{column.var_name});");
                             break;
                         default:
                             writer.WriteLineEx($"Reader >> Item.{column.var_name}[ArrayIndex];");
@@ -266,7 +268,7 @@ namespace TableGenerate
                             break;
                         case BaseType.Struct:
                         case BaseType.Enum when !column.bit_flags:
-                            writer.WriteLineEx($"Reader >> reinterpret_cast<{column.primitive_type.GenerateBaseType(this._gen_type)}&>(Item.{column.var_name});");
+                            writer.WriteLineEx($"{{ int32 Temp{column.var_name} = 0; Reader >> Temp{column.var_name}; Item.{column.var_name} = static_cast<{column.GenerateType(this._gen_type)}>(Temp{column.var_name}); }}");
                             break;
                         default:
                             writer.WriteLineEx($"Reader >> Item.{column.var_name};");

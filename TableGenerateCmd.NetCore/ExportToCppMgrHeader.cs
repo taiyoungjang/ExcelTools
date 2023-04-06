@@ -36,7 +36,6 @@ namespace TableGenerate
                     writer.WriteLineEx($"#pragma once");
                     writer.WriteLineEx($"#ifdef WITH_EDITOR");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
-                    writer.WriteLineEx($"#include \"TableManager.h\"");
                     
                     writer.WriteLineEx(string.Empty);
 
