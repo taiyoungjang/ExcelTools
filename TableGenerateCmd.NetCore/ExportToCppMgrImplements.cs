@@ -30,14 +30,12 @@ namespace TableGenerate
 
                     //            writer.WriteLine("#include <Base/properties.h>");
                     //            writer.WriteLine("#include <Base/service.h>");
-                    writer.WriteLineEx($"#ifdef WITH_EDITOR");
+                    writer.WriteLineEx($"#if WITH_EDITOR");
                     writer.WriteLineEx($"#include \"{filename}.h\"");
                     writer.WriteLineEx($"#include \"CoreMinimal.h\"");
                     writer.WriteLineEx($"#include \"UObject/Package.h\"");
                     writer.WriteLineEx($"#include \"UObject/SavePackage.h\"");
                     writer.WriteLineEx($"#include \"EditorAssetLibrary.h\"");
-                    writer.WriteLineEx($"#include \"ISourceControlProvider.h\"");
-                    writer.WriteLineEx($"#include \"ISourceControlModule.h\"");
                     writer.WriteLineEx($"#include \"SourceControlHelpers.h\"");
                     writer.WriteLineEx($"#include \"Engine/DataTable.h\"");
                     writer.WriteLineEx($"#include \"{filename.Replace("TableManager",string.Empty)}TableRow.h\"");

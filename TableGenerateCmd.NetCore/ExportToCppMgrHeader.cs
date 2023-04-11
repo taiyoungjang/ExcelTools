@@ -34,7 +34,7 @@ namespace TableGenerate
                     writer.WriteLineEx("// DO NOT TOUCH SOURCE....");
 
                     writer.WriteLineEx($"#pragma once");
-                    writer.WriteLineEx($"#ifdef WITH_EDITOR");
+                    writer.WriteLineEx($"#if WITH_EDITOR");
                     writer.WriteLineEx($"#include \"TableManager.h\"");
                     
                     writer.WriteLineEx(string.Empty);
