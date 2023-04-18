@@ -107,7 +107,7 @@ namespace TableGenerate
                                 {
                                 }
                                 writer.WriteLineEx(
-                                    $"{types[i].Name.PadRight(namePadding)} = {underlyingValue.ToString().PadLeft(valuePadding)}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)} {(string.IsNullOrEmpty(desc)?"":$"// {desc}")}");
+                                    $"{types[i].Name.PadRight(namePadding)} = {underlyingValue.ToString().PadLeft(valuePadding)}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)} {(string.IsNullOrEmpty(desc)?"":$"UMETA(Tooltip = \"{desc}\")")}{(i < enumValues.Length ? "," : string.Empty)}");
                             }
                             if( !bit_flags )
                             {
