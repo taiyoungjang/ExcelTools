@@ -54,14 +54,13 @@ namespace TableGenerate
 
         public override bool Generate(System.Reflection.Assembly refAssembly, System.Reflection.Assembly mscorlibAssembly, ClassUtil.ExcelImporter imp, string outputPath, string sFileName, ref int current, ref int max, string language, List<string> except)
         {
-            System.Text.Encoding enc = new System.Text.ASCIIEncoding();
+            System.Text.Encoding enc = new UTF8Encoding();
             string viewFilename = System.IO.Path.GetFileName(sFileName);
 
             var regex = new System.Text.RegularExpressions.Regex(@"\.[x][l][s]?\w");
             string[] enumTypeFileNames = System.IO.Directory.GetFiles(_enumTypeDir, "*.cs");
             string csFileName = $"{_csFileDir}{System.IO.Path.DirectorySeparatorChar}{regex.Replace(viewFilename, ".cs")}";
             string csMngFileName = $"{_csFileDir}{System.IO.Path.DirectorySeparatorChar}{regex.Replace(viewFilename, "Manager.cs")}";
-            string shared_directory = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location);
 
             StringBuilder str = new StringBuilder();
             string folder = (System.IO.Path.DirectorySeparatorChar == '/' ? "/" : string.Empty) + System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(TableGenerate.ExportBase)).Location.Replace("file:///", String.Empty));
@@ -78,15 +77,26 @@ namespace TableGenerate
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Data.Common.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Threading.Tasks.Parallel.dll",
                 $"{folder}{System.IO.Path.DirectorySeparatorChar}System.Collections.Concurrent.dll",
-                $"{folder}{System.IO.Path.DirectorySeparatorChar}TableGenerateCmd.dll"
+                $"{folder}{System.IO.Path.DirectorySeparatorChar}TableGenerateCmd.dll",
+                refAssembly.Location,
             };
             List<string> compileFiles = new List<string>();
-            foreach(string enumTypeFileName in enumTypeFileNames)
+            //foreach(string enumTypeFileName in enumTypeFileNames)
+            //{
+                //compileFiles.Add(System.IO.File.ReadAllText(enumTypeFileName, enc));
+            //}
+            var csFileText = System.IO.File.ReadAllText(csFileName, enc);
+            if(!string.IsNullOrEmpty(csFileText))
             {
-                compileFiles.Add(System.IO.File.ReadAllText(enumTypeFileName, enc));
-            }
-            compileFiles.Add(System.IO.File.ReadAllText(csFileName, enc));
-            compileFiles.Add(System.IO.File.ReadAllText(csMngFileName, enc));
+                compileFiles.Add(csFileText);
+            }   
+            else
+                compileFiles.Add($"// {csFileName} is empty");
+            var csMngFileText = File.ReadAllText(csMngFileName, enc);
+            if(!string.IsNullOrEmpty(csMngFileText))
+            {
+                compileFiles.Add(csMngFileText);
+            }   
 
             string str_class = string.Empty;
             string str_loader_class = string.Empty;
@@ -185,10 +195,10 @@ namespace TableGenerate
             {
                 assembly = CompileFiles(compileFiles, refAssemblies);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //System.IO.File.WriteAllText($"{viewFilename}err.cs", str.ToString());
-                //System.IO.File.WriteAllText($"{viewFilename}ex.cs", ex.ToString());
+                System.IO.File.WriteAllText($"{viewFilename}err.cs",  string.Concat(compileFiles));
+                System.IO.File.WriteAllText($"{viewFilename}ex.cs", ex.ToString());
                 throw;
             }
             //using (var fs = System.IO.File.OpenRead(outputPath + "/" + str_class + ".dll"))
@@ -229,7 +239,7 @@ namespace TableGenerate
         }
         public static System.Reflection.Assembly CompileFiles(List<string> textList, string[] refAssemblies)
         {
-            string output_path = System.IO.Path.GetTempFileName() + ".dll";
+            string output_path = Path.GetTempFileName().Replace(".tmp",".dll");
             SyntaxTree[] syntaxTrees = new SyntaxTree[textList.Count];
             for(int i=0;i<textList.Count;++i)
             {

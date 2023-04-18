@@ -456,6 +456,7 @@ namespace TableGenerate
                                             var o = enumDescriptor.GetOptions();
                                             var value = o.GetExtension(BitFlagsExtensions.BitFlags);
                                             column.str_bit_flags = value;
+                                            column.primitive_type = BaseType.Int32;
                                         }
                                         var bluePrintType = fileDescriptorProto.Extension.FirstOrDefault(t => t.Name.Equals("blue_print_type"));
                                         if (bluePrintType != null)
@@ -464,6 +465,7 @@ namespace TableGenerate
                                             var o = enumDescriptor.GetOptions();
                                             var value = o.GetExtension(BitFlagsExtensions.BluePrintType);
                                             column.blue_print_type = value;
+                                            column.primitive_type = BaseType.Int8;
                                         }
                                         break;
                                     }

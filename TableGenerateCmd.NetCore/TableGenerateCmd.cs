@@ -225,7 +225,7 @@ namespace TableGenerateCmd
 
         public static System.Reflection.Assembly CompileFiles(string name, List<string> textList)
         {
-            string tempFileName = System.IO.Path.GetTempFileName().Replace(".tmp", "");
+            string tempFileName = Path.GetTempFileName().Replace(".tmp","");
             string output_path = $"{tempFileName}.dll";
             string output_path_xml = $"{tempFileName}.xml";
             SyntaxTree[] syntaxTrees = new SyntaxTree[textList.Count()];
