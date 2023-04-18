@@ -6,7 +6,6 @@ using System.Linq;
 using StreamWrite.Extension;
 using System.CodeDom.Compiler;
 using System.Reflection;
-using Google.Protobuf.Reflection;
 
 namespace TableGenerate
 {
@@ -38,6 +37,7 @@ namespace TableGenerate
                 {
                     foreach (var typeInfo in enums)
                     {
+                        Dictionary<string, string> descriptions = new();
                         bool bit_flags = false;
                         string str_blue_print_type = string.Empty;
                         string enum_size_type = "int32";
@@ -60,6 +60,15 @@ namespace TableGenerate
                             
                         using var stream = new MemoryStream();
                         using var writer = new IndentedTextWriter(new StreamWriter(stream,  Encoding.UTF8), " ");
+
+                        try
+                        {
+                            descriptions = EnumDescriptorSchemaFilter.BuildDescription(typeInfo);
+                        }
+                        catch (Exception e)
+                        {
+                            writer.WriteLineEx($"{e.StackTrace}");
+                        }
 
                         writer.WriteLineEx($"// generate E{typeInfo.Name}");
                 
@@ -92,9 +101,13 @@ namespace TableGenerate
                                 object? value = enumValues.GetValue(i);
                                 // Convert the value to its underlying type (int, byte, long, ...)
                                 object? underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
-                                #nullable disable                                
+                                #nullable disable
+                                string desc = string.Empty;
+                                if (descriptions.TryGetValue(types[i].Name, out desc) || descriptions.TryGetValue($"{typeInfo.Name}_{types[i].Name}", out desc))
+                                {
+                                }
                                 writer.WriteLineEx(
-                                    $"{types[i].Name.PadRight(namePadding)} = {underlyingValue.ToString().PadLeft(valuePadding)}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)}");
+                                    $"{types[i].Name.PadRight(namePadding)} = {underlyingValue.ToString().PadLeft(valuePadding)}{(i==0&&bit_flags?" UMETA(Hidden)":string.Empty)}{(i < enumValues.Length ? "," : string.Empty)} {(string.IsNullOrEmpty(desc)?"":$"// {desc}")}");
                             }
                             if( !bit_flags )
                             {
