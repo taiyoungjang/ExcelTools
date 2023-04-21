@@ -175,7 +175,7 @@ namespace TableGenerate
                         writer.WriteLineEx("rowIndex++;");
                         writer.WriteLineEx("}");
                         writer.WriteLineEx("}");
-                        writer.WriteLineEx("StringUi.ExcelLoad(rows, language, dataStage);");
+                        writer.WriteLineEx(@$"{sheetName}.ExcelLoad(rows, language, dataStage);");
                         writer.WriteLineEx("}");
 
                         writer.WriteLineEx("}");
