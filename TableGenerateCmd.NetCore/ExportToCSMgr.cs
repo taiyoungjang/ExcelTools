@@ -121,19 +121,67 @@ namespace TableGenerate
                     writer.WriteLineEx("System.Action<string> excelAction = excelName =>");
                     writer.WriteLineEx("{");
                     writer.WriteLineEx("language = language.Trim();");
-                    writer.WriteLineEx("string directoryName = System.IO.Path.GetDirectoryName(path);");
-                    writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
-                    writer.WriteLineEx("imp.Open(path);");
+                    writer.WriteLineEx(@$"var directory = System.IO.Path.GetDirectoryName(path) + ""/"" + GetFileName();");
+                    writer.WriteLineEx("System.Collections.Generic.List<string> excelFiles = new() {path};");
+                    writer.WriteLineEx("if (System.IO.Directory.Exists(directory))");
+                    writer.WriteLineEx("{");
+                    writer.WriteLineEx(@"excelFiles.AddRange( System.IO.Directory.GetFiles(directory, ""*.xls*"") );");
+                    writer.WriteLineEx("}");
                     writer.WriteLineEx("switch (excelName)");
                     writer.WriteLineEx("{");
                     var sheetNames = sheets.Select(sheetName => sheetName.Trim().Replace(" ", "_"));
                     foreach (string sheetName in sheetNames)
                     {
-                        writer.WriteLineEx($@"case ""{sheetName}"":{sheetName}.ExcelLoad( imp, directoryName, language, dataStage);");
+                        writer.WriteLineEx($@"case ""{sheetName}"":");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("System.Collections.Generic.List<TableGenerateCmd.StringWithDesc[,]> rowsList = new();");
+                        writer.WriteLineEx("for( var i=0;i<excelFiles.Count;++i)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("var imp = new ClassUtil.ExcelImporter();");
+                        writer.WriteLineEx("imp.Open(excelFiles[i]);");
+                        writer.WriteLineEx($@"var rows = imp.GetSheet(""{sheetName}"", language);");
+                        writer.WriteLineEx("if (i > 0)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("var headerRows = 5;");
+                        writer.WriteLineEx("TableGenerateCmd.StringWithDesc[,] split = new TableGenerateCmd.StringWithDesc[rows.GetLength(0) - headerRows, rows.GetLength(1)];");
+                        writer.WriteLineEx("for (var r = headerRows; r < rows.GetLength(0); r++)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("for (var c = 0; c < rows.GetLength(1); c++)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("split[r - headerRows, c] = rows[r, c];");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("rowsList.Add(split);");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("else");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("rowsList.Add(rows);");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("imp.Dispose();");
+                        writer.WriteLineEx("}");
+                        
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("var rowCount = rowsList.Sum(t => t.GetLength(0));");
+                        writer.WriteLineEx("var rows = new TableGenerateCmd.StringWithDesc[ rowCount, rowsList[0].GetLength(1)];");
+                        writer.WriteLineEx("int rowIndex = 0;");
+                        writer.WriteLineEx("foreach(var data in rowsList)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("for (var r = 0; r < data.GetLength(0); r++)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("for (var c = 0; c < data.GetLength(1); c++)");
+                        writer.WriteLineEx("{");
+                        writer.WriteLineEx("rows[rowIndex, c] = data[r, c];");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("rowIndex++;");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("}");
+                        writer.WriteLineEx("StringUi.ExcelLoad(rows, language, dataStage);");
+                        writer.WriteLineEx("}");
+
+                        writer.WriteLineEx("}");
                         writer.WriteLineEx("break;");
                     }
                     writer.WriteLineEx("}");
-                    writer.WriteLineEx("imp.Dispose();");
                     writer.WriteLineEx("};");
                     writer.WriteLineEx($"System.Threading.Tasks.Parallel.ForEach(new string[]{{{(string.Join(',', sheetNames.Select(t => $@"""{t}""")))}}},excelAction);");
                     writer.WriteLineEx("}");
@@ -512,7 +560,7 @@ namespace TableGenerate
             var dataStageColumn = columns.FirstOrDefault(compare => compare.var_name.Trim().ToLower() == "datastage");
 
             writer.WriteLineEx(
-                "public static void ExcelLoad(ClassUtil.ExcelImporter imp,string path,string language, string dataStage)");
+                "public static void ExcelLoad(TableGenerateCmd.StringWithDesc[,] rows, string language, string dataStage)");
             writer.WriteLineEx("{");
             if (dataStageColumn != null)
             {
@@ -520,7 +568,6 @@ namespace TableGenerate
                 writer.WriteLineEx($"var dataStageEnum__ = System.Enum.Parse<{dataStageColumn.type_name}>( dataStage.Split('_').Last(), ignoreCase: true );");
             }
             writer.WriteLineEx("var i=0; var j=0;");
-            writer.WriteLineEx("TableGenerateCmd.StringWithDesc[,] rows = null;");
             foreach (var column in columns)
             {
                 string name = column.var_name;
@@ -540,7 +587,6 @@ namespace TableGenerate
 
             writer.WriteLineEx("try");
             writer.WriteLineEx("{");
-            writer.WriteLineEx($"rows = imp.GetSheet(\"{sheetName}\", language);");
             writer.WriteLineEx($"var list__ = new System.Collections.Generic.List<{sheetName}>(rows.GetLength(0) - 5);");
             writer.WriteLineEx("for (i = 5; i < rows.GetLength(0); i++)");
             writer.WriteLineEx("{");
@@ -549,7 +595,7 @@ namespace TableGenerate
             if (dataStageColumn != null)
             {
                 writer.WriteLineEx($"var dataStageText = rows[i,{dataStageColumn.data_column_index}].Text.Trim();");
-                writer.WriteLineEx($"  if( !string.IsNullOrEmpty(dataStageText) && (dataStageText.Split('|').Select(x__=>(int)System.Enum.Parse<{dataStageColumn.type_name}>(x__.Split('_').Last(), ignoreCase: true)).Sum() & (int)dataStageEnum__) != (int) dataStageEnum__ ) {{ continue;}}");
+                writer.WriteLineEx($"if( !string.IsNullOrEmpty(dataStageText) && (dataStageText.Split('|').Select(x__=>(int)System.Enum.Parse<{dataStageColumn.type_name}>(x__.Split('_').Last(), ignoreCase: true)).Sum() & (int)dataStageEnum__) != (int) dataStageEnum__ ) {{ continue;}}");
             }
             foreach (var column in columns)
             {
