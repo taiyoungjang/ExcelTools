@@ -465,7 +465,7 @@ namespace TableGenerate
                                             var o = enumDescriptor.GetOptions();
                                             var value = o.GetExtension(BitFlagsExtensions.BluePrintType);
                                             column.blue_print_type = value;
-                                            column.primitive_type = BaseType.Int8;
+                                            column.primitive_type = BaseType.Int32;
                                         }
                                         break;
                                     }
