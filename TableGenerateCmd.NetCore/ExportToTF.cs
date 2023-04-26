@@ -126,18 +126,8 @@ namespace TableGenerate
             str.AppendLine($"     var loader__ = new {str_loader_class}();");
             str.AppendLine("      try");
             str.AppendLine("      {");
-            str.AppendLine($"       string directory = System.IO.Directory.GetParent(inputPath).FullName+System.IO.Path.DirectorySeparatorChar+loader__.GetFileName()+System.IO.Path.DirectorySeparatorChar;");
-            str.AppendLine($"       string[] files = new string[0];");
-            str.AppendLine($"       if(System.IO.Directory.Exists(directory))");
-            str.AppendLine($"         files = System.IO.Directory.GetFiles(directory,\"*.xlsm\");");
             str.AppendLine($"       excel_name = System.IO.Path.GetFileName(inputPath);");
             str.AppendLine($"       loader__.ExcelLoad( inputPath, \"{language}\", \"{DataStage}\");");
-            str.AppendLine($"       foreach(var file in files)");
-            str.AppendLine($"       {{");
-            str.AppendLine($"         excel_name = System.IO.Path.GetFileName(file);");
-            str.AppendLine($"         if( excel_name.Contains(\"~$\"))continue;");
-            str.AppendLine($"         loader__.ExcelLoad( file,\"{language}\", \"{DataStage}\" );");
-            str.AppendLine($"       }}");
             str.AppendLine($"       loader__.WriteFile( outputPath,{ProgramCmd.using_perforce.ToString().ToLower()});");
             str.AppendLine("      }");
             str.AppendLine("      catch(System.Exception ex)");

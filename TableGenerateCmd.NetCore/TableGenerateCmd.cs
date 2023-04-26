@@ -466,7 +466,7 @@ namespace TableGenerateCmd
                 else
                 {
                     // only single file
-                    rgFiles = System.IO.Directory.GetFiles(di[i].FullName, _extType).Select(t => new FileInfo(t))
+                    rgFiles = System.IO.Directory.GetFiles(di[i].FullName, _extType, SearchOption.TopDirectoryOnly).Select(t => new FileInfo(t))
                         .ToArray();
                 }
 
