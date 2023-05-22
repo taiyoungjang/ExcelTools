@@ -280,7 +280,9 @@ namespace TableGenerate
                 case BaseType.String:
                     writer.WriteLineEx($"const FName Key = {primaryName};");
                     break;
-                case BaseType.Int32:
+                case BaseType.Int64:
+                    writer.WriteLineEx($"const FName Key = *FString::Printf(TEXT(\"%lld\"), {primaryName});");
+                    break;
                 default:
                     writer.WriteLineEx($"const FName Key = *FString::FromInt({primaryName});");
                     break;
